@@ -10,6 +10,14 @@ export default defineConfig(({ mode }) => ({
   server: {
     host: "::",
     port: Number(process.env.PORT) || 5173,
+    allowedHosts: [
+      '.netlify.app',
+      'localhost',
+      '127.0.0.1',
+      '::1',
+      'nuptul.com',
+      'www.nuptul.com'
+    ],
   },
   plugins: [
     react(),

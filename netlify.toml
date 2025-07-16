@@ -15,9 +15,11 @@
 
 [context.deploy-preview]
   environment = { NODE_ENV = "development" }
+  command = "npm ci --include=dev && npm run build:dev"
 
 [context.branch-deploy]
   environment = { NODE_ENV = "development" }
+  command = "npm ci --include=dev && npm run build:dev"
 
 # Security headers
 [[headers]]
