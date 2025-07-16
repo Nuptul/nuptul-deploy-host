@@ -1,0 +1,75 @@
+name: Multi-Agent Orchestrator
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Run every 6 hours
+  workflow_dispatch:
+  issues:
+    types: [opened, labeled]
+
+jobs:
+  orchestrate:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Validate Agent System
+      run: node .github/agents/validate-system.cjs
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Run Testing Agent
+      if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+      run: node .github/agents/testing/run-testing-agent.js
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+        VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+    
+    - name: Process Issues
+      if: github.event_name == 'issues'
+      run: |
+        node .github/agents/orchestrator/analyze-issue.cjs ${{ github.event.issue.number }}
+        node .github/agents/orchestrator/assign-agent.cjs ${{ github.event.issue.number }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    
+    - name: Health Check
+      run: node .github/agents/orchestrator/check-agent-health.cjs
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  migration:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'workflow_dispatch'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '18'
+        cache: 'npm'
+    
+    - name: Install dependencies
+      run: npm ci
+    
+    - name: Run Migration Agent
+      run: node .github/agents/migration/run-migration.js
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        SUPABASE_DEV_URL: ${{ secrets.SUPABASE_DEV_URL }}
+        SUPABASE_DEV_ANON_KEY: ${{ secrets.SUPABASE_DEV_ANON_KEY }}
+        SUPABASE_PROD_URL: ${{ secrets.VITE_SUPABASE_URL }}
+        SUPABASE_PROD_SERVICE_KEY: ${{ secrets.SUPABASE_PROD_SERVICE_KEY }}
