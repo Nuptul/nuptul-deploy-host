@@ -1,5 +1,7 @@
 # 🔮 Nuptul Deploy Host
 
+<!-- Build trigger: 2025-01-16 -->
+
 ## Advanced Multi-Agent Wedding Platform with Infinite Agentic Loop Architecture
 
 ### 🚀 Project Overview
