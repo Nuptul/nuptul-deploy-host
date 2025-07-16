@@ -5,4 +5,3 @@
 sed -i '/<link rel="modulepreload" href="data:application\/octet-stream/d' dist/index.html
 
 echo "✅ Fixed build issues"
-EOF < /dev/null
