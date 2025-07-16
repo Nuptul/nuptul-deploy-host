@@ -1,9 +1,13 @@
 #!/usr/bin/env node
 
-const { chromium, firefox, webkit } = require('playwright');
-const fs = require('fs').promises;
-const path = require('path');
-const { Octokit } = require('@octokit/rest');
+import { chromium, firefox, webkit } from 'playwright';
+import fs from 'fs/promises';
+import path from 'path';
+import { Octokit } from '@octokit/rest';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 class TestingAgent {
   constructor(config) {
