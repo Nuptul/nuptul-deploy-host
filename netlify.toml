@@ -5,6 +5,19 @@
 [build.environment]
   NODE_VERSION = "20"
 
+# Disable problematic plugins
+[[plugins]]
+  package = "netlify-plugin-inline-source"
+  enabled = false
+
+[[plugins]]
+  package = "netlify-plugin-subfont"
+  enabled = false
+
+[[plugins]]
+  package = "netlify-plugin-html-validate"
+  enabled = false
+
 [[redirects]]
   from = "/*"
   to = "/index.html"
