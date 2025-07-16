@@ -48,8 +48,8 @@ export default defineConfig(({ mode }) => ({
     rollupOptions: {
       output: {
         manualChunks: (id) => {
-          // Core React libraries
-          if (id.includes('react') || id.includes('react-dom')) {
+          // Core React libraries - must include ALL React-related packages
+          if (id.includes('react') || id.includes('react-dom') || id.includes('react/') || id.includes('react-dom/') || id.includes('scheduler') || id.includes('use-sync-external-store')) {
             return 'vendor-react';
           }
           
@@ -158,10 +158,15 @@ export default defineConfig(({ mode }) => ({
     include: [
       'react',
       'react-dom',
+      'react-dom/client',
       'react-router-dom',
       '@supabase/supabase-js',
       'framer-motion',
-      'lucide-react'
+      'lucide-react',
+      'scheduler',
+      'use-sync-external-store'
     ],
+    // Force Vite to pre-bundle these packages
+    force: true
   },
 }));
