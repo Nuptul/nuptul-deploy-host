@@ -1,0 +1,827 @@
+/* Premium Wedding Font imports */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400;0,6..96,500;0,6..96,600;0,6..96,700;1,6..96,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Pinyon+Script&display=swap');
+
+/* Import iOS 18.6 Inspired Mobile Design System */
+@import './styles/mobile-luxury.css';
+
+/* Import Global Typography Standards */
+@import './styles/typography-global.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Infinite Moving Cards Animation */
+@keyframes scroll {
+  to {
+    transform: translateX(calc(-50% - 0.5rem));
+  }
+}
+
+.animate-scroll {
+  animation: scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite;
+}
+
+/* Liquid Glass Effects Animations */
+@keyframes liquidShift {
+  0%, 100% {
+    background-position: 0% 50%;
+    transform: translateZ(0) scale(1);
+  }
+  25% {
+    background-position: 50% 30%;
+    transform: translateZ(0) scale(1.02);
+  }
+  50% {
+    background-position: 100% 50%;
+    transform: translateZ(0) scale(1);
+  }
+  75% {
+    background-position: 50% 70%;
+    transform: translateZ(0) scale(1.01);
+  }
+}
+
+@keyframes liquidBubble {
+  0%, 100% {
+    transform: translateY(0) scale(1);
+    opacity: 0.4;
+  }
+  50% {
+    transform: translateY(-10px) scale(1.1);
+    opacity: 0.6;
+  }
+}
+
+@keyframes liquidWave {
+  0% {
+    transform: translateX(-100%) translateZ(0);
+  }
+  100% {
+    transform: translateX(100%) translateZ(0);
+  }
+}
+
+/* Glassmorphism Wedding App Design System
+   All colors MUST be HSL. Glass effects optimized for 60fps performance.
+*/
+
+@layer base {
+  :root {
+    /* Wedding App Brand Colors - HSL */
+    --wedding-navy: 210 22% 22%;           /* #2C3E50 */
+    --wedding-cream: 40 33% 94%;           /* #F5F2ED */
+    --wedding-gold: 45 86% 58%;            /* #D4AF37 */
+    --wedding-navy-light: 210 22% 35%;     /* Lighter navy */
+    --wedding-cream-dark: 40 20% 85%;      /* Darker cream */
+
+    /* Glass Effect Colors - Optimized for transparency */
+    --glass-white: 0 0% 100%;              /* Pure white base */
+    --glass-black: 0 0% 0%;                /* Pure black base */
+    --glass-navy: 210 22% 22%;             /* Navy glass tint */
+    --glass-cream: 40 33% 94%;             /* Cream glass tint */
+
+    /* Glass Accent Tints - Subtle colors for glass overlays */
+    --glass-blue-tint: 220 68% 50%;        /* #3B82F6 */
+    --glass-purple-tint: 256 68% 58%;      /* #8B5CF6 */
+    --glass-pink-tint: 330 68% 60%;        /* #EC4899 */
+    --glass-green-tint: 142 76% 47%;       /* #22C55E */
+
+    /* Core Design System Colors */
+    --background: 40 33% 94%;              /* Wedding cream */
+    --foreground: 210 22% 22%;             /* Wedding navy */
+
+    --card: 0 0% 100%;                     /* Pure white for glass base */
+    --card-foreground: 210 22% 22%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 210 22% 22%;
+
+    --primary: 210 22% 22%;                /* Wedding navy */
+    --primary-foreground: 40 33% 94%;      /* Wedding cream */
+
+    --secondary: 0 0% 98%;                 /* Light glass base */
+    --secondary-foreground: 210 22% 22%;
+
+    --muted: 210 14% 89%;                  /* Muted glass */
+    --muted-foreground: 210 22% 45%;
+
+    --accent: 220 68% 50%;                 /* Glass blue accent */
+    --accent-foreground: 0 0% 100%;
+
+    /* Status Colors for Password Strength */
+    --success: 142 76% 47%;                /* Green for strong passwords */
+    --warning: 48 96% 53%;                 /* Yellow for medium passwords */
+    --destructive: 0 84% 60%;              /* Red for weak passwords */
+    --destructive-foreground: 0 0% 98%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 210 14% 89%;                 /* Subtle borders for glass */
+    --input: 210 14% 89%;
+    --ring: 220 68% 50%;                   /* Focus ring */
+
+    --radius: 1rem;                        /* Rounded corners for glass */
+
+    /* Glass Effect Variables */
+    --glass-blur-primary: 20px;            /* Main glass blur */
+    --glass-blur-secondary: 10px;          /* Secondary glass blur */
+    --glass-blur-frosted: 40px;            /* Maximum blur */
+    
+    --glass-opacity-primary: 0.8;          /* Main glass opacity */
+    --glass-opacity-secondary: 0.6;        /* Secondary glass opacity */
+    --glass-opacity-frosted: 0.4;          /* Frosted glass opacity */
+
+    /* Background Gradients */
+    --gradient-mesh: 
+      radial-gradient(at 30% 20%, hsl(220 68% 50% / 0.1) 0px, transparent 50%),
+      radial-gradient(at 80% 80%, hsl(256 68% 58% / 0.1) 0px, transparent 50%),
+      radial-gradient(at 20% 70%, hsl(330 68% 60% / 0.1) 0px, transparent 50%);
+
+    --gradient-background: linear-gradient(135deg, hsl(40 33% 96%) 0%, hsl(40 20% 92%) 100%);
+
+    /* Animation Easing */
+    --ease-glass: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .dark {
+    /* Dark Mode Overrides */
+    --background: 210 22% 8%;              /* Dark navy */
+    --foreground: 40 33% 94%;              /* Light cream */
+
+    --card: 210 22% 12%;                   /* Dark glass base */
+    --card-foreground: 40 33% 94%;
+
+    --popover: 210 22% 12%;
+    --popover-foreground: 40 33% 94%;
+
+    --primary: 40 33% 94%;                 /* Cream in dark mode */
+    --primary-foreground: 210 22% 8%;
+
+    --secondary: 210 22% 15%;              /* Dark glass */
+    --secondary-foreground: 40 33% 94%;
+
+    --muted: 210 22% 15%;
+    --muted-foreground: 210 14% 65%;
+
+    --accent: 40 33% 94%;                  /* Cream accent in dark */
+    --accent-foreground: 210 22% 8%;
+
+    --border: 210 22% 18%;
+    --input: 210 22% 18%;
+    --ring: 40 33% 94%;
+
+    /* Dark Mode Gradients */
+    --gradient-mesh:
+      radial-gradient(at 30% 20%, hsl(220 68% 50% / 0.2) 0px, transparent 50%),
+      radial-gradient(at 80% 80%, hsl(256 68% 58% / 0.2) 0px, transparent 50%),
+      radial-gradient(at 20% 70%, hsl(330 68% 60% / 0.2) 0px, transparent 50%);
+
+    --gradient-background: linear-gradient(135deg, hsl(210 22% 6%) 0%, hsl(210 22% 12%) 100%);
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  html,
+  body {
+    @apply text-foreground;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    min-height: 100vh;
+    font-size: clamp(15px, 3vw, 18px);
+    width: 100vw;
+    overflow-x: hidden;
+    
+    /* Safe area handling for notches and rounded corners */
+    padding: env(safe-area-inset-top, 0) 
+             env(safe-area-inset-right, 0) 
+             env(safe-area-inset-bottom, 0) 
+             env(safe-area-inset-left, 0);
+    
+    position: relative;
+  }
+
+  /* Prevent body scroll when dashboard is open */
+  body.dashboard-open {
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* Live Reactions Animation */
+  @keyframes float-up {
+    0% { opacity: 1; transform: translateY(0) scale(1); }
+    50% { opacity: 1; transform: translateY(-20px) scale(1.2); }
+    100% { opacity: 0; transform: translateY(-40px) scale(0.8); }
+  }
+
+  body::before {
+    content: '';
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: var(--gradient-mesh);
+    background-attachment: fixed;
+    pointer-events: none;
+    z-index: -1;
+  }
+}
+
+@layer components {
+  /* Enhanced Glass Effect Classes - Mobile Optimized */
+  .glass-primary {
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.15) 0%, 
+      rgba(255, 255, 255, 0.08) 50%, 
+      rgba(255, 255, 255, 0.12) 100%);
+    backdrop-filter: blur(var(--glass-blur-primary)) saturate(1.8);
+    -webkit-backdrop-filter: blur(var(--glass-blur-primary)) saturate(1.8);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.08),
+      inset 0 1px 1px rgba(255, 255, 255, 0.4);
+    
+    /* Performance optimizations */
+    will-change: backdrop-filter;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    
+    /* Mobile blur reduction */
+    @media (max-width: 768px) {
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    
+    /* Motion sensitivity */
+    @media (prefers-reduced-motion: reduce) {
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+    
+    /* Fallback for unsupported browsers */
+    @supports not (backdrop-filter: blur(20px)) {
+      background: hsl(var(--glass-white) / 0.95);
+    }
+  }
+
+  .dark .glass-primary {
+    background: hsl(var(--glass-black) / var(--glass-opacity-primary));
+    border: 1px solid hsl(var(--glass-white) / 0.15);
+    box-shadow: 
+      0 8px 32px hsl(var(--glass-black) / 0.32),
+      0 0 0 1px hsl(var(--glass-white) / 0.15),
+      inset 0 1px 0 hsl(var(--glass-white) / 0.1);
+  }
+
+  .glass-secondary {
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.1) 0%, 
+      rgba(255, 255, 255, 0.05) 50%, 
+      rgba(255, 255, 255, 0.08) 100%);
+    backdrop-filter: blur(var(--glass-blur-secondary)) saturate(1.8);
+    -webkit-backdrop-filter: blur(var(--glass-blur-secondary)) saturate(1.8);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 
+      0 4px 16px rgba(0, 0, 0, 0.06),
+      inset 0 1px 1px rgba(255, 255, 255, 0.35);
+  }
+
+  .glass-frosted {
+    background: hsl(var(--glass-white) / var(--glass-opacity-frosted));
+    backdrop-filter: blur(var(--glass-blur-frosted));
+    -webkit-backdrop-filter: blur(var(--glass-blur-frosted));
+    border: 1px solid hsl(var(--glass-white) / 0.1);
+    box-shadow: 
+      0 2px 8px hsl(var(--glass-black) / 0.02),
+      inset 0 0 0 1px hsl(var(--glass-white) / 0.05);
+  }
+
+  .dark .glass-secondary {
+    background: hsl(var(--glass-black) / var(--glass-opacity-secondary));
+    border: 1px solid hsl(var(--glass-white) / 0.08);
+    box-shadow: 
+      0 4px 16px hsl(var(--glass-black) / 0.32),
+      inset 0 0 0 1px hsl(var(--glass-white) / 0.08);
+  }
+
+  .dark .glass-frosted {
+    background: hsl(var(--glass-black) / var(--glass-opacity-frosted));
+    border: 1px solid hsl(var(--glass-white) / 0.05);
+    box-shadow: 
+      0 2px 8px hsl(var(--glass-black) / 0.32),
+      inset 0 0 0 1px hsl(var(--glass-white) / 0.05);
+  }
+
+  .glass-card {
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.12) 0%, 
+      rgba(255, 255, 255, 0.06) 50%, 
+      rgba(255, 255, 255, 0.1) 100%);
+    backdrop-filter: blur(15px) saturate(2);
+    -webkit-backdrop-filter: blur(15px) saturate(2);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 16px;
+    position: relative;
+    
+    /* Performance optimizations */
+    will-change: backdrop-filter, transform;
+    transform: translateZ(0);
+    -webkit-transform: translateZ(0);
+    
+    /* Mobile optimizations */
+    @media (max-width: 768px) {
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      border-radius: 12px;
+    }
+    
+    /* Enhanced neumorphic card shadows with tint */
+    box-shadow: 
+      6px 6px 12px hsl(var(--glass-black) / 0.12),
+      -3px -3px 6px hsl(var(--glass-white) / 0.6),
+      inset 0.5px 0.5px 1px hsl(var(--glass-white) / 0.45),
+      inset -0.5px -0.5px 1px hsl(var(--glass-black) / 0.05);
+    
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
+    /* Reduced motion support */
+    @media (prefers-reduced-motion: reduce) {
+      transition: none;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+    }
+  }
+
+  /* Glass-Polished Popup - Premium Combined Effect */
+  .glass-popup {
+    background: linear-gradient(135deg, 
+      hsla(210, 22%, 22%, 0.1) 0%, 
+      hsla(220, 68%, 50%, 0.05) 50%, 
+      hsla(210, 22%, 22%, 0.08) 100%);
+    backdrop-filter: blur(25px) saturate(1.5);
+    -webkit-backdrop-filter: blur(25px) saturate(1.5);
+    border: 1px solid hsl(var(--glass-white) / 0.3);
+    border-radius: 24px;
+    position: relative;
+    overflow: hidden;
+    
+    /* Neumorphism shadows with dark tint */
+    box-shadow: 
+      12px 12px 24px hsl(var(--glass-black) / 0.15),
+      -8px -8px 16px hsl(var(--glass-white) / 0.8),
+      inset 1px 1px 2px hsl(var(--glass-white) / 0.6),
+      inset -1px -1px 2px hsl(var(--glass-black) / 0.1),
+      0 0 0 1px hsl(var(--glass-white) / 0.2);
+    
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .glass-popup::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 50%;
+    background: linear-gradient(135deg,
+      hsl(var(--glass-white) / 0.3) 0%,
+      hsl(var(--glass-white) / 0.1) 50%,
+      transparent 100%);
+    border-radius: 24px 24px 0 0;
+    pointer-events: none;
+  }
+
+  .glass-popup::after {
+    content: '';
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    right: 1px;
+    bottom: 1px;
+    background: linear-gradient(135deg,
+      hsl(var(--glass-white) / 0.05) 0%,
+      transparent 40%,
+      hsl(var(--glass-black) / 0.02) 100%);
+    border-radius: 23px;
+    pointer-events: none;
+  }
+
+  /* Mobile-first Dashboard Interface */
+  .nav-bottom {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 64px;
+    min-height: 64px;
+    background: linear-gradient(135deg, 
+      hsla(210, 22%, 22%, 0.15) 0%, 
+      hsla(220, 68%, 50%, 0.08) 50%, 
+      hsla(210, 22%, 22%, 0.12) 100%);
+    backdrop-filter: blur(15px) saturate(1.5);
+    -webkit-backdrop-filter: blur(15px) saturate(1.5);
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    z-index: 100;
+    
+    /* Safe area padding */
+    padding-left: env(safe-area-inset-left, 0);
+    padding-right: env(safe-area-inset-right, 0);
+    padding-bottom: env(safe-area-inset-bottom, 0);
+    
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    
+    /* Performance optimization for mobile */
+    will-change: backdrop-filter;
+    
+    /* Reduce blur on scroll for performance */
+    @media (max-width: 600px) and (prefers-reduced-motion: no-preference) {
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    
+    /* Fallback for older browsers */
+    @supports not (backdrop-filter: blur(10px)) {
+      background: rgba(0, 0, 0, 0.95);
+    }
+  }
+
+  .nav-bottom .nav-item {
+    min-width: 44px;
+    min-height: 44px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 8px;
+    color: rgba(255, 255, 255, 0.7);
+    text-decoration: none;
+    transition: color 0.2s ease;
+    touch-action: manipulation;
+  }
+
+  .dashboard-popup {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 120px; /* Position above bottom navigation (20px + nav height + buffer) */
+    z-index: 200;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    padding: 16px;
+    
+    /* Safe area insets */
+    padding-left: max(16px, env(safe-area-inset-left, 0));
+    padding-right: max(16px, env(safe-area-inset-right, 0));
+    padding-bottom: 0; /* No bottom padding since we're positioned above nav */
+  }
+
+  .dashboard-popup-content {
+    width: clamp(300px, 90vw, 430px);
+    max-height: 70vh;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border-radius: 24px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    overflow: hidden;
+    
+    /* Glassmorphism shadow */
+    box-shadow: 
+      0 20px 40px rgba(0, 0, 0, 0.1),
+      0 10px 25px rgba(0, 0, 0, 0.05),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.3);
+    
+    /* Fade-slide-up animation */
+    animation: dashboard-slide-up 0.25s ease-out;
+  }
+
+  .dashboard-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    z-index: 150;
+    transition: opacity 0.25s ease;
+  }
+
+  /* Typography Classes with Dolly Font for Headings */
+  .wedding-display {
+    @apply text-6xl md:text-7xl font-light tracking-tight font-dolly;
+  }
+
+  .wedding-heading {
+    @apply text-3xl md:text-4xl font-medium tracking-tight font-dolly;
+  }
+
+  .wedding-subheading {
+    @apply text-xl md:text-2xl font-normal font-dolly;
+  }
+
+  /* Apply Dolly font to all headings globally */
+  h1, h2, h3, h4, h5, h6 {
+    font-family: 'Playfair Display', serif;
+  }
+
+  /* Apply Dolly font to form elements */
+  label, .form-label {
+    font-family: 'Playfair Display', serif;
+  }
+
+  /* Animation Classes */
+  .animate-scale-in {
+    animation: scale-in 0.5s var(--ease-bounce) forwards;
+  }
+}
+
+@layer utilities {
+  /* Glass Color Utilities */
+  .text-glass-blue {
+    color: hsl(var(--glass-blue-tint));
+  }
+  
+  .text-glass-purple {
+    color: hsl(var(--glass-purple-tint));
+  }
+  
+  .text-glass-pink {
+    color: hsl(var(--glass-pink-tint));
+  }
+  
+  .text-glass-green {
+    color: hsl(var(--glass-green-tint));
+  }
+
+  /* Responsive Grid Utilities */
+  .responsive-grid-4 {
+    @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5;
+  }
+
+  .responsive-grid-2 {
+    @apply grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4;
+  }
+
+  /* Mobile Touch Targets */
+  .touch-target {
+    @apply min-w-[44px] min-h-[44px] flex items-center justify-center;
+  }
+
+  /* Mobile Optimized Breakpoints */
+  @media (max-width: 360px) {
+    .force-single-col {
+      @apply grid-cols-1 !important;
+    }
+  }
+
+  /* Responsive Card Padding */
+  .responsive-card-padding {
+    @apply p-3 sm:p-4 lg:p-6;
+  }
+
+  .responsive-card-padding-sm {
+    @apply p-2 sm:p-3 lg:p-4;
+  }
+
+  /* Responsive Typography Scale */
+  .responsive-text-base {
+    @apply text-xs sm:text-sm lg:text-base;
+  }
+
+  /* Accessibility Utilities */
+  .sr-only {
+    @apply absolute w-px h-px p-0 -m-px overflow-hidden whitespace-nowrap border-0;
+    clip: rect(0, 0, 0, 0);
+  }
+
+  /* Focus Management */
+  .focus-trap {
+    @apply outline-none ring-2 ring-accent ring-opacity-50;
+  }
+
+  /* High Contrast Mode Support */
+  @media (prefers-contrast: high) {
+    .glass-primary,
+    .glass-secondary,
+    .glass-card {
+      border-width: 2px;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+      background: hsl(var(--background));
+    }
+  }
+
+  /* Motion Preferences */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+/* Mobile Media Queries */
+@media (max-width: 600px) {
+  .nav-bottom {
+    display: flex;
+  }
+}
+
+@media (min-width: 600px) {
+  .nav-bottom {
+    display: none;
+  }
+}
+
+/* Keyframe Animations */
+@keyframes dashboard-slide-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes glass-float {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+}
+
+/* Mobile Navigation and Form Interaction Fixes */
+@layer utilities {
+  /* Ensure modals and popups don't interfere with navigation */
+  .modal-overlay {
+    z-index: 9998 !important;
+  }
+  
+  .modal-content {
+    z-index: 9999 !important;
+  }
+  
+  /* Mobile-specific adjustments for forms */
+  @media (max-width: 768px) {
+    .modal-content {
+      max-height: 85vh !important;
+      margin-bottom: 100px !important;
+      overflow-y: auto;
+    }
+    
+    /* Ensure bottom padding for forms on mobile */
+    .mobile-form-container {
+      padding-bottom: 120px !important;
+    }
+    
+    /* Ensure proper spacing for fixed bottom navigation */
+    .mobile-safe-bottom {
+      padding-bottom: max(100px, env(safe-area-inset-bottom, 0px)) !important;
+    }
+    
+    /* Keyboard handling for mobile inputs */
+    .mobile-input-container {
+      margin-bottom: 20px;
+    }
+    
+    .mobile-input-container:last-child {
+      margin-bottom: 40px;
+    }
+  }
+  
+  /* Touch target improvements */
+  .touch-target {
+    min-width: 44px !important;
+    min-height: 44px !important;
+  }
+  
+  /* Prevent navigation interference */
+  .nav-overlay-prevention {
+    position: relative;
+    z-index: 10000;
+  }
+
+  /* Gradient utilities for Aceternity components */
+  .bg-gradient-radial {
+    background-image: radial-gradient(ellipse at center, var(--tw-gradient-stops));
+  }
+  
+  /* Liquid glass effects - iOS 18.6 inspired with more transparency */
+  .liquid-glass {
+    background: linear-gradient(135deg, 
+      rgba(255, 255, 255, 0.15) 0%, 
+      rgba(255, 255, 255, 0.08) 50%, 
+      rgba(255, 255, 255, 0.12) 100%);
+    backdrop-filter: blur(20px) saturate(2);
+    -webkit-backdrop-filter: blur(20px) saturate(2);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    border-radius: 20px;
+    box-shadow: 
+      0 8px 32px rgba(0, 0, 0, 0.08),
+      inset 0 1px 1px rgba(255, 255, 255, 0.45),
+      inset 0 -1px 1px rgba(0, 0, 0, 0.03);
+    position: relative;
+    overflow: hidden;
+  }
+  
+  /* Liquid glass variations for different color accents */
+  .liquid-glass-blue {
+    background: linear-gradient(135deg, 
+      hsla(220, 68%, 50%, 0.15) 0%, 
+      hsla(220, 68%, 50%, 0.08) 50%, 
+      hsla(210, 22%, 22%, 0.06) 100%);
+  }
+  
+  .liquid-glass-orange {
+    background: linear-gradient(135deg, 
+      hsla(33, 100%, 50%, 0.12) 0%, 
+      hsla(33, 100%, 50%, 0.06) 50%, 
+      hsla(210, 22%, 22%, 0.05) 100%);
+  }
+  
+  .liquid-glass-green {
+    background: linear-gradient(135deg, 
+      hsla(142, 76%, 47%, 0.12) 0%, 
+      hsla(142, 76%, 47%, 0.06) 50%, 
+      hsla(210, 22%, 22%, 0.05) 100%);
+  }
+  
+  .liquid-glass-purple {
+    background: linear-gradient(135deg, 
+      hsla(256, 68%, 58%, 0.12) 0%, 
+      hsla(256, 68%, 58%, 0.06) 50%, 
+      hsla(210, 22%, 22%, 0.05) 100%);
+  }
+  
+  /* Neumorphic card styles with dark tint */
+  .neu-card {
+    background: linear-gradient(135deg, 
+      hsla(210, 22%, 22%, 0.06) 0%, 
+      hsla(220, 68%, 50%, 0.03) 50%, 
+      hsla(210, 22%, 22%, 0.04) 100%);
+    backdrop-filter: blur(20px) saturate(1.5);
+    -webkit-backdrop-filter: blur(20px) saturate(1.5);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 
+      8px 8px 16px rgba(0, 0, 0, 0.1),
+      -4px -4px 8px rgba(255, 255, 255, 0.7),
+      inset 0.5px 0.5px 1px rgba(255, 255, 255, 0.4),
+      inset -0.5px -0.5px 1px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  .neu-card:hover {
+    box-shadow: 
+      10px 10px 20px rgba(0, 0, 0, 0.12),
+      -5px -5px 10px rgba(255, 255, 255, 0.8),
+      inset 0.5px 0.5px 1px rgba(255, 255, 255, 0.5),
+      inset -0.5px -0.5px 1px rgba(0, 0, 0, 0.05);
+  }
+}

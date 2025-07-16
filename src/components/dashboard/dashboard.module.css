@@ -1,0 +1,211 @@
+/* Liquid Glass Effects for Dashboard Components */
+
+.liquidGlassContainer {
+  position: relative;
+  overflow: hidden;
+  background-size: 600% 600%;
+  animation: liquidShift 15s ease-in-out infinite;
+}
+
+.liquidGlassContainer::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 70%, rgba(221, 160, 221, 0.2) 0%, transparent 60%);
+  background-size: 200% 200%;
+  animation: liquidBubble 6s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.liquidGlassContainer::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 70% 30%, rgba(255, 182, 193, 0.15) 0%, transparent 50%);
+  background-size: 180% 180%;
+  animation: liquidBubble 7s ease-in-out infinite reverse;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Subtle liquid effect */
+.liquidGlassSubtle {
+  position: relative;
+  overflow: hidden;
+  background-size: 400% 400%;
+  animation: liquidShift 20s ease-in-out infinite;
+}
+
+.liquidGlassSubtle::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 80%, rgba(173, 216, 230, 0.15) 0%, transparent 50%);
+  background-size: 150% 150%;
+  animation: liquidBubble 8s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Strong liquid effect */
+.liquidGlassStrong {
+  position: relative;
+  overflow: hidden;
+  background-size: 800% 800%;
+  animation: liquidShift 10s ease-in-out infinite;
+}
+
+.liquidGlassStrong::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(135, 206, 235, 0.1) 50%, transparent 100%);
+  animation: liquidWave 4s linear infinite;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Glass Card with Liquid Effect */
+.liquidGlassCard {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.25) 100%);
+  backdrop-filter: blur(25px) saturate(1.8);
+  -webkit-backdrop-filter: blur(25px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.4);
+  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.6);
+  background-size: 600% 600%;
+  animation: liquidShift 15s ease-in-out infinite;
+}
+
+.liquidGlassCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 70%, rgba(221, 160, 221, 0.2) 0%, transparent 60%);
+  background-size: 200% 200%;
+  animation: liquidBubble 6s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Button with Liquid Effect */
+.liquidGlassButton {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(135, 206, 235, 0.8) 0%, rgba(152, 255, 208, 0.7) 50%, rgba(255, 182, 193, 0.75) 100%);
+  backdrop-filter: blur(15px) saturate(2);
+  -webkit-backdrop-filter: blur(15px) saturate(2);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  box-shadow: 0 4px 16px rgba(135, 206, 235, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.8);
+  background-size: 400% 400%;
+  animation: liquidShift 20s ease-in-out infinite;
+}
+
+.liquidGlassButton::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 20% 80%, rgba(173, 216, 230, 0.15) 0%, transparent 50%);
+  background-size: 150% 150%;
+  animation: liquidBubble 8s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Update card with liquid effect */
+.liquidUpdateCard {
+  position: relative;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(20px) saturate(1.8);
+  -webkit-backdrop-filter: blur(20px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background-size: 400% 400%;
+  animation: liquidShift 25s ease-in-out infinite;
+}
+
+.liquidUpdateCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 40% 60%, rgba(173, 216, 230, 0.1) 0%, transparent 40%);
+  background-size: 150% 150%;
+  animation: liquidBubble 10s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Stat Card Liquid Effects */
+.statCard {
+  position: relative;
+  overflow: hidden;
+  background-size: 400% 400%;
+  animation: liquidShift 25s ease-in-out infinite;
+}
+
+.statCard::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.1) 0%, transparent 60%);
+  background-size: 120% 120%;
+  animation: liquidBubble 10s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+.statCard::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 80% 20%, rgba(173, 216, 230, 0.08) 0%, transparent 50%);
+  background-size: 150% 150%;
+  animation: liquidBubble 12s ease-in-out infinite reverse;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+/* Action Button Liquid Effects */
+.actionButton {
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+.actionButton::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.2) 50%, transparent 100%);
+  transform: translateX(-100%);
+  transition: transform 0.6s ease;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+.actionButton:hover::before {
+  transform: translateX(100%);
+}
+
+/* Schedule Item Liquid Effects */
+.scheduleItem {
+  position: relative;
+  overflow: hidden;
+  background-size: 300% 300%;
+  animation: liquidShift 30s ease-in-out infinite;
+}
+
+.scheduleItem::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(ellipse at 30% 50%, rgba(255, 255, 255, 0.08) 0%, transparent 70%);
+  background-size: 150% 150%;
+  animation: liquidBubble 12s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: inherit;
+}

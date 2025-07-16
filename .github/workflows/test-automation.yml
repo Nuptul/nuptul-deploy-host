@@ -1,0 +1,88 @@
+name: Automated Testing Agent
+
+on:
+  schedule:
+    - cron: '0 */6 * * *'  # Every 6 hours
+  workflow_dispatch:
+    inputs:
+      test_scope:
+        description: 'Testing scope'
+        required: false
+        default: 'full'
+        type: choice
+        options:
+          - full
+          - critical
+          - performance
+          - accessibility
+
+jobs:
+  ui-testing:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: |
+          npm ci
+          npx playwright install chromium firefox webkit
+      
+      - name: Start application
+        run: |
+          npm run build
+          npm run preview &
+          sleep 10
+      
+      - name: Run Testing Agent
+        id: testing
+        run: |
+          node .github/agents/testing/run-testing-agent.js \
+            --scope="${{ github.event.inputs.test_scope || 'full' }}" \
+            --github-token="${{ secrets.GITHUB_TOKEN }}" \
+            --output=./test-results
+        env:
+          TESTING_AGENT_CONFIG: .github/agents/testing/config.json
+      
+      - name: Upload test artifacts
+        if: always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: test-results-${{ github.run_id }}
+          path: |
+            test-results/
+            screenshots/
+            logs/
+      
+      - name: Create issues from findings
+        if: always()
+        run: |
+          node .github/agents/testing/create-issues.js \
+            --results=./test-results/findings.json \
+            --github-token="${{ secrets.GITHUB_TOKEN }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Update dashboard
+        if: always()
+        run: |
+          # Placeholder for dashboard update
+          echo "Updating dashboard with test results..."
+          echo "Total issues found: $(jq '.issues | length' test-results/findings.json || echo 0)"
+      
+      - name: Performance metrics
+        if: success()
+        run: |
+          node .github/agents/testing/analyze-performance.js \
+            --results=./test-results/performance.json
+      
+      - name: Accessibility report
+        if: success()
+        run: |
+          node .github/agents/testing/analyze-accessibility.js \
+            --results=./test-results/accessibility.json

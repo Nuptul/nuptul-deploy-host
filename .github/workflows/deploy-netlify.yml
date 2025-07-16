@@ -1,0 +1,98 @@
+name: Deploy to Netlify
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    types: [closed]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Deployment environment'
+        required: true
+        type: choice
+        options:
+          - production
+          - staging
+          - preview
+
+jobs:
+  deploy:
+    if: github.event_name == 'push' || (github.event.pull_request.merged == true) || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment || 'production' }}
+    
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run tests
+        run: npm test
+      
+      - name: Build application
+        run: npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+      
+      - name: Deploy to Netlify
+        uses: netlify/actions/cli@master
+        id: deploy
+        with:
+          args: deploy --dir=dist --prod
+        env:
+          NETLIFY_AUTH_TOKEN: ${{ secrets.NETLIFY_AUTH_TOKEN }}
+          NETLIFY_SITE_ID: ${{ secrets.NETLIFY_SITE_ID }}
+      
+      - name: Create deployment record
+        run: |
+          echo "Deployment URL: ${{ steps.deploy.outputs.deploy-url }}"
+          
+          # Record deployment in GitHub
+          if [ "${{ github.event_name }}" == "push" ]; then
+            gh api repos/${{ github.repository }}/deployments \
+              -f ref=${{ github.sha }} \
+              -f environment=${{ github.event.inputs.environment || 'production' }} \
+              -f description="Deployed to Netlify" \
+              -f auto_merge=false \
+              -f required_contexts='[]' \
+              --jq '.id' > deployment_id.txt
+            
+            DEPLOYMENT_ID=$(cat deployment_id.txt)
+            
+            gh api repos/${{ github.repository }}/deployments/${DEPLOYMENT_ID}/statuses \
+              -f state=success \
+              -f environment=${{ github.event.inputs.environment || 'production' }} \
+              -f environment_url=${{ steps.deploy.outputs.deploy-url }} \
+              -f description="Deployment successful"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      - name: Update dashboard
+        if: success()
+        run: |
+          # Placeholder for dashboard update
+          echo "Updating deployment status in dashboard..."
+          echo "Environment: ${{ github.event.inputs.environment || 'production' }}"
+          echo "URL: ${{ steps.deploy.outputs.deploy-url }}"
+      
+      - name: Run smoke tests
+        if: success()
+        run: |
+          npm run test:e2e -- --url=${{ steps.deploy.outputs.deploy-url }}
+      
+      - name: Notify agents
+        if: success()
+        run: |
+          # Notify all agents about new deployment
+          echo "Notifying agents about deployment..."
+          echo "New deployment available at: ${{ steps.deploy.outputs.deploy-url }}"

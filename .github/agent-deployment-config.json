@@ -1,0 +1,236 @@
+{
+  "deployment": {
+    "name": "Nuptul Multi-Agent System",
+    "version": "1.0.0",
+    "environment": "production",
+    "site_id": "9ae8b5b5-8e7c-4134-b7fc-717d90d82fb0",
+    "domain": "nuptial-production.netlify.app",
+    "target_domain": "nuptial.com"
+  },
+  "agents": {
+    "testing": {
+      "path": ".github/agents/testing/",
+      "schedule": "0 */6 * * *",
+      "config": {
+        "browsers": ["chromium", "firefox", "webkit"],
+        "viewports": [
+          {"width": 1920, "height": 1080},
+          {"width": 1366, "height": 768},
+          {"width": 375, "height": 667}
+        ],
+        "test_suites": {
+          "navigation": ["header", "footer", "mobile_menu", "breadcrumbs"],
+          "accessibility": ["color_contrast", "keyboard_navigation", "screen_reader", "aria_labels"],
+          "performance": ["load_time", "core_web_vitals", "lighthouse_score"],
+          "functional": ["login", "rsvp", "gallery", "messaging", "venue_search"]
+        },
+        "issue_creation": {
+          "severity_threshold": "high",
+          "auto_assign": true,
+          "labels": ["bug", "testing-agent", "automated"]
+        }
+      }
+    },
+    "migration": {
+      "path": ".github/agents/migration/",
+      "trigger": "manual",
+      "config": {
+        "phases": ["prepare", "schema", "data", "functions", "config", "verify"],
+        "rollback_enabled": true,
+        "backup_retention": "30d",
+        "verification_timeout": "10m"
+      }
+    },
+    "development": {
+      "path": ".github/agents/development/",
+      "personas": {
+        "frontend": {
+          "expertise": ["React", "TypeScript", "UI/UX", "Responsive Design"],
+          "mcp_preferences": {
+            "magic": true,
+            "supabase": false,
+            "netlify": true,
+            "docker": true
+          },
+          "issue_labels": ["frontend", "ui", "react", "typescript"]
+        },
+        "backend": {
+          "expertise": ["Node.js", "Supabase", "APIs", "Database"],
+          "mcp_preferences": {
+            "magic": false,
+            "supabase": true,
+            "netlify": false,
+            "docker": true
+          },
+          "issue_labels": ["backend", "api", "database", "supabase"]
+        },
+        "fullstack": {
+          "expertise": ["Full Stack", "Integration", "End-to-End"],
+          "mcp_preferences": {
+            "magic": true,
+            "supabase": true,
+            "netlify": true,
+            "docker": true
+          },
+          "issue_labels": ["fullstack", "integration", "feature"]
+        },
+        "security": {
+          "expertise": ["Security", "Authentication", "Vulnerability Assessment"],
+          "mcp_preferences": {
+            "magic": false,
+            "supabase": true,
+            "netlify": false,
+            "docker": true
+          },
+          "issue_labels": ["security", "auth", "vulnerability"]
+        },
+        "performance": {
+          "expertise": ["Performance", "Optimization", "Monitoring"],
+          "mcp_preferences": {
+            "magic": false,
+            "supabase": true,
+            "netlify": true,
+            "docker": true
+          },
+          "issue_labels": ["performance", "optimization", "monitoring"]
+        },
+        "qa": {
+          "expertise": ["Testing", "Quality Assurance", "Validation"],
+          "mcp_preferences": {
+            "magic": false,
+            "supabase": false,
+            "netlify": false,
+            "docker": true
+          },
+          "issue_labels": ["qa", "testing", "quality"]
+        },
+        "devops": {
+          "expertise": ["DevOps", "CI/CD", "Deployment", "Infrastructure"],
+          "mcp_preferences": {
+            "magic": false,
+            "supabase": true,
+            "netlify": true,
+            "docker": true
+          },
+          "issue_labels": ["devops", "deployment", "infrastructure"]
+        },
+        "refactorer": {
+          "expertise": ["Code Quality", "Refactoring", "Technical Debt"],
+          "mcp_preferences": {
+            "magic": false,
+            "supabase": false,
+            "netlify": false,
+            "docker": true
+          },
+          "issue_labels": ["refactoring", "code-quality", "technical-debt"]
+        },
+        "scribe": {
+          "expertise": ["Documentation", "Technical Writing", "Guides"],
+          "mcp_preferences": {
+            "magic": false,
+            "supabase": false,
+            "netlify": false,
+            "docker": true
+          },
+          "issue_labels": ["documentation", "guides", "writing"]
+        }
+      }
+    },
+    "orchestrator": {
+      "path": ".github/agents/orchestrator/",
+      "schedule": "*/15 * * * *",
+      "config": {
+        "issue_routing": {
+          "analysis_timeout": "30s",
+          "assignment_strategy": "expertise_match",
+          "fallback_agent": "fullstack"
+        },
+        "health_monitoring": {
+          "check_interval": "15m",
+          "failure_threshold": 3,
+          "recovery_actions": ["rebalance", "spawn_backup"]
+        },
+        "resource_management": {
+          "max_parallel_agents": 5,
+          "agent_timeout": "30m",
+          "cleanup_interval": "24h"
+        }
+      }
+    }
+  },
+  "workflows": {
+    "orchestrator.yml": {
+      "triggers": ["issues", "pull_request", "schedule", "workflow_dispatch"],
+      "jobs": ["route-new-issues", "manage-pull-requests", "health-check", "cleanup-stale-resources"]
+    },
+    "agent-ci.yml": {
+      "triggers": ["pull_request", "workflow_dispatch"],
+      "jobs": ["validate-agent-work"]
+    },
+    "test-automation.yml": {
+      "triggers": ["schedule", "workflow_dispatch"],
+      "jobs": ["ui-testing"]
+    },
+    "deploy-netlify.yml": {
+      "triggers": ["push", "pull_request", "workflow_dispatch"],
+      "jobs": ["deploy"]
+    }
+  },
+  "secrets": {
+    "required": [
+      "VITE_SUPABASE_URL",
+      "VITE_SUPABASE_ANON_KEY",
+      "NETLIFY_AUTH_TOKEN",
+      "NETLIFY_SITE_ID",
+      "GITHUB_TOKEN"
+    ],
+    "optional": [
+      "AGENT_POOL",
+      "AGENT_CONFIG",
+      "DASHBOARD_URL",
+      "STORAGE_CONFIG"
+    ]
+  },
+  "monitoring": {
+    "dashboard": {
+      "enabled": true,
+      "websocket_port": 8080,
+      "metrics_retention": "7d"
+    },
+    "alerts": {
+      "email_enabled": false,
+      "slack_enabled": false,
+      "github_issues": true
+    }
+  },
+  "quality_gates": {
+    "build": {
+      "timeout": "10m",
+      "required_checks": ["lint", "type-check", "test", "build"]
+    },
+    "deployment": {
+      "timeout": "5m",
+      "required_checks": ["smoke-test", "health-check"]
+    },
+    "testing": {
+      "timeout": "20m",
+      "required_checks": ["ui-test", "accessibility", "performance"]
+    }
+  },
+  "infinite_loop": {
+    "enabled": true,
+    "max_iterations": 100,
+    "cooldown_period": "5m",
+    "stop_conditions": [
+      "critical_failure",
+      "resource_exhaustion",
+      "manual_intervention"
+    ]
+  },
+  "metadata": {
+    "created": "2024-01-16T12:00:00Z",
+    "last_updated": "2024-01-16T12:00:00Z",
+    "version": "1.0.0",
+    "maintainer": "Nuptul Multi-Agent System"
+  }
+}

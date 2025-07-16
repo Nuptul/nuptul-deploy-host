@@ -1,0 +1,84 @@
+name: Agent CI/CD Pipeline
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+  workflow_dispatch:
+    inputs:
+      agent_id:
+        description: 'Agent ID to test'
+        required: false
+        type: string
+
+jobs:
+  validate-agent-work:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Identify Agent
+        id: agent
+        run: |
+          if [ -n "${{ github.event.inputs.agent_id }}" ]; then
+            echo "agent_id=${{ github.event.inputs.agent_id }}" >> $GITHUB_OUTPUT
+          else
+            echo "agent_id=$(echo ${{ github.head_ref }} | cut -d'/' -f2)" >> $GITHUB_OUTPUT
+          fi
+      
+      - name: Run Agent-Specific Tests
+        run: |
+          echo "Running tests for agent: ${{ steps.agent.outputs.agent_id }}"
+          npm run test -- --agent=${{ steps.agent.outputs.agent_id }}
+      
+      - name: Code Quality Check
+        run: |
+          npm run lint
+          npm run type-check
+      
+      - name: Build Check
+        run: npm run build
+      
+      - name: Security Scan
+        uses: github/super-linter@v4
+        env:
+          DEFAULT_BRANCH: main
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_ALL_CODEBASE: false
+          VALIDATE_JAVASCRIPT_ES: true
+          VALIDATE_TYPESCRIPT_ES: true
+          VALIDATE_JSX: true
+          VALIDATE_TSX: true
+      
+      - name: Update Agent Status
+        if: always()
+        run: |
+          STATUS="failed"
+          if [ "${{ job.status }}" == "success" ]; then
+            STATUS="tests_complete"
+          fi
+          
+          # Update agent status in dashboard (placeholder for actual implementation)
+          echo "Agent ${{ steps.agent.outputs.agent_id }} status: $STATUS"
+          
+          # Create status comment on PR
+          if [ -n "${{ github.event.pull_request.number }}" ]; then
+            gh pr comment ${{ github.event.pull_request.number }} \
+              --body "🤖 **Agent Status Update**
+              
+              Agent: \`${{ steps.agent.outputs.agent_id }}\`
+              Status: \`$STATUS\`
+              Build: ${{ job.status }}
+              
+              [View Details](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
