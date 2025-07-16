@@ -1,4 +1,4 @@
-import { supabase, supabaseAdmin } from '@/integrations/supabase/client';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface GuestMatchResult {
   matched: boolean;
@@ -151,24 +151,12 @@ export const GuestMatcher = {
   // Get unlinked users for admin
   async getUnlinkedUsers() {
     try {
-      let authUsers: any[] = [];
-      
-      // Try to get users from auth admin API first
-      if (supabaseAdmin) {
-        const { data: authData, error: authError } = await supabaseAdmin.auth.admin.listUsers();
-        if (!authError && authData) {
-          authUsers = authData.users || [];
-        }
-      }
-      
-      // Fallback to profiles table if auth admin fails
-      if (authUsers.length === 0) {
-        const { data: profilesData } = await supabase
-          .from('profiles')
-          .select('*')
-          .order('created_at', { ascending: false });
-        authUsers = profilesData || [];
-      }
+      // Use profiles table to get users
+      const { data: profilesData } = await supabase
+        .from('profiles')
+        .select('*')
+        .order('created_at', { ascending: false });
+      const authUsers = profilesData || [];
       
       // Get guest list to see which users are already linked
       const { data: guestData } = await supabase
