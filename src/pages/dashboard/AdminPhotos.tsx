@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Image, CheckCircle, XCircle, Eye, Calendar, User } from 'lucide-react';
+import { Image, CheckCircle, XCircle, Eye, Calendar, User } from 'lucide-react';
 import GlassCard from '@/components/GlassCard';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -118,12 +118,6 @@ const AdminPhotos: React.FC = () => {
     <div className="min-h-screen px-5 pt-12 pb-6">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5 text-[#7a736b]" />
-        </button>
         <div>
           <h1 className="text-2xl font-semibold text-[#2d3f51]">Photo Moderation</h1>
           <p className="text-sm text-[#7a736b]">Review and manage photo uploads</p>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Users, UserPlus, Settings, Activity, Search, Filter, MoreHorizontal, UserCheck, Mail, Phone, MapPin, Plus, Edit, Trash2, Copy, Utensils, FileText, User, Key, Split, Link, Heart } from 'lucide-react';
+import { Users, UserPlus, Settings, Activity, Search, Filter, MoreHorizontal, UserCheck, Mail, Phone, MapPin, Plus, Edit, Trash2, Copy, Utensils, FileText, User, Key, Split, Link, Heart } from 'lucide-react';
 import AdaptiveGlassCard from '@/components/AdaptiveGlassCard';
 import { supabase, supabaseAdmin } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -810,12 +810,6 @@ const AdminUsers: React.FC = () => {
     <div className="min-h-screen px-5 pt-12 pb-6">
       {/* Header */}
       <div className="flex items-center gap-4 mb-6">
-        <button
-          onClick={() => navigate('/dashboard')}
-          className="w-10 h-10 rounded-full bg-white/20 hover:bg-white/30 flex items-center justify-center transition-colors"
-        >
-          <ArrowLeft className="w-5 h-5 text-blue-600" />
-        </button>
         <div>
           <h1 className="text-2xl font-semibold text-blue-900">User Roles & Guest List Management</h1>
           <p className="text-sm text-blue-700">Manage users, roles, guest list, and linking</p>
