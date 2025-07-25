@@ -597,18 +597,58 @@ const CommunicationCenter: React.FC = () => {
           
           {/* Quick Mass Actions */}
           <div className="grid grid-cols-2 gap-3">
-            <Button variant="outline" className="glass-card p-3 h-auto flex-col gap-2">
-              <Mail className="w-5 h-5 text-glass-blue" />
+            <Button
+              className="p-3 min-h-[60px] flex-col gap-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+              style={{
+                background: 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+                backdropFilter: 'blur(20px) saturate(1.8)',
+                WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: '#FFFFFF',
+                fontWeight: '600',
+                borderRadius: '12px',
+                boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+              }}
+            >
+              <Mail className="w-5 h-5" />
               <div className="text-xs text-center">
                 <div className="font-medium">RSVP Reminder</div>
-                <div className="text-muted-foreground">Send to pending guests</div>
+                <div className="opacity-80">Send to pending guests</div>
               </div>
             </Button>
-            <Button variant="outline" className="glass-card p-3 h-auto flex-col gap-2">
-              <Bell className="w-5 h-5 text-glass-purple" />
+            <Button
+              className="p-3 min-h-[60px] flex-col gap-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+              style={{
+                background: 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+                backdropFilter: 'blur(20px) saturate(1.8)',
+                WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: '#FFFFFF',
+                fontWeight: '600',
+                borderRadius: '12px',
+                boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+              }}
+            >
+              <Bell className="w-5 h-5" />
               <div className="text-xs text-center">
                 <div className="font-medium">Event Update</div>
-                <div className="text-muted-foreground">Notify confirmed guests</div>
+                <div className="opacity-80">Notify confirmed guests</div>
               </div>
             </Button>
           </div>
@@ -623,11 +663,51 @@ const CommunicationCenter: React.FC = () => {
             </h4>
             
             <div className="grid grid-cols-2 gap-2">
-              <Button variant="outline" className="glass-secondary border-0 justify-start text-xs">
+              <Button
+                className="justify-start text-xs min-h-[44px] px-3 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                style={{
+                  background: 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+                  backdropFilter: 'blur(20px) saturate(1.8)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  color: '#FFFFFF',
+                  fontWeight: '600',
+                  borderRadius: '12px',
+                  boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+                  e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+                }}
+              >
                 <Heart className="w-3 h-3 mr-1" />
                 Wedding Update
               </Button>
-              <Button variant="outline" className="glass-secondary border-0 justify-start text-xs">
+              <Button
+                className="justify-start text-xs min-h-[44px] px-3 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                style={{
+                  background: 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+                  backdropFilter: 'blur(20px) saturate(1.8)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  color: '#FFFFFF',
+                  fontWeight: '600',
+                  borderRadius: '12px',
+                  boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+                  e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+                }}
+              >
                 <MessageSquare className="w-3 h-3 mr-1" />
                 Support Message
               </Button>

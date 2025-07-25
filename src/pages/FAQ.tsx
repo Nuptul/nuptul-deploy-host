@@ -1,25 +1,22 @@
 import React, { useState, useEffect } from 'react';
 import GlassCard from '@/components/GlassCard';
-import { WeddingFAQCards } from '@/components/ui/wedding-faq-cards';
-import { 
-  HelpCircle, 
-  MapPin, 
-  Car, 
-  Bus, 
-  Shirt, 
-  Baby, 
-  Coffee, 
+import {
+  HelpCircle,
+  MapPin,
+  Car,
+  Bus,
+  Shirt,
+  Baby,
+  Coffee,
   Calendar,
   AlertCircle,
   Loader2,
   Bed,
   Gift,
   Phone,
-  PartyPopper,
-  ChevronDown,
-  ChevronUp
+  PartyPopper
 } from 'lucide-react';
-import { getPublicFAQs, incrementFAQViewCount } from '@/lib/api/faq';
+import { getPublicFAQs } from '@/lib/api/faq';
 import { useToast } from '@/hooks/use-toast';
 
 // Icon mapping
@@ -56,7 +53,6 @@ interface FAQGroup {
 const FAQ: React.FC = () => {
   const [faqGroups, setFaqGroups] = useState<FAQGroup[]>([]);
   const [loading, setLoading] = useState(true);
-  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
   const { toast } = useToast();
 
   useEffect(() => {
@@ -67,12 +63,6 @@ const FAQ: React.FC = () => {
     try {
       const data = await getPublicFAQs();
       setFaqGroups(data);
-      
-      // Auto-expand featured items
-      const featuredIds = data.flatMap(group => 
-        group.items.filter((item: any) => item.is_featured).map((item: any) => item.id)
-      );
-      setExpandedItems(new Set(featuredIds));
     } catch (error) {
       console.error('Error loading FAQs:', error);
       toast({
@@ -83,20 +73,6 @@ const FAQ: React.FC = () => {
     } finally {
       setLoading(false);
     }
-  };
-
-  const toggleExpanded = async (id: string) => {
-    setExpandedItems(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(id)) {
-        newSet.delete(id);
-      } else {
-        newSet.add(id);
-        // Track view count when expanding
-        incrementFAQViewCount(id).catch(console.error);
-      }
-      return newSet;
-    });
   };
 
   if (loading) {
@@ -110,10 +86,7 @@ const FAQ: React.FC = () => {
     );
   }
 
-  // Find important venue update FAQ
-  const venueUpdateFAQ = faqGroups
-    .flatMap(g => g.items)
-    .find(item => item.question.toLowerCase().includes('venue different'));
+
 
   return (
     <div className="min-h-screen px-3 sm:px-5 pt-8 sm:pt-12 pb-20">
@@ -127,49 +100,9 @@ const FAQ: React.FC = () => {
         </p>
       </div>
 
-      {/* Featured FAQ Carousel */}
-      {faqGroups.length > 0 && (
-        <div className="mb-8 sm:mb-12">
-          <WeddingFAQCards
-            items={faqGroups
-              .flatMap(group => 
-                group.items.map(item => ({
-                  id: item.id,
-                  question: item.question,
-                  answer: item.answer,
-                  category: group.slug === 'venue-transport' ? 'venue' : 
-                           group.slug === 'accommodation' ? 'accommodation' :
-                           group.slug === 'schedule-events' ? 'schedule' :
-                           group.slug === 'food-photos' ? 'photography' :
-                           group.slug === 'children-accessibility' ? 'general' : 'general',
-                  views: item.view_count || 0
-                }))
-              )
-              .filter(item => item.views > 10) // Show popular FAQs
-              .slice(0, 8) // Limit to 8 cards for better performance
-            }
-            speed="slow"
-            direction="left"
-            className="mb-4"
-          />
-        </div>
-      )}
 
-      {/* Important Notice - Show if venue update FAQ exists */}
-      {venueUpdateFAQ && (
-        <GlassCard className="mb-6 sm:mb-8 p-4 sm:p-6 animate-fade-up border-l-4 border-amber-400" style={{ animationDelay: '0.1s' }}>
-          <div className="flex items-start gap-3">
-            <AlertCircle className="w-5 h-5 sm:w-6 sm:h-6 text-amber-600 flex-shrink-0 mt-1" />
-            <div>
-              <h3 className="font-semibold text-wedding-navy mb-2 text-sm sm:text-base">Important Venue Update</h3>
-              <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">
-                Please note the venue has changed from The Edwards to Ben Ean due to the original venue going into liquidation in February 2025. 
-                We've arranged coach transport to help with the change. Thank you for your understanding!
-              </p>
-            </div>
-          </div>
-        </GlassCard>
-      )}
+
+
 
       {/* FAQ Groups */}
       <div className="space-y-6 sm:space-y-8 max-w-4xl mx-auto">
@@ -193,45 +126,31 @@ const FAQ: React.FC = () => {
 
               {/* FAQ Items */}
               <div className="space-y-3 sm:space-y-4">
-                {group.items.map((faq, index) => (
-                  <GlassCard 
+                {group.items
+                  .filter((faq, index, array) => {
+                    // Remove duplicates by checking if this is the first occurrence of the question
+                    return array.findIndex(item => item.question.toLowerCase().trim() === faq.question.toLowerCase().trim()) === index;
+                  })
+                  .map((faq, index) => (
+                  <div
                     key={faq.id}
-                    className="overflow-hidden animate-fade-up cursor-pointer"
+                    className="liquid-glass overflow-hidden animate-fade-up transition-all duration-300 hover:scale-[1.01] hover:shadow-lg"
                     style={{ animationDelay: `${0.3 + (index * 0.05)}s` }}
                   >
-                    <div
-                      onClick={() => toggleExpanded(faq.id)}
-                      className="p-4 sm:p-6 hover:bg-white/5 transition-colors"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-wedding-navy mb-1 leading-relaxed text-sm sm:text-base flex items-center gap-2">
-                            {faq.is_featured && (
-                              <span className="text-wedding-gold">⭐</span>
-                            )}
-                            {faq.question}
-                          </h3>
-                          {expandedItems.has(faq.id) && (
-                            <p className="text-muted-foreground leading-relaxed text-xs sm:text-sm mt-3">
-                              {faq.answer}
-                            </p>
+                    <div className="p-4 sm:p-6">
+                      <div className="space-y-3">
+                        <h3 className="font-semibold text-wedding-navy leading-relaxed text-sm sm:text-base flex items-center gap-2">
+                          {faq.is_featured && (
+                            <span className="text-wedding-gold">⭐</span>
                           )}
-                        </div>
-                        <div className="flex-shrink-0">
-                          {expandedItems.has(faq.id) ? (
-                            <ChevronUp className="w-4 h-4 text-muted-foreground" />
-                          ) : (
-                            <ChevronDown className="w-4 h-4 text-muted-foreground" />
-                          )}
-                        </div>
-                      </div>
-                      {faq.view_count > 50 && (
-                        <p className="text-xs text-muted-foreground mt-2">
-                          Viewed {faq.view_count} times
+                          {faq.question}
+                        </h3>
+                        <p className="text-wedding-navy/80 leading-relaxed text-xs sm:text-sm">
+                          {faq.answer}
                         </p>
-                      )}
+                      </div>
                     </div>
-                  </GlassCard>
+                  </div>
                 ))}
               </div>
             </div>
@@ -241,9 +160,8 @@ const FAQ: React.FC = () => {
 
       {/* Weekend Events - Now dynamic from Schedule & Events category */}
       {faqGroups.some(g => g.slug === 'schedule-events' && g.items.length > 0) && (
-        <GlassCard 
-          className="mt-6 sm:mt-8 p-4 sm:p-6 animate-fade-up max-w-4xl mx-auto" 
-          variant="secondary"
+        <div 
+          className="liquid-glass mt-6 sm:mt-8 p-4 sm:p-6 animate-fade-up max-w-4xl mx-auto" 
           style={{ animationDelay: '1.0s' }}
         >
           <h3 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4 text-wedding-navy flex items-center gap-2">
@@ -251,41 +169,40 @@ const FAQ: React.FC = () => {
             Weekend Events
           </h3>
           <div className="space-y-3 sm:space-y-4 text-xs sm:text-sm">
-            <div className="p-3 sm:p-4 bg-glass-green/10 rounded-lg">
+            <div className="p-3 sm:p-4 bg-wedding-gold/10 rounded-lg">
               <p className="font-medium text-wedding-navy mb-1 text-sm sm:text-base">Saturday, October 4th, 2025</p>
-              <p className="text-muted-foreground">
+              <p className="text-wedding-navy/80">
                 <strong>Pre-wedding drinks:</strong> Prince of Mereweather pub, 4-8 PM
               </p>
-              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+              <p className="text-xs text-wedding-navy/70 mt-1 leading-relaxed">
                 Come have a drink and grab a meal if you're hungry!
               </p>
             </div>
             
             <div className="p-3 sm:p-4 bg-glass-blue/10 rounded-lg">
               <p className="font-medium text-wedding-navy mb-1 text-sm sm:text-base">Monday, October 6th, 2025</p>
-              <p className="text-muted-foreground">
+              <p className="text-wedding-navy/80">
                 <strong>Recovery hangout:</strong> Newcastle Beach, from 11 AM
               </p>
-              <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+              <p className="text-xs text-wedding-navy/70 mt-1 leading-relaxed">
                 Kiosk with good coffee and food - perfect for recovery!
               </p>
             </div>
           </div>
-        </GlassCard>
+        </div>
       )}
 
       {/* Contact Card */}
-      <GlassCard 
-        className="mt-4 sm:mt-6 p-4 sm:p-6 text-center animate-fade-up max-w-md mx-auto" 
-        variant="frosted"
+      <div 
+        className="liquid-glass mt-4 sm:mt-6 p-4 sm:p-6 text-center animate-fade-up max-w-md mx-auto" 
         style={{ animationDelay: '1.2s' }}
       >
-        <HelpCircle className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 sm:mb-3 text-glass-purple" />
+        <HelpCircle className="w-6 h-6 sm:w-8 sm:h-8 mx-auto mb-2 sm:mb-3 text-glass-blue" />
         <h3 className="font-semibold mb-2 text-wedding-navy text-sm sm:text-base">Still have questions?</h3>
-        <p className="text-muted-foreground text-xs sm:text-sm leading-relaxed">
+        <p className="text-wedding-navy/80 text-xs sm:text-sm leading-relaxed">
           Don't hesitate to reach out to Tim & Kirsten directly if you need any clarification!
         </p>
-      </GlassCard>
+      </div>
     </div>
   );
 };

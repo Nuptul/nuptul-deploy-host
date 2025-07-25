@@ -20,29 +20,39 @@ const RoleAssignment: React.FC<RoleAssignmentProps> = ({
 
   const updateRole = async (newRole: 'guest' | 'admin' | 'couple') => {
     if (newRole === currentRole) return;
-    
+
     setIsUpdating(true);
     try {
-      // Update user_roles table
-      const { error: roleError } = await supabase
+      console.log(`Updating role for user ${userId} (${userEmail}) to ${newRole}`);
+
+      // Update user_roles table with better error handling
+      const { data, error: roleError } = await supabase
         .from('user_roles')
-        .upsert({ 
-          user_id: userId, 
-          role: newRole 
-        }, { 
-          onConflict: 'user_id' 
-        });
+        .upsert({
+          user_id: userId,
+          role: newRole,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id',
+          ignoreDuplicates: false
+        })
+        .select()
+        .single();
 
-      if (roleError) throw roleError;
+      if (roleError) {
+        console.error('Role update error:', roleError);
+        throw roleError;
+      }
 
+      console.log('Role update successful:', data);
       toast.success(`Role updated to ${newRole} for ${userEmail}`);
-      
+
       if (onRoleUpdate) {
         onRoleUpdate(newRole);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error updating role:', error);
-      toast.error('Failed to update user role');
+      toast.error(`Failed to update user role: ${error.message || 'Unknown error'}`);
     } finally {
       setIsUpdating(false);
     }

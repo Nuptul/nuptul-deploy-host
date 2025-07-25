@@ -15,8 +15,8 @@ const CountdownSection: React.FC = () => {
     seconds: 0
   });
 
-  // Tim & Kirsten's Wedding Date - October 5th, 2025
-  const weddingDate = new Date('2025-10-05T16:00:00');
+  // Tim & Kirsten's Wedding Date - October 5th, 2025 at 3:00 PM
+  const weddingDate = new Date('2025-10-05T15:00:00');
 
   useEffect(() => {
     const updateCountdown = () => {

@@ -2,10 +2,12 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { ContentManagementSystem } from '@/components/admin/ContentManagementSystem';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+
+// Lazy load the ContentManagementSystem to catch any loading errors
+const ContentManagementSystem = React.lazy(() => import('@/components/admin/ContentManagementSystem'));
 
 const AdminContent: React.FC = () => {
   const navigate = useNavigate();
@@ -61,7 +63,19 @@ const AdminContent: React.FC = () => {
           </p>
         </div>
 
-        <ContentManagementSystem />
+        <div className="p-4 border rounded-lg bg-white">
+          <h2 className="text-xl font-semibold mb-4">Advanced Content Management System</h2>
+          <React.Suspense fallback={
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-gray-600">Loading enhanced CMS...</p>
+              </div>
+            </div>
+          }>
+            <ContentManagementSystem />
+          </React.Suspense>
+        </div>
       </div>
     </div>
   );

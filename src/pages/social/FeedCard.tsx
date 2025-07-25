@@ -66,6 +66,24 @@ interface FeedPost {
   share_count: number;
   is_wedding_related: boolean;
   tags: string[];
+  poll?: {
+    id: string;
+    question: string;
+    options: Array<{
+      id: string;
+      text: string;
+      votes: number;
+    }>;
+    expires_at: string;
+    allow_multiple: boolean;
+    user_voted: boolean;
+    user_votes?: string[];
+  };
+  shared_post?: FeedPost;
+  mentions?: Array<{
+    user_id: string;
+    display_name: string;
+  }>;
 }
 
 interface FeedCardProps {
@@ -74,6 +92,7 @@ interface FeedCardProps {
   onComment?: (postId: string, content: string, replyTo?: string) => void;
   onShare?: (postId: string) => void;
   onUserClick?: (userId: string) => void;
+  onVotePoll?: (pollId: string, optionIds: string[]) => void;
   className?: string;
 }
 
@@ -83,6 +102,7 @@ const FeedCard: React.FC<FeedCardProps> = ({
   onComment,
   onShare,
   onUserClick,
+  onVotePoll,
   className = ''
 }) => {
   const { onlineUsers } = usePresence();
@@ -129,33 +149,30 @@ const FeedCard: React.FC<FeedCardProps> = ({
   const popularReactions = ['❤️', '😍', '🎉', '💍', '👏', '😂'];
 
   return (
-    <div className={`w-full rounded-2xl overflow-hidden ${styles.liquidGlassCard} ${className}`} style={{
-      background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.25) 100%)',
-      backdropFilter: 'blur(25px) saturate(1.8)',
-      WebkitBackdropFilter: 'blur(25px) saturate(1.8)',
-      border: '1px solid rgba(255, 255, 255, 0.4)',
-      boxShadow: '0 8px 32px rgba(31, 38, 135, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.6)'
-    }}>
+    <div className={`w-full rounded-2xl overflow-hidden group transition-all duration-300 hover:shadow-2xl ${className}`}>
+      <div className="absolute inset-0 bg-gradient-to-r from-white/90 via-wedding-pearl/80 to-white/90 backdrop-blur-2xl" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/10" />
+      <div className="relative glass-card-enhanced">
       {/* Post Header */}
-      <div className="pb-3 px-4 pt-4" style={{
-        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%)',
-        borderBottom: '1px solid rgba(255, 255, 255, 0.3)'
-      }}>
+      <div className="pb-3 px-4 pt-4 border-b border-gray-200/30">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="relative">
-              <Avatar 
-                className="w-10 h-10 cursor-pointer hover:ring-2 hover:ring-wedding-gold transition-all"
-                onClick={() => onUserClick?.(post.user_id)}
-              >
+              <div className="relative group">
+                <div className="absolute inset-0 bg-gradient-to-r from-wedding-gold to-amber-400 rounded-full blur opacity-0 group-hover:opacity-60 transition-opacity" />
+                <Avatar 
+                  className="relative w-10 h-10 cursor-pointer ring-2 ring-white shadow-lg group-hover:shadow-xl transition-all duration-200 group-hover:scale-105"
+                  onClick={() => onUserClick?.(post.user_id)}
+                >
                 <AvatarImage src={post.user_avatar} alt={post.user_name} />
                 <AvatarFallback className="bg-gradient-to-br from-wedding-gold to-yellow-500 text-white font-bold">
                   {post.user_name.split(' ').map(n => n[0]).join('').slice(0, 2)}
                 </AvatarFallback>
-              </Avatar>
-              {isUserOnline(post.user_id) && (
-                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full" />
-              )}
+                </Avatar>
+                {isUserOnline(post.user_id) && (
+                  <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-green-500 border-2 border-white rounded-full animate-pulse" />
+                )}
+              </div>
             </div>
             
             <div className="flex-1">
@@ -173,7 +190,7 @@ const FeedCard: React.FC<FeedCardProps> = ({
                   {post.user_name}
                 </span>
                 {post.is_wedding_related && (
-                  <Badge variant="secondary" className="text-xs bg-gradient-to-r from-wedding-gold/20 to-yellow-400/20 text-wedding-gold border border-wedding-gold/30">
+                  <Badge variant="secondary" className="text-xs bg-gradient-to-r from-wedding-gold/20 to-yellow-400/20 text-wedding-gold border border-wedding-gold/30 shadow-sm animate-float">
                     💍 Wedding
                   </Badge>
                 )}
@@ -238,7 +255,7 @@ const FeedCard: React.FC<FeedCardProps> = ({
                   <img
                     src={media.url}
                     alt={media.alt_text || `Image ${index + 1}`}
-                    className="w-full h-48 object-cover hover:scale-105 transition-transform cursor-pointer"
+                    className="w-full h-48 object-cover hover:scale-110 transition-all duration-500 cursor-pointer"
                   />
                 )}
                 
@@ -294,6 +311,154 @@ const FeedCard: React.FC<FeedCardProps> = ({
                 )}
               </div>
             ))}
+          </div>
+        )}
+
+        {/* Poll */}
+        {post.poll && (
+          <div className="p-4 rounded-lg border" style={{
+            background: 'linear-gradient(135deg, rgba(147, 51, 234, 0.05) 0%, rgba(126, 34, 206, 0.03) 100%)',
+            borderColor: 'rgba(147, 51, 234, 0.2)'
+          }}>
+            <h4 className="font-semibold mb-3" style={{
+              fontFamily: '"Montserrat", sans-serif',
+              fontSize: '16px',
+              color: '#000000'
+            }}>
+              {post.poll.question}
+            </h4>
+            <div className="space-y-2">
+              {post.poll.options.map((option) => {
+                const totalVotes = post.poll!.options.reduce((sum, opt) => sum + opt.votes, 0);
+                const percentage = totalVotes > 0 ? (option.votes / totalVotes) * 100 : 0;
+                const isSelected = post.poll!.user_votes?.includes(option.id);
+                
+                return (
+                  <button
+                    key={option.id}
+                    onClick={() => !post.poll!.user_voted && onVotePoll?.(post.poll!.id, [option.id])}
+                    disabled={post.poll!.user_voted}
+                    className="w-full text-left p-3 rounded-lg transition-all relative overflow-hidden"
+                    style={{
+                      background: post.poll!.user_voted 
+                        ? 'rgba(147, 51, 234, 0.05)' 
+                        : 'rgba(255, 255, 255, 0.5)',
+                      border: `1px solid ${isSelected ? '#9333ea' : 'rgba(147, 51, 234, 0.2)'}`,
+                      cursor: post.poll!.user_voted ? 'default' : 'pointer'
+                    }}
+                  >
+                    {post.poll!.user_voted && (
+                      <div 
+                        className="absolute inset-0 transition-all duration-500"
+                        style={{
+                          background: 'linear-gradient(90deg, rgba(147, 51, 234, 0.2) 0%, rgba(147, 51, 234, 0.1) 100%)',
+                          width: `${percentage}%`
+                        }}
+                      />
+                    )}
+                    <div className="relative flex justify-between items-center">
+                      <span style={{
+                        fontFamily: '"Montserrat", sans-serif',
+                        fontSize: '14px',
+                        fontWeight: isSelected ? '600' : '400',
+                        color: '#000000'
+                      }}>
+                        {option.text}
+                      </span>
+                      {post.poll!.user_voted && (
+                        <span style={{
+                          fontFamily: '"Montserrat", sans-serif',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#9333ea'
+                        }}>
+                          {percentage.toFixed(0)}%
+                        </span>
+                      )}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="mt-3 text-sm" style={{
+              fontFamily: '"Montserrat", sans-serif',
+              color: 'rgba(0, 0, 0, 0.6)'
+            }}>
+              {post.poll.options.reduce((sum, opt) => sum + opt.votes, 0)} votes • 
+              {new Date(post.poll.expires_at) > new Date() 
+                ? ` Ends ${formatDistanceToNow(new Date(post.poll.expires_at))}` 
+                : ' Ended'}
+            </div>
+          </div>
+        )}
+
+        {/* Shared Post */}
+        {post.shared_post && (
+          <div className="mt-3 p-3 rounded-lg border" style={{
+            background: 'rgba(255, 255, 255, 0.3)',
+            borderColor: 'rgba(0, 0, 0, 0.1)'
+          }}>
+            <div className="flex items-center gap-2 mb-2">
+              <Avatar className="w-6 h-6">
+                <AvatarImage src={post.shared_post.user_avatar} alt={post.shared_post.user_name} />
+                <AvatarFallback className="text-xs">
+                  {post.shared_post.user_name.split(' ').map(n => n[0]).join('').slice(0, 2)}
+                </AvatarFallback>
+              </Avatar>
+              <span style={{
+                fontFamily: '"Montserrat", sans-serif',
+                fontSize: '13px',
+                fontWeight: '600',
+                color: '#000000'
+              }}>
+                {post.shared_post.user_name}
+              </span>
+              <span style={{
+                fontFamily: '"Montserrat", sans-serif',
+                fontSize: '12px',
+                color: 'rgba(0, 0, 0, 0.6)'
+              }}>
+                • {getTimeAgo(post.shared_post.created_at)}
+              </span>
+            </div>
+            {post.shared_post.content && (
+              <p style={{
+                fontFamily: '"Montserrat", sans-serif',
+                fontSize: '13px',
+                color: '#000000'
+              }}>
+                {post.shared_post.content}
+              </p>
+            )}
+            {post.shared_post.media_attachments && post.shared_post.media_attachments.length > 0 && (
+              <div className="mt-2 grid grid-cols-2 gap-1">
+                {post.shared_post.media_attachments.slice(0, 4).map((media, index) => (
+                  <div key={media.id} className="relative rounded overflow-hidden bg-gray-100 aspect-square">
+                    {media.type === 'image' && (
+                      <img
+                        src={media.url}
+                        alt={media.alt_text || `Shared image ${index + 1}`}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                    {media.type === 'video' && (
+                      <video
+                        src={media.url}
+                        poster={media.thumbnail_url}
+                        className="w-full h-full object-cover"
+                      />
+                    )}
+                    {index === 3 && post.shared_post!.media_attachments.length > 4 && (
+                      <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
+                        <span className="text-white font-semibold">
+                          +{post.shared_post!.media_attachments.length - 4}
+                        </span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
 
@@ -593,6 +758,7 @@ const FeedCard: React.FC<FeedCardProps> = ({
         )}
       </div>
     </div>
+  </div>
   );
 };
 

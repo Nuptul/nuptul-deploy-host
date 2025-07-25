@@ -23,13 +23,15 @@ const MapLoadingPlaceholder = ({ venueName }: { venueName: string }) => (
       <h2 className="text-lg sm:text-xl font-semibold text-wedding-navy">Location</h2>
     </div>
     
-    <div className="w-full h-64 sm:h-80 bg-gradient-to-br from-glass-green/20 to-glass-blue/20 rounded-glass flex items-center justify-center">
-      <div className="text-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-wedding-navy mx-auto mb-3"></div>
-        <p className="text-sm text-wedding-navy font-medium">Loading Interactive Map...</p>
-        <p className="text-xs text-muted-foreground mt-1">
-          High-quality map experience loading
-        </p>
+    <div className="relative w-full pb-[100%] sm:pb-[75%] md:pb-[100%]">
+      <div className="absolute inset-0 bg-gradient-to-br from-glass-green/20 to-glass-blue/20 rounded-2xl flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-wedding-navy mx-auto mb-3"></div>
+          <p className="text-sm text-wedding-navy font-medium">Loading Interactive Map...</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            High-quality map experience loading
+          </p>
+        </div>
       </div>
     </div>
   </GlassCard>

@@ -1,39 +1,115 @@
-import React, { useState } from 'react';
-import { IconBell, IconCheck, IconTrash, IconX } from '@tabler/icons-react';
+import React, { useState, useEffect } from 'react';
+import { IconBell, IconCheck, IconTrash, IconX, IconMessage } from '@tabler/icons-react';
 import { useNotifications } from '@/hooks/useNotifications';
 import { formatDistanceToNow } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/hooks/useAuth';
+import InstantMessenger from '@/components/chat/InstantMessenger';
 
 const NotificationBell: React.FC = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [showDropdown, setShowDropdown] = useState(false);
-  const { 
-    notifications, 
-    unreadCount, 
-    loading, 
-    markAsRead, 
-    markAllAsRead, 
-    clearAll 
+  const [showMessenger, setShowMessenger] = useState(false);
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+  const {
+    notifications,
+    unreadCount,
+    loading,
+    markAsRead,
+    markAllAsRead,
+    clearAll
   } = useNotifications();
+
+  // Fetch unread message count
+  useEffect(() => {
+    if (user?.id) {
+      fetchUnreadMessageCount();
+
+      // Set up real-time subscription for new messages
+      const channel = supabase
+        .channel('instant-message-notifications')
+        .on('postgres_changes', {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'chat_messages'
+        }, () => {
+          fetchUnreadMessageCount();
+        })
+        .on('postgres_changes', {
+          event: 'UPDATE',
+          schema: 'public',
+          table: 'chat_messages'
+        }, () => {
+          fetchUnreadMessageCount();
+        })
+        .subscribe();
+
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [user?.id]);
+
+  const fetchUnreadMessageCount = async () => {
+    if (!user?.id) return;
+
+    try {
+      // Count unread messages in chats where user is a participant
+      const { data: chats, error: chatsError } = await supabase
+        .from('chats')
+        .select('id')
+        .contains('participant_ids', [user.id]);
+
+      if (chatsError) throw chatsError;
+
+      if (chats && chats.length > 0) {
+        const chatIds = chats.map(chat => chat.id);
+
+        const { count, error: messagesError } = await supabase
+          .from('chat_messages')
+          .select('*', { count: 'exact', head: true })
+          .in('chat_id', chatIds)
+          .neq('sender_id', user.id)
+          .eq('is_read', false);
+
+        if (messagesError) throw messagesError;
+
+        setUnreadMessageCount(count || 0);
+      }
+    } catch (error) {
+      console.error('Error fetching unread message count:', error);
+    }
+  };
 
   const handleNotificationClick = (notification: any) => {
     markAsRead(notification.id);
-    
+
     // Navigate based on notification type
     if (notification.metadata?.link) {
       navigate(notification.metadata.link);
-    } else if (notification.type === 'message') {
-      navigate('/social');
+    } else if (notification.type === 'message' || notification.type === 'instant_message') {
+      // Open instant messenger instead of navigating to social
+      setShowMessenger(true);
+      setShowDropdown(false);
+      return;
     } else if (notification.type === 'social_post' && notification.metadata?.post_id) {
       navigate(`/social#post-${notification.metadata.post_id}`);
     }
-    
+
+    setShowDropdown(false);
+  };
+
+  const handleMessengerClick = () => {
+    setShowMessenger(true);
     setShowDropdown(false);
   };
 
   const getNotificationIcon = (type: string) => {
     switch (type) {
       case 'message':
+      case 'instant_message':
         return '💬';
       case 'social_post':
         return '📱';
@@ -48,6 +124,9 @@ const NotificationBell: React.FC = () => {
     }
   };
 
+  // Calculate total unread count (notifications + instant messages)
+  const totalUnreadCount = unreadCount + unreadMessageCount;
+
   return (
     <div className="relative">
       <button
@@ -56,7 +135,7 @@ const NotificationBell: React.FC = () => {
         style={{
           width: '44px',
           height: '44px',
-          background: unreadCount > 0 
+          background: totalUnreadCount > 0
             ? 'linear-gradient(135deg, rgba(255, 59, 48, 0.2) 0%, rgba(255, 107, 107, 0.15) 100%)'
             : 'linear-gradient(135deg, rgba(69, 183, 209, 0.15) 0%, rgba(78, 205, 196, 0.1) 100%)',
           backdropFilter: 'blur(20px) saturate(1.5)',
@@ -72,23 +151,23 @@ const NotificationBell: React.FC = () => {
           size={22} 
           stroke={1.5} 
           style={{ 
-            color: unreadCount > 0 ? '#FF3B30' : 'rgba(0, 0, 0, 0.6)',
+            color: totalUnreadCount > 0 ? '#FF3B30' : 'rgba(0, 0, 0, 0.6)',
             transition: 'color 0.3s ease'
           }} 
         />
-        {unreadCount > 0 && (
-          <div 
+        {totalUnreadCount > 0 && (
+          <div
             className="absolute -top-1 -right-1 rounded-full flex items-center justify-center"
             style={{
               width: '20px',
               height: '20px',
-              background: unreadCount > 5 ? '#FF3B30' : '#34C759',
+              background: totalUnreadCount > 5 ? '#FF3B30' : '#34C759',
               border: '2px solid white',
               boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
             }}
           >
             <span className="text-xs text-white font-bold" style={{ fontFamily: '"Montserrat", sans-serif' }}>
-              {unreadCount > 9 ? '9+' : unreadCount}
+              {totalUnreadCount > 9 ? '9+' : totalUnreadCount}
             </span>
           </div>
         )}
@@ -109,6 +188,24 @@ const NotificationBell: React.FC = () => {
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-gray-900">Notifications</h3>
                 <div className="flex items-center gap-2">
+                  {/* Instant Messenger Button */}
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleMessengerClick();
+                    }}
+                    className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1 px-2 py-1 rounded-md hover:bg-blue-50 transition-colors"
+                    title="Open Instant Messenger"
+                  >
+                    <IconMessage className="w-4 h-4" />
+                    Messages
+                    {unreadMessageCount > 0 && (
+                      <span className="bg-red-500 text-white text-xs rounded-full w-4 h-4 flex items-center justify-center">
+                        {unreadMessageCount > 9 ? '9+' : unreadMessageCount}
+                      </span>
+                    )}
+                  </button>
+
                   {unreadCount > 0 && (
                     <button
                       onClick={(e) => {
@@ -117,7 +214,7 @@ const NotificationBell: React.FC = () => {
                       }}
                       className="text-sm text-blue-600 hover:text-blue-700 flex items-center gap-1"
                     >
-                      <Check className="w-4 h-4" />
+                      <IconCheck className="w-4 h-4" />
                       Mark all read
                     </button>
                   )}
@@ -129,7 +226,7 @@ const NotificationBell: React.FC = () => {
                       }}
                       className="text-sm text-red-600 hover:text-red-700"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <IconTrash className="w-4 h-4" />
                     </button>
                   )}
                 </div>
@@ -191,6 +288,19 @@ const NotificationBell: React.FC = () => {
             </div>
           </div>
         </>
+      )}
+
+      {/* Instant Messenger Component */}
+      {showMessenger && (
+        <InstantMessenger
+          isMinimized={false}
+          onMinimize={() => setShowMessenger(false)}
+          onClose={() => setShowMessenger(false)}
+          className="fixed bottom-4 right-4 z-50"
+          isMobile={false}
+          isCenter={false}
+          isDashboardActive={false}
+        />
       )}
     </div>
   );

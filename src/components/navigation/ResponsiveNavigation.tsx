@@ -76,7 +76,7 @@ const ResponsiveNavigation: React.FC<ResponsiveNavigationProps> = ({
       {routes.map((route) => {
         const isActive = activeRoute === route.id;
         const isCenter = route.isCenter;
-        
+
         return (
           <HapticFeedback key={route.id} type="light">
             <button

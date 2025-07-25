@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { useAuth } from '@/hooks/useAuth';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -12,12 +13,21 @@ import { useToast } from '@/hooks/use-toast';
 import { Eye, EyeOff, User, Mail, Phone, MapPin, Users, Send, Heart, Utensils, FileText, CheckCircle } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { PasswordStrengthMeter } from '@/components/auth/PasswordStrengthMeter';
-import { SignUpFormData, signUpSchema } from '@/lib/auth-validation';
-import GlassCard from '@/components/GlassCard';
+import {
+  SignUpFormData,
+  signUpSchema,
+  signUpStep1Schema,
+  signUpStep2Schema,
+  signUpStep3Schema,
+  SignUpStep1Data,
+  SignUpStep2Data,
+  SignUpStep3Data
+} from '@/lib/auth-validation';
+import AdaptiveGlassCard from '@/components/AdaptiveGlassCard';
 import { GuestMatcher, GuestMatchResult } from '@/utils/guestMatching';
 import { supabase } from '@/integrations/supabase/client';
 import ProfilePictureSignup from '@/components/ui/ProfilePictureSignup';
-import { RSVPRadioButtons } from '@/components/ui/RSVPButtons';
+// import { RSVPRadioButtons } from '@/components/ui/RSVPButtons'; // Removed - RSVP handled on dedicated page
 
 const DIETARY_OPTIONS = [
   'Vegetarian',
@@ -106,7 +116,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
   const [guestMatch, setGuestMatch] = useState<GuestMatchResult | null>(null);
   const [showGuestConfirm, setShowGuestConfirm] = useState(false);
   const [profilePictureFile, setProfilePictureFile] = useState<File | null>(null);
-  const [hasExistingRSVP, setHasExistingRSVP] = useState(false);
+  // const [hasExistingRSVP, setHasExistingRSVP] = useState(false); // Removed - RSVP handled separately
   
   const { signUp, signInWithMagicLink } = useAuth();
   const { toast } = useToast();
@@ -129,6 +139,90 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
 
   const watchHasPlusOne = signUpForm.watch('hasPlusOne');
 
+  // Step validation functions
+  const validateStep1 = async (): Promise<boolean> => {
+    const currentData = signUpForm.getValues();
+    const step1Data = {
+      email: currentData.email,
+      password: currentData.password,
+      confirmPassword: currentData.confirmPassword,
+      firstName: currentData.firstName,
+      lastName: currentData.lastName,
+      mobile: currentData.mobile,
+    };
+
+    try {
+      signUpStep1Schema.parse(step1Data);
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        error.errors.forEach((err) => {
+          signUpForm.setError(err.path[0] as keyof SignUpFormData, {
+            type: 'manual',
+            message: err.message,
+          });
+        });
+      }
+      return false;
+    }
+  };
+
+  const validateStep2 = async (): Promise<boolean> => {
+    const currentData = signUpForm.getValues();
+    const step2Data = {
+      address: currentData.address,
+      suburb: currentData.suburb,
+      state: currentData.state,
+      country: currentData.country,
+      postcode: currentData.postcode,
+    };
+
+    try {
+      signUpStep2Schema.parse(step2Data);
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        error.errors.forEach((err) => {
+          signUpForm.setError(err.path[0] as keyof SignUpFormData, {
+            type: 'manual',
+            message: err.message,
+          });
+        });
+      }
+      return false;
+    }
+  };
+
+  const validateStep3 = async (): Promise<boolean> => {
+    const currentData = signUpForm.getValues();
+    const step3Data = {
+      relationshipToCouple: currentData.relationshipToCouple,
+      emergencyContact: currentData.emergencyContact,
+      dietaryRequirements: currentData.dietaryRequirements,
+      allergies: currentData.allergies,
+      specialAccommodations: currentData.specialAccommodations,
+      bio: currentData.bio,
+      hasPlusOne: currentData.hasPlusOne,
+      plusOneName: currentData.plusOneName,
+      plusOneEmail: currentData.plusOneEmail,
+    };
+
+    try {
+      signUpStep3Schema.parse(step3Data);
+      return true;
+    } catch (error) {
+      if (error instanceof z.ZodError) {
+        error.errors.forEach((err) => {
+          signUpForm.setError(err.path[0] as keyof SignUpFormData, {
+            type: 'manual',
+            message: err.message,
+          });
+        });
+      }
+      return false;
+    }
+  };
+
   const checkGuestMatch = async (data: SignUpFormData) => {
     const match = await GuestMatcher.matchGuestOnSignup(
       data.email, 
@@ -141,14 +235,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
       setGuestMatch(match);
       setShowGuestConfirm(true);
       
-      // Check if guest has already RSVP'd
-      if (match.rsvpRespondedAt) {
-        setHasExistingRSVP(true);
-        toast({
-          title: "Welcome back!",
-          description: "We already have your RSVP response on file.",
-        });
-      }
+      // RSVP check removed - will be handled on dedicated RSVP page
       
       return true;
     }
@@ -165,11 +252,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
         return;
       }
 
-      // Get RSVP response from form (only if they haven't already RSVP'd)
-      const formElement = document.querySelector('form');
-      const attendingResponse = hasExistingRSVP 
-        ? (guestMatch?.rsvpStatus === 'attending' ? 'yes' : 'no')
-        : formElement?.querySelector('input[name="attending"]:checked')?.value;
+      // RSVP response removed - users will RSVP through dedicated page
       
       const profileData = {
         mobile: data.mobile,
@@ -188,8 +271,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
         hasPlusOne: data.hasPlusOne,
         plusOneName: data.plusOneName,
         plusOneEmail: data.plusOneEmail,
-        rsvp_status: attendingResponse === 'yes' ? 'attending' : 'not_attending',
-        rsvp_responded_at: new Date().toISOString(),
+        // RSVP data removed - will be collected on dedicated RSVP page
       };
 
       const { data: authData, error } = await signUp(data.email, data.password, data.firstName, data.lastName, profileData);
@@ -336,8 +418,27 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
     });
   };
 
-  const nextStep = () => {
-    setCurrentStep(prev => prev + 1);
+  const nextStep = async () => {
+    let isValid = false;
+
+    // Validate current step before proceeding
+    if (currentStep === 1) {
+      isValid = await validateStep1();
+    } else if (currentStep === 2) {
+      isValid = await validateStep2();
+    } else if (currentStep === 3) {
+      isValid = await validateStep3();
+    }
+
+    if (isValid) {
+      setCurrentStep(prev => prev + 1);
+    } else {
+      toast({
+        title: "Please complete all required fields",
+        description: "Fill in all required fields before proceeding to the next step.",
+        variant: "destructive",
+      });
+    }
   };
 
   const prevStep = () => {
@@ -355,7 +456,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
           </p>
         </div>
 
-        <GlassCard className="p-4 border-green-200 bg-green-50/50">
+        <AdaptiveGlassCard variant="nature" className="p-4">
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <span className="font-medium">Guest Name:</span>
@@ -368,26 +469,26 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
             <div className="flex items-center justify-between">
               <span className="font-medium">Confidence:</span>
               <span className={`capitalize ${
-                guestMatch.confidence === 'high' ? 'text-green-600' : 
+                guestMatch.confidence === 'high' ? 'text-green-600' :
                 guestMatch.confidence === 'medium' ? 'text-yellow-600' : 'text-red-600'
               }`}>
                 {guestMatch.confidence}
               </span>
             </div>
           </div>
-        </GlassCard>
+        </AdaptiveGlassCard>
 
         <div className="space-y-3">
           <Button
             onClick={confirmGuestMatch}
-            className="w-full bg-green-600 hover:bg-green-700 text-white font-dolly"
+            className="w-full min-h-[48px] bg-green-600 hover:bg-green-700 text-white font-dolly transition-all duration-200"
           >
             Yes, this is me - Link to Guest List
           </Button>
           <Button
             onClick={rejectGuestMatch}
             variant="outline"
-            className="w-full font-dolly"
+            className="w-full min-h-[48px] font-dolly transition-all duration-200"
           >
             No, this is not me - Continue without linking
           </Button>
@@ -463,7 +564,9 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-2">
-              <Label htmlFor="firstName" className="font-dolly">First Name</Label>
+              <Label htmlFor="firstName" className="font-dolly">
+                First Name <span className="text-red-500">*</span>
+              </Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -481,7 +584,9 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="lastName" className="font-dolly">Last Name</Label>
+              <Label htmlFor="lastName" className="font-dolly">
+                Last Name <span className="text-red-500">*</span>
+              </Label>
               <div className="relative">
                 <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 <Input
@@ -501,7 +606,9 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email" className="font-dolly">Email</Label>
+            <Label htmlFor="email" className="font-dolly">
+              Email <span className="text-red-500">*</span>
+            </Label>
             <div className="relative">
               <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -520,7 +627,9 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="mobile" className="font-dolly">Mobile Number</Label>
+            <Label htmlFor="mobile" className="font-dolly">
+              Mobile Number <span className="text-red-500">*</span>
+            </Label>
             <div className="relative">
               <Phone className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
@@ -539,7 +648,9 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password" className="font-dolly">Password</Label>
+            <Label htmlFor="password" className="font-dolly">
+              Password <span className="text-red-500">*</span>
+            </Label>
             <div className="relative">
               <Input
                 id="password"
@@ -565,7 +676,9 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword" className="font-dolly">Confirm Password</Label>
+            <Label htmlFor="confirmPassword" className="font-dolly">
+              Confirm Password <span className="text-red-500">*</span>
+            </Label>
             <div className="relative">
               <Input
                 id="confirmPassword"
@@ -592,7 +705,25 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
           <Button
             type="button"
             onClick={nextStep}
-            className="w-full bg-wedding-navy hover:bg-wedding-navy-light min-h-[44px] font-dolly"
+            className="w-full min-h-[44px] font-dolly transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+            style={{
+              background: 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+              backdropFilter: 'blur(20px) saturate(1.8)',
+              WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              color: '#FFFFFF',
+              fontWeight: '600',
+              borderRadius: '12px',
+              boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+              e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+              e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+            }}
           >
             Next: Address Details
           </Button>
@@ -602,7 +733,9 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
       {currentStep === 2 && (
         <>
           <div className="space-y-2">
-            <Label htmlFor="address" className="font-dolly">Address</Label>
+            <Label htmlFor="address" className="font-dolly">
+              Address <span className="text-red-500">*</span>
+            </Label>
             <div className="relative">
               <MapPin className="absolute left-3 top-3 w-4 h-4 text-muted-foreground" />
               <Textarea
@@ -621,7 +754,9 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="suburb" className="font-dolly">Suburb</Label>
+            <Label htmlFor="suburb" className="font-dolly">
+              Suburb <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="suburb"
               type="text"
@@ -638,7 +773,9 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div className="space-y-2">
-              <Label htmlFor="state" className="font-dolly">State/Province</Label>
+              <Label htmlFor="state" className="font-dolly">
+                State/Province <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="state"
                 type="text"
@@ -653,7 +790,9 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="country" className="font-dolly">Country</Label>
+              <Label htmlFor="country" className="font-dolly">
+                Country <span className="text-red-500">*</span>
+              </Label>
               <Input
                 id="country"
                 type="text"
@@ -670,7 +809,9 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="postcode" className="font-dolly">Postcode/Zip Code</Label>
+            <Label htmlFor="postcode" className="font-dolly">
+              Postcode/Zip Code <span className="text-red-500">*</span>
+            </Label>
             <Input
               id="postcode"
               type="text"
@@ -743,14 +884,32 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
               type="button"
               variant="outline"
               onClick={prevStep}
-              className="flex-1 font-dolly"
+              className="flex-1 min-h-[48px] font-dolly transition-all duration-200 border-blue-200 text-blue-700 hover:bg-blue-50"
             >
               Back
             </Button>
             <Button
               type="button"
               onClick={nextStep}
-              className="flex-1 bg-wedding-navy hover:bg-wedding-navy-light min-h-[44px] font-dolly"
+              className="flex-1 min-h-[44px] font-dolly transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+              style={{
+                background: 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+                backdropFilter: 'blur(20px) saturate(1.8)',
+                WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: '#FFFFFF',
+                fontWeight: '600',
+                borderRadius: '12px',
+                boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+              }}
             >
               Next: Wedding Details
             </Button>
@@ -761,7 +920,9 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
       {currentStep === 3 && (
         <>
           <div className="space-y-2">
-            <Label htmlFor="relationshipToCouple" className="font-dolly">Relationship to Couple</Label>
+            <Label htmlFor="relationshipToCouple" className="font-dolly">
+              Relationship to Couple <span className="text-red-500">*</span>
+            </Label>
             <Select 
               value={signUpForm.watch('relationshipToCouple')} 
               onValueChange={(value) => signUpForm.setValue('relationshipToCouple', value)}
@@ -862,44 +1023,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
             </div>
           </div>
 
-          {hasExistingRSVP && guestMatch && (
-            <div className="mb-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-              <div className="flex items-center gap-2 text-green-700">
-                <CheckCircle className="w-5 h-5" />
-                <span className="font-medium">You've already RSVP'd!</span>
-              </div>
-              <p className="text-sm text-green-600 mt-1">
-                We have your response as: {guestMatch.rsvpStatus === 'attending' ? "Yes, attending" : "Not attending"}
-              </p>
-            </div>
-          )}
-
-          {!hasExistingRSVP && (
-            <div className="space-y-4">
-              <div className="p-4 bg-muted/30 rounded-lg border-2 border-wedding-navy/20">
-                <div className="text-center mb-4">
-                  <h3 className="text-lg font-semibold font-dolly text-wedding-navy">
-                    Tim & Kirsten's Wedding
-                  </h3>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    October 5th, 2025 • Ben Ean Winery
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    Arrival: 2:30 PM • Ceremony: 3:00 PM
-                  </p>
-                </div>
-                <Label className="text-base font-medium font-dolly flex items-center gap-2 mb-3">
-                  <Heart className="w-5 h-5 text-wedding-navy" />
-                  Will you be able to attend our wedding?
-                </Label>
-                <RSVPRadioButtons 
-                  name="attending" 
-                  defaultValue="yes"
-                  className="mt-2"
-                />
-            </div>
-          </div>
-          )}
+          {/* RSVP section removed - users will RSVP through the dedicated RSVP page after signup */}
 
           <div className="space-y-2">
             <Label htmlFor="specialAccommodations" className="font-dolly">Special Accommodations</Label>
@@ -951,14 +1075,37 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
               type="button"
               variant="outline"
               onClick={prevStep}
-              className="flex-1 font-dolly"
+              className="flex-1 min-h-[48px] font-dolly transition-all duration-200 border-blue-200 text-blue-700 hover:bg-blue-50"
             >
               Back
             </Button>
             <Button
               type="submit"
-              className="flex-1 bg-wedding-navy hover:bg-wedding-navy-light min-h-[44px] font-dolly"
+              className="flex-1 min-h-[44px] font-dolly transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
               disabled={signUpForm.formState.isSubmitting}
+              style={{
+                background: signUpForm.formState.isSubmitting ? 'rgba(0, 122, 255, 0.5)' : 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+                backdropFilter: 'blur(20px) saturate(1.8)',
+                WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: '#FFFFFF',
+                fontWeight: '600',
+                borderRadius: '12px',
+                boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)',
+                cursor: signUpForm.formState.isSubmitting ? 'not-allowed' : 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                if (!signUpForm.formState.isSubmitting) {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+                  e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!signUpForm.formState.isSubmitting) {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+                }
+              }}
             >
               {signUpForm.formState.isSubmitting ? 'Creating Account...' : 'Create Account'}
             </Button>
@@ -970,7 +1117,7 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
         <button
           type="button"
           onClick={onSwitchToSignIn}
-          className="text-glass-blue hover:text-glass-blue/80 transition-colors min-h-[44px] text-sm px-2 py-2 font-dolly"
+          className="text-blue-600 hover:text-blue-800 transition-colors min-h-[44px] text-sm px-2 py-2 font-dolly"
         >
           Already have an account? Sign in
         </button>

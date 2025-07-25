@@ -28,57 +28,34 @@ const AdminRoleManager: React.FC<AdminRoleManagerProps> = ({
     setError(null);
 
     try {
-      // First, try to update existing role
-      const { data: updateData, error: updateError } = await supabase
+      console.log(`Updating role for user ${userId} to ${newRole}`);
+
+      // Use upsert to handle both insert and update cases
+      const { data, error } = await supabase
         .from('user_roles')
-        .update({ 
+        .upsert({
+          user_id: userId,
           role: newRole,
           updated_at: new Date().toISOString()
+        }, {
+          onConflict: 'user_id',
+          ignoreDuplicates: false
         })
-        .eq('user_id', userId)
         .select()
         .single();
 
-      if (updateError) {
-        // If update fails, try insert
-        if (updateError.code === 'PGRST116') {
-          const { data: insertData, error: insertError } = await supabase
-            .from('user_roles')
-            .insert({
-              user_id: userId,
-              role: newRole
-            })
-            .select()
-            .single();
-
-          if (insertError) {
-            throw insertError;
-          }
-        } else {
-          throw updateError;
-        }
+      if (error) {
+        console.error('Upsert error:', error);
+        throw error;
       }
 
-      // Alternative approach using RPC function if direct update fails
-      if (!updateData && !updateError) {
-        const { error: rpcError } = await supabase
-          .rpc('upsert_user_role', {
-            p_user_id: userId,
-            p_role: newRole
-          });
-
-        if (rpcError) {
-          console.error('RPC error:', rpcError);
-          // Continue anyway, sometimes RPC succeeds despite returning an error
-        }
-      }
-
+      console.log('Role update successful:', data);
       toast.success(`Role updated to ${newRole} successfully!`);
       onRoleUpdate();
     } catch (err: any) {
       console.error('Error updating role:', err);
       setError(err.message || 'Failed to update role');
-      
+
       // Show more detailed error for debugging
       toast.error(`Failed to update role: ${err.message}`, {
         description: err.details || err.hint || 'Please check console for details'
@@ -128,28 +105,112 @@ const AdminRoleManager: React.FC<AdminRoleManagerProps> = ({
 
           <div className="flex gap-2 flex-wrap">
             <Button
-              variant={currentRole === 'guest' ? 'default' : 'outline'}
-              size="sm"
+              className="min-h-[44px] px-3 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
               onClick={() => handleRoleUpdate('guest')}
               disabled={loading || currentRole === 'guest'}
+              style={{
+                background: currentRole === 'guest'
+                  ? 'linear-gradient(135deg, #34C759 0%, #30A14E 100%)'
+                  : (loading || currentRole === 'guest')
+                    ? 'rgba(0, 122, 255, 0.5)'
+                    : 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+                backdropFilter: 'blur(20px) saturate(1.8)',
+                WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: '#FFFFFF',
+                fontWeight: '600',
+                borderRadius: '12px',
+                boxShadow: currentRole === 'guest'
+                  ? '0 8px 24px rgba(52, 199, 89, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+                  : '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)',
+                cursor: (loading || currentRole === 'guest') ? 'not-allowed' : 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                if (!(loading || currentRole === 'guest')) {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+                  e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!(loading || currentRole === 'guest')) {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+                }
+              }}
             >
               {loading && currentRole !== 'guest' && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Set as Guest
             </Button>
             <Button
-              variant={currentRole === 'couple' ? 'default' : 'outline'}
-              size="sm"
+              className="min-h-[44px] px-3 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
               onClick={() => handleRoleUpdate('couple')}
               disabled={loading || currentRole === 'couple'}
+              style={{
+                background: currentRole === 'couple'
+                  ? 'linear-gradient(135deg, #34C759 0%, #30A14E 100%)'
+                  : (loading || currentRole === 'couple')
+                    ? 'rgba(0, 122, 255, 0.5)'
+                    : 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+                backdropFilter: 'blur(20px) saturate(1.8)',
+                WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: '#FFFFFF',
+                fontWeight: '600',
+                borderRadius: '12px',
+                boxShadow: currentRole === 'couple'
+                  ? '0 8px 24px rgba(52, 199, 89, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+                  : '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)',
+                cursor: (loading || currentRole === 'couple') ? 'not-allowed' : 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                if (!(loading || currentRole === 'couple')) {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+                  e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!(loading || currentRole === 'couple')) {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+                }
+              }}
             >
               {loading && currentRole !== 'couple' && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Set as Couple
             </Button>
             <Button
-              variant={currentRole === 'admin' ? 'default' : 'outline'}
-              size="sm"
+              className="min-h-[44px] px-3 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
               onClick={() => handleRoleUpdate('admin')}
               disabled={loading || currentRole === 'admin'}
+              style={{
+                background: currentRole === 'admin'
+                  ? 'linear-gradient(135deg, #34C759 0%, #30A14E 100%)'
+                  : (loading || currentRole === 'admin')
+                    ? 'rgba(0, 122, 255, 0.5)'
+                    : 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+                backdropFilter: 'blur(20px) saturate(1.8)',
+                WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: '#FFFFFF',
+                fontWeight: '600',
+                borderRadius: '12px',
+                boxShadow: currentRole === 'admin'
+                  ? '0 8px 24px rgba(52, 199, 89, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+                  : '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)',
+                cursor: (loading || currentRole === 'admin') ? 'not-allowed' : 'pointer'
+              }}
+              onMouseEnter={(e) => {
+                if (!(loading || currentRole === 'admin')) {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+                  e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!(loading || currentRole === 'admin')) {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+                }
+              }}
             >
               {loading && currentRole !== 'admin' && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Set as Admin

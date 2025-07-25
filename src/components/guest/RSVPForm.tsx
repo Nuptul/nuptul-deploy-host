@@ -14,7 +14,7 @@ import {
   Mail,
   MessageSquare
 } from 'lucide-react';
-import GlassCard from '@/components/GlassCard';
+import AdaptiveGlassCard from '@/components/AdaptiveGlassCard';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -38,6 +38,8 @@ interface RSVPFormData {
   plus_one_email: string;
   dietary_needs: string[];
   allergies: string[];
+  plus_one_dietary_needs: string[];
+  plus_one_allergies: string[];
   special_requests: string;
   additional_guests: {
     first_name: string;
@@ -55,7 +57,7 @@ interface RSVPFormData {
   };
 }
 
-interface RSVPIntegrationProps {
+interface RSVPFormProps {
   guestId?: string;
   onRSVPSubmitted?: (data: RSVPFormData) => void;
   readonly?: boolean;
@@ -87,10 +89,10 @@ const ALLERGY_OPTIONS = [
   'Other'
 ];
 
-const RSVPIntegration: React.FC<RSVPIntegrationProps> = ({ 
-  guestId, 
+const RSVPForm: React.FC<RSVPFormProps> = ({
+  guestId,
   onRSVPSubmitted,
-  readonly = false 
+  readonly = false
 }) => {
   const { user } = useAuth();
   const [loading, setLoading] = useState(false);
@@ -102,6 +104,8 @@ const RSVPIntegration: React.FC<RSVPIntegrationProps> = ({
     plus_one_email: '',
     dietary_needs: [],
     allergies: [],
+    plus_one_dietary_needs: [],
+    plus_one_allergies: [],
     special_requests: '',
     additional_guests: [],
     contact_updates: {
@@ -143,6 +147,8 @@ const RSVPIntegration: React.FC<RSVPIntegrationProps> = ({
         plus_one_email: data.plus_one_email || '',
         dietary_needs: data.dietary_requirements || [],
         allergies: data.allergies || [],
+        plus_one_dietary_needs: data.plus_one_dietary_requirements || [],
+        plus_one_allergies: data.plus_one_allergies || [],
         special_requests: data.special_accommodations || '',
         contact_updates: {
           phone: data.mobile || '',
@@ -181,6 +187,8 @@ const RSVPIntegration: React.FC<RSVPIntegrationProps> = ({
           plus_one_email: data.plus_one_email || '',
           dietary_needs: data.dietary_requirements || [],
           allergies: data.allergies || [],
+          plus_one_dietary_needs: data.plus_one_dietary_requirements || [],
+          plus_one_allergies: data.plus_one_allergies || [],
           special_requests: data.special_accommodations || '',
           contact_updates: {
             phone: data.mobile || '',
@@ -202,48 +210,87 @@ const RSVPIntegration: React.FC<RSVPIntegrationProps> = ({
   const handleSubmitRSVP = async () => {
     try {
       setSubmitting(true);
-      
+
       const targetGuestId = guestId || currentGuest?.id;
       if (!targetGuestId && !user?.id) {
         toast.error('No guest record found');
         return;
       }
 
-      // Update guest record with RSVP data
-      const updateData = {
-        rsvp_status: formData.rsvp_status, // Already using 'attending' or 'not_attending'
+      console.log('Submitting RSVP:', { targetGuestId, userId: user?.id, rsvpStatus: formData.rsvp_status });
+
+      // 1. UPDATE USER PROFILE (profiles table)
+      const profileUpdateData = {
+        rsvp_status: formData.rsvp_status,
         rsvp_responded_at: new Date().toISOString(),
         plus_one_name: formData.plus_one_name || null,
         plus_one_email: formData.plus_one_email || null,
         dietary_requirements: formData.dietary_needs,
         allergies: formData.allergies,
+        plus_one_dietary_requirements: formData.plus_one_dietary_needs,
+        plus_one_allergies: formData.plus_one_allergies,
         special_accommodations: formData.special_requests || null,
         mobile: formData.contact_updates.phone,
         address: formData.contact_updates.address,
         address_suburb: formData.contact_updates.suburb,
         state: formData.contact_updates.state,
         postcode: formData.contact_updates.postcode,
-        emergency_contact: formData.contact_updates.emergency_contact
+        emergency_contact: formData.contact_updates.emergency_contact,
+        rsvp_completed: true
       };
 
-      let updateQuery;
+      let profileUpdateQuery;
       if (targetGuestId) {
-        // Update by profile ID
-        updateQuery = supabase
+        profileUpdateQuery = supabase
           .from('profiles')
-          .update(updateData)
+          .update(profileUpdateData)
           .eq('id', targetGuestId);
       } else {
-        // Update by user_id (current user)
-        updateQuery = supabase
+        profileUpdateQuery = supabase
           .from('profiles')
-          .update(updateData)
+          .update(profileUpdateData)
           .eq('user_id', user?.id);
       }
 
-      const { error: updateError } = await updateQuery;
+      const { error: profileError } = await profileUpdateQuery;
+      if (profileError) {
+        console.error('Error updating profile:', profileError);
+        throw profileError;
+      }
 
-      if (updateError) throw updateError;
+      // 2. UPDATE TIM & KIRSTEN'S GUEST LIST (guest_list table)
+      // Find the linked guest list entry
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('guest_list_id, user_id')
+        .eq(targetGuestId ? 'id' : 'user_id', targetGuestId || user?.id)
+        .single();
+
+      if (profileData?.guest_list_id) {
+        console.log('Updating guest list entry:', profileData.guest_list_id);
+
+        const guestListUpdateData = {
+          rsvp_status: formData.rsvp_status,
+          rsvp_date: new Date().toISOString(),
+          rsvp_count: formData.rsvp_status === 'attending' ? 1 : 0,
+          dietary_requirements: formData.dietary_needs.join(', ') || null,
+          notes: formData.special_requests || null
+        };
+
+        const { error: guestListError } = await supabase
+          .from('guest_list')
+          .update(guestListUpdateData)
+          .eq('id', profileData.guest_list_id);
+
+        if (guestListError) {
+          console.error('Error updating guest list:', guestListError);
+          // Don't throw here - profile update succeeded
+        } else {
+          console.log('Successfully updated guest list');
+        }
+      } else {
+        console.log('No guest list entry linked - this user may need manual linking');
+      }
 
       // Add additional guests to the system
       if (formData.additional_guests.length > 0) {
@@ -340,6 +387,8 @@ const RSVPIntegration: React.FC<RSVPIntegrationProps> = ({
         plus_one_email: formData.plus_one_email || null,
         dietary_requirements: formData.dietary_needs,
         allergies: formData.allergies,
+        plus_one_dietary_requirements: formData.plus_one_dietary_needs,
+        plus_one_allergies: formData.plus_one_allergies,
         special_accommodations: formData.special_requests || null,
         mobile: formData.contact_updates.phone,
         address: formData.contact_updates.address,
@@ -392,12 +441,12 @@ const RSVPIntegration: React.FC<RSVPIntegrationProps> = ({
 
   if (loading) {
     return (
-      <GlassCard className="p-6">
+      <AdaptiveGlassCard variant="informational" className="p-6">
         <div className="text-center py-8">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-wedding-navy mx-auto"></div>
-          <p className="text-[#7a736b] mt-4">Loading RSVP information...</p>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="text-gray-600 mt-4">Loading RSVP information...</p>
         </div>
-      </GlassCard>
+      </AdaptiveGlassCard>
     );
   }
 
@@ -406,7 +455,7 @@ const RSVPIntegration: React.FC<RSVPIntegrationProps> = ({
   return (
     <div className="space-y-6">
       {/* Header */}
-      <GlassCard className="p-6 text-center">
+      <AdaptiveGlassCard variant="romantic" className="p-6 text-center">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -429,13 +478,13 @@ const RSVPIntegration: React.FC<RSVPIntegrationProps> = ({
             </div>
           )}
         </motion.div>
-      </GlassCard>
+      </AdaptiveGlassCard>
 
       {/* RSVP Status */}
-      <GlassCard className="p-6">
+      <AdaptiveGlassCard variant="informational" className="p-6">
         <div className="space-y-4">
-          <h3 className="text-lg font-semibold text-[#2d3f51] flex items-center gap-2">
-            <Calendar className="w-5 h-5" />
+          <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+            <Calendar className="w-5 h-5 text-blue-600" />
             Will you be attending?
           </h3>
           
@@ -446,7 +495,7 @@ const RSVPIntegration: React.FC<RSVPIntegrationProps> = ({
             size="large"
           />
         </div>
-      </GlassCard>
+      </AdaptiveGlassCard>
 
       {/* Conditional sections based on RSVP status */}
       <AnimatePresence>
@@ -458,7 +507,7 @@ const RSVPIntegration: React.FC<RSVPIntegrationProps> = ({
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
             >
-              <GlassCard className="p-6">
+              <AdaptiveGlassCard variant="nature" className="p-6">
                 <div className="space-y-4">
                   <h3 className="text-lg font-semibold text-[#2d3f51] flex items-center gap-2">
                     <UserPlus className="w-5 h-5" />
@@ -488,21 +537,94 @@ const RSVPIntegration: React.FC<RSVPIntegrationProps> = ({
                       />
                     </div>
                   </div>
+
+                  {/* Plus One Dietary Requirements - Show only if plus one name is provided */}
+                  {formData.plus_one_name && (
+                    <div className="mt-6 pt-6 border-t border-gray-200">
+                      <h4 className="text-md font-medium text-[#2d3f51] mb-4">
+                        Plus One Dietary Preferences & Allergies
+                      </h4>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                          <Label className="text-sm font-medium">Plus One Dietary Needs</Label>
+                          <div className="grid grid-cols-2 gap-2 mt-2">
+                            {DIETARY_OPTIONS.map((option) => (
+                              <div key={option} className="flex items-center space-x-2">
+                                <Checkbox
+                                  id={`plus-one-dietary-${option}`}
+                                  checked={formData.plus_one_dietary_needs.includes(option)}
+                                  onCheckedChange={(checked) => {
+                                    if (checked) {
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        plus_one_dietary_needs: [...prev.plus_one_dietary_needs, option]
+                                      }));
+                                    } else {
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        plus_one_dietary_needs: prev.plus_one_dietary_needs.filter(item => item !== option)
+                                      }));
+                                    }
+                                  }}
+                                  disabled={isAlreadyResponded}
+                                />
+                                <Label htmlFor={`plus-one-dietary-${option}`} className="text-sm">
+                                  {option}
+                                </Label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div>
+                          <Label className="text-sm font-medium">Plus One Allergies</Label>
+                          <div className="grid grid-cols-2 gap-2 mt-2">
+                            {ALLERGY_OPTIONS.map((option) => (
+                              <div key={option} className="flex items-center space-x-2">
+                                <Checkbox
+                                  id={`plus-one-allergy-${option}`}
+                                  checked={formData.plus_one_allergies.includes(option)}
+                                  onCheckedChange={(checked) => {
+                                    if (checked) {
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        plus_one_allergies: [...prev.plus_one_allergies, option]
+                                      }));
+                                    } else {
+                                      setFormData(prev => ({
+                                        ...prev,
+                                        plus_one_allergies: prev.plus_one_allergies.filter(item => item !== option)
+                                      }));
+                                    }
+                                  }}
+                                  disabled={isAlreadyResponded}
+                                />
+                                <Label htmlFor={`plus-one-allergy-${option}`} className="text-sm">
+                                  {option}
+                                </Label>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
                 </div>
-              </GlassCard>
+              </AdaptiveGlassCard>
             </motion.div>
 
-            {/* Dietary Requirements */}
+            {/* Your Dietary Requirements */}
             <motion.div
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
             >
-              <GlassCard className="p-6">
+              <AdaptiveGlassCard variant="formal" className="p-6">
                 <div className="space-y-4">
-                  <h3 className="text-lg font-semibold text-[#2d3f51] flex items-center gap-2">
+                  <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
                     <Utensils className="w-5 h-5" />
-                    Dietary Preferences & Allergies
+                    Your Dietary Preferences & Allergies
                   </h3>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -569,7 +691,7 @@ const RSVPIntegration: React.FC<RSVPIntegrationProps> = ({
                     </div>
                   </div>
                 </div>
-              </GlassCard>
+              </AdaptiveGlassCard>
             </motion.div>
 
             {/* Additional Guests */}
@@ -579,7 +701,7 @@ const RSVPIntegration: React.FC<RSVPIntegrationProps> = ({
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
               >
-                <GlassCard className="p-6">
+                <AdaptiveGlassCard variant="informational" className="p-6">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <h3 className="text-lg font-semibold text-[#2d3f51] flex items-center gap-2">
@@ -649,7 +771,7 @@ const RSVPIntegration: React.FC<RSVPIntegrationProps> = ({
                       ))}
                     </AnimatePresence>
                   </div>
-                </GlassCard>
+                </AdaptiveGlassCard>
               </motion.div>
             )}
           </>
@@ -657,7 +779,7 @@ const RSVPIntegration: React.FC<RSVPIntegrationProps> = ({
       </AnimatePresence>
 
       {/* Contact Updates */}
-      <GlassCard className="p-6">
+      <AdaptiveGlassCard variant="informational" className="p-6">
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-[#2d3f51] flex items-center gap-2">
             <Phone className="w-5 h-5" />
@@ -752,10 +874,10 @@ const RSVPIntegration: React.FC<RSVPIntegrationProps> = ({
             </div>
           </div>
         </div>
-      </GlassCard>
+      </AdaptiveGlassCard>
 
       {/* Special Requests */}
-      <GlassCard className="p-6">
+      <AdaptiveGlassCard variant="formal" className="p-6">
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-[#2d3f51] flex items-center gap-2">
             <MessageSquare className="w-5 h-5" />
@@ -770,11 +892,11 @@ const RSVPIntegration: React.FC<RSVPIntegrationProps> = ({
             disabled={readonly}
           />
         </div>
-      </GlassCard>
+      </AdaptiveGlassCard>
 
       {/* Submit Button */}
       {!isAlreadyResponded && (
-        <GlassCard className="p-6">
+        <AdaptiveGlassCard variant="informational" className="p-6">
           <div className="text-center space-y-4">
             <Button
               onClick={handleSubmitRSVP}
@@ -814,10 +936,10 @@ const RSVPIntegration: React.FC<RSVPIntegrationProps> = ({
               }
             </p>
           </div>
-        </GlassCard>
+        </AdaptiveGlassCard>
       )}
     </div>
   );
 };
 
-export default RSVPIntegration;
+export default RSVPForm;

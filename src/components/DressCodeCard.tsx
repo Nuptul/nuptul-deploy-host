@@ -1,7 +1,42 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { IconHanger2, IconUserCircle, IconMan, IconMusic } from '@tabler/icons-react';
+import { supabase } from '@/integrations/supabase/client';
 
 const DressCodeCard: React.FC = () => {
+  const [dressCodeContent, setDressCodeContent] = useState({
+    title: 'Attire',
+    subtitle: 'Dapper / Cocktail',
+    description: 'We\'d love to see our friends and family get dressed up with us!',
+    ladies: 'Classy dress, pantsuit or jumpsuit',
+    gentlemen: 'Suits, dress chinos, button up shirt and optional tie. We love a pocket kerchief!',
+    note: 'Dress to impress but keep it comfortable for dancing!'
+  });
+
+  useEffect(() => {
+    const fetchDressCodeContent = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('content_blocks')
+          .select('*')
+          .eq('section_key', 'dress_code')
+          .eq('is_active', true)
+          .single();
+
+        if (data && !error) {
+          // Parse the content to extract dress code details
+          const content = data.content;
+          setDressCodeContent(prev => ({
+            ...prev,
+            description: content
+          }));
+        }
+      } catch (error) {
+        console.error('Error fetching dress code content:', error);
+      }
+    };
+
+    fetchDressCodeContent();
+  }, []);
   
 
   return (
@@ -48,14 +83,14 @@ const DressCodeCard: React.FC = () => {
           <IconHanger2 size={28} className="text-white" stroke={1.5} />
         </div>
         <div>
-          <h2 className="text-2xl font-bold" style={{ color: '#000000' }}>Attire</h2>
-          <p className="text-lg font-semibold" style={{ color: '#007AFF' }}>Dapper / Cocktail</p>
+          <h2 className="text-2xl font-bold" style={{ color: '#000000' }}>{dressCodeContent.title}</h2>
+          <p className="text-lg font-semibold" style={{ color: '#007AFF' }}>{dressCodeContent.subtitle}</p>
         </div>
       </div>
-      
+
       <div className="space-y-4 relative z-10">
         <p className="text-lg" style={{ color: 'rgba(0, 0, 0, 0.8)', lineHeight: '1.6' }}>
-          We'd love to see our friends and family get dressed up with us!
+          {dressCodeContent.description}
         </p>
         
         <div className="space-y-3">
@@ -64,7 +99,7 @@ const DressCodeCard: React.FC = () => {
               <IconUserCircle size={20} style={{ color: '#007AFF' }} stroke={1.5} />
             </div>
             <p className="text-base" style={{ color: 'rgba(0, 0, 0, 0.75)' }}>
-              <span className="font-semibold" style={{ color: '#000000' }}>Ladies:</span> Classy dress, pantsuit or jumpsuit
+              <span className="font-semibold" style={{ color: '#000000' }}>Ladies:</span> {dressCodeContent.ladies}
             </p>
           </div>
           <div className="flex items-start gap-3">
@@ -72,7 +107,7 @@ const DressCodeCard: React.FC = () => {
               <IconMan size={20} style={{ color: '#007AFF' }} stroke={1.5} />
             </div>
             <p className="text-base" style={{ color: 'rgba(0, 0, 0, 0.75)' }}>
-              <span className="font-semibold" style={{ color: '#000000' }}>Gentlemen:</span> Suits, dress chinos, button up shirt and optional tie. We love a pocket kerchief!
+              <span className="font-semibold" style={{ color: '#000000' }}>Gentlemen:</span> {dressCodeContent.gentlemen}
             </p>
           </div>
         </div>
@@ -87,7 +122,7 @@ const DressCodeCard: React.FC = () => {
           <div className="flex items-center gap-3">
             <IconMusic size={20} style={{ color: '#007AFF' }} stroke={1.5} />
             <p className="text-base font-medium" style={{ color: 'rgba(0, 0, 0, 0.85)' }}>
-              Dress to impress but keep it comfortable for dancing!
+              {dressCodeContent.note}
             </p>
           </div>
         </div>

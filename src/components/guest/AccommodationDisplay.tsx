@@ -359,7 +359,6 @@ const AccommodationCard: React.FC<AccommodationCardProps> = ({
                     coordinates: accommodation.coordinates,
                     description: accommodation.description
                   }}
-                  className="h-64"
                 />
               </div>
             )}

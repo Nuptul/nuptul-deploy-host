@@ -140,9 +140,10 @@ const GuestContentManager: React.FC = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           {[
-            { time: '2:00 PM', event: 'Ceremony', location: 'St. Mary\'s Church', color: 'blue' },
-            { time: '4:00 PM', event: 'Cocktail Hour', location: 'Garden Terrace', color: 'green' },
-            { time: '6:00 PM', event: 'Reception', location: 'Grand Ballroom', color: 'purple' }
+            { time: '2:30 PM', event: 'Guest Arrival', location: 'Ben Ean Winery', color: 'blue' },
+            { time: '3:00 PM', event: 'Wedding Ceremony', location: 'Ben Ean Winery', color: 'purple' },
+            { time: '4:30 PM', event: 'Cocktail Hour', location: 'Garden Terrace', color: 'green' },
+            { time: '6:00 PM', event: 'Reception', location: 'Ben Ean Function Centre', color: 'orange' }
           ].map((item, index) => (
             <div key={index} className="flex items-center gap-4 p-3 border rounded-lg">
               <input 

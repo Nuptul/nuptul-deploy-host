@@ -239,40 +239,97 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     );
 
-    // Check for existing session
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      
-      setSession(session);
-      setUser(session?.user ?? null);
-      
-      if (session?.user) {
-        fetchUserData(session.user.id);
-      } else {
+    // Check for existing session with a small delay to ensure localStorage is ready
+    const initializeAuth = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        if (session?.user) {
+          await fetchUserData(session.user.id);
+        } else {
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error('Error initializing auth:', error);
         setLoading(false);
       }
-    });
+    };
+
+    // Small delay to ensure localStorage is ready
+    setTimeout(initializeAuth, 50);
 
     return () => subscription.unsubscribe();
   }, []); // Empty dependency array - this effect should only run once
 
   const signUp = async (email: string, password: string, firstName?: string, lastName?: string, profileData?: any) => {
     const redirectUrl = `${window.location.origin}/auth/confirm`;
-    
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: redirectUrl,
-        data: {
-          firstName: firstName || '',
-          lastName: lastName || '',
-          phone: profileData?.phone,
-          role: 'guest' // Default role for new users
+
+    try {
+      // Step 1: Create auth user
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: {
+            firstName: firstName || '',
+            lastName: lastName || '',
+            phone: profileData?.mobile || profileData?.phone,
+            role: 'guest' // Default role for new users
+          }
+        }
+      });
+
+      if (error) return { data, error };
+
+      // Step 2: Create profile if user was created successfully
+      if (data.user && !error) {
+        const profileInsertData = {
+          user_id: data.user.id,
+          email: email,
+          first_name: firstName || '',
+          last_name: lastName || '',
+          mobile: profileData?.mobile || profileData?.phone || '',
+          address: profileData?.address || '',
+          address_suburb: profileData?.address_suburb || '',
+          state: profileData?.state || '',
+          country: profileData?.country || '',
+          postcode: profileData?.postcode || '',
+          emergency_contact: profileData?.emergencyContact || '',
+          relationship_to_couple: profileData?.relationshipToCouple || '',
+          dietary_requirements: profileData?.dietaryRequirements || [],
+          allergies: profileData?.allergies || [],
+          special_accommodations: profileData?.specialAccommodations || '',
+          bio: profileData?.bio || '',
+          has_plus_one: profileData?.hasPlusOne || false,
+          plus_one_name: profileData?.plusOneName || '',
+          plus_one_email: profileData?.plusOneEmail || '',
+          plus_one_invited: profileData?.hasPlusOne || false,
+          rsvp_status: profileData?.rsvp_status || null,
+          rsvp_responded_at: profileData?.rsvp_responded_at || null,
+          created_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert(profileInsertData);
+
+        if (profileError) {
+          console.error('Error creating profile:', profileError);
+          // Don't return the profile error as the auth user was created successfully
+          // The profile will be created later when the user logs in
         }
       }
-    });
-    
-    return { data, error };
+
+      return { data, error };
+    } catch (err) {
+      console.error('Signup error:', err);
+      return { data: null, error: err };
+    }
   };
 
   const signIn = async (email: string, password: string) => {

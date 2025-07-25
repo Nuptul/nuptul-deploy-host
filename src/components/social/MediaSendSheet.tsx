@@ -127,12 +127,24 @@ const MediaSendSheet: React.FC<MediaSendSheetProps> = ({
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
-                  className="glass-card p-4 text-center hover:bg-wedding-navy/10 transition-colors"
+                  className="glass-card p-4 text-center transition-colors"
+                  style={{
+                    background: 'linear-gradient(135deg, rgba(0, 102, 204, 0.1) 0%, rgba(0, 122, 255, 0.05) 100%)',
+                    border: '1px solid rgba(0, 102, 204, 0.2)',
+                    backdropFilter: 'blur(10px)',
+                    WebkitBackdropFilter: 'blur(10px)'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 102, 204, 0.15) 0%, rgba(0, 122, 255, 0.1) 100%)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 102, 204, 0.1) 0%, rgba(0, 122, 255, 0.05) 100%)';
+                  }}
                 >
-                  <div className="text-wedding-navy mb-2 flex justify-center">
+                  <div className="mb-2 flex justify-center" style={{ color: '#0066CC' }}>
                     {action.icon}
                   </div>
-                  <span className="text-sm font-medium text-wedding-navy">
+                  <span className="text-sm font-medium" style={{ color: '#007AFF' }}>
                     {action.label}
                   </span>
                 </motion.div>
@@ -200,7 +212,7 @@ const MediaSendSheet: React.FC<MediaSendSheetProps> = ({
                     <Button
                       onClick={handleSend}
                       size="sm"
-                      className="bg-wedding-navy hover:bg-wedding-navy/90"
+                      className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white"
                     >
                       Send
                     </Button>

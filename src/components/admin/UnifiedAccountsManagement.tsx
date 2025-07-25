@@ -439,20 +439,52 @@ const UnifiedAccountsManagement: React.FC<UnifiedAccountsManagementProps> = ({ u
                   <>
                     {account.role !== 'admin' && (
                       <Button
-                        size="sm"
-                        variant="outline"
+                        className="text-xs px-2 py-1 min-h-[44px] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                         onClick={() => updateUserRole(account.id, 'admin')}
-                        className="text-xs px-2 py-1 h-6"
+                        style={{
+                          background: 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+                          backdropFilter: 'blur(20px) saturate(1.8)',
+                          WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          color: '#FFFFFF',
+                          fontWeight: '600',
+                          borderRadius: '12px',
+                          boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+                          e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+                          e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+                        }}
                       >
                         Make Admin
                       </Button>
                     )}
                     {account.role === 'admin' && (
                       <Button
-                        size="sm"
-                        variant="outline"
+                        className="text-xs px-2 py-1 min-h-[44px] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                         onClick={() => updateUserRole(account.id, 'guest')}
-                        className="text-xs px-2 py-1 h-6"
+                        style={{
+                          background: 'linear-gradient(135deg, #FF9500 0%, #FF6D00 100%)',
+                          backdropFilter: 'blur(20px) saturate(1.8)',
+                          WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          color: '#FFFFFF',
+                          fontWeight: '600',
+                          borderRadius: '12px',
+                          boxShadow: '0 8px 24px rgba(255, 149, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #FF6D00 0%, #E65100 100%)';
+                          e.currentTarget.style.boxShadow = '0 12px 32px rgba(255, 149, 0, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #FF9500 0%, #FF6D00 100%)';
+                          e.currentTarget.style.boxShadow = '0 8px 24px rgba(255, 149, 0, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+                        }}
                       >
                         Remove Admin
                       </Button>
@@ -462,20 +494,52 @@ const UnifiedAccountsManagement: React.FC<UnifiedAccountsManagementProps> = ({ u
                   <>
                     {!account.invite_sent && (
                       <Button
-                        size="sm"
-                        variant="outline"
+                        className="text-xs px-2 py-1 min-h-[44px] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                         onClick={() => sendInvitation(account)}
-                        className="text-xs px-2 py-1 h-6"
+                        style={{
+                          background: 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+                          backdropFilter: 'blur(20px) saturate(1.8)',
+                          WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          color: '#FFFFFF',
+                          fontWeight: '600',
+                          borderRadius: '12px',
+                          boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+                          e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+                          e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+                        }}
                       >
                         <Send className="w-3 h-3 mr-1" />
                         Invite
                       </Button>
                     )}
                     <Button
-                      size="sm"
-                      variant="outline"
+                      className="text-xs px-2 py-1 min-h-[44px] min-w-[44px] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                       onClick={() => setSelectedGuest(account)}
-                      className="text-xs px-2 py-1 h-6"
+                      style={{
+                        background: 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+                        backdropFilter: 'blur(20px) saturate(1.8)',
+                        WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        color: '#FFFFFF',
+                        fontWeight: '600',
+                        borderRadius: '12px',
+                        boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+                        e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+                        e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+                      }}
                     >
                       <Edit3 className="w-3 h-3" />
                     </Button>

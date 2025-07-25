@@ -266,7 +266,34 @@ const TransportationManager: React.FC = () => {
             Coordinate guest transportation with bus bookings and carpool coordination
           </p>
         </div>
-        <Button onClick={sendTransportReminders} disabled={unorganizedCount === 0}>
+        <Button
+          className="min-h-[44px] px-4 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+          onClick={sendTransportReminders}
+          disabled={unorganizedCount === 0}
+          style={{
+            background: unorganizedCount === 0 ? 'rgba(0, 122, 255, 0.5)' : 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+            backdropFilter: 'blur(20px) saturate(1.8)',
+            WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            color: '#FFFFFF',
+            fontWeight: '600',
+            borderRadius: '12px',
+            boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)',
+            cursor: unorganizedCount === 0 ? 'not-allowed' : 'pointer'
+          }}
+          onMouseEnter={(e) => {
+            if (unorganizedCount > 0) {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+              e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (unorganizedCount > 0) {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+              e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+            }
+          }}
+        >
           <Send className="w-4 h-4 mr-2" />
           Send Reminders ({unorganizedCount})
         </Button>

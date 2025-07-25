@@ -7,13 +7,25 @@ interface AuthHeaderProps {
 export const AuthHeader: React.FC<AuthHeaderProps> = ({ mode }) => {
   return (
     <div className="text-center mb-6 sm:mb-8">
-      {/* Logo positioned above heading */}
-      <div className="flex justify-center mb-4">
-        <img 
-          src="https://iwmfxcrzzwpmxomydmuq.storage.supabase.co/v1/object/public/home-hero//logo.png" 
-          alt="Wedding Logo" 
-          className="w-24 h-24 sm:w-32 sm:h-32 object-contain"
-        />
+      {/* Nuptul Logo positioned above heading - Much Larger */}
+      <div className="flex justify-center mb-8">
+        <div className="relative">
+          <img
+            src="/nuptul-logo.png"
+            alt="Nuptul - Wedding Management Platform"
+            className="w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 object-contain transition-all duration-300 hover:scale-105"
+            style={{
+              filter: 'drop-shadow(0 8px 24px rgba(0, 102, 204, 0.3))',
+            }}
+          />
+          {/* Enhanced glow effect for larger logo */}
+          <div
+            className="absolute inset-0 w-48 h-48 sm:w-64 sm:h-64 lg:w-80 lg:h-80 rounded-full opacity-25 blur-2xl"
+            style={{
+              background: 'radial-gradient(circle, rgba(0, 102, 204, 0.4) 0%, rgba(0, 102, 204, 0.2) 50%, transparent 70%)',
+            }}
+          />
+        </div>
       </div>
       
       {/* Main couple heading - Premium Calligraphy Style */}

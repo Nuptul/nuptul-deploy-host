@@ -126,7 +126,7 @@ const developmentConfig: DeploymentConfig = {
     photoUploads: true
   },
   urls: {
-    app: 'http://localhost:5173',
+    app: import.meta.env.VITE_APP_URL || 'https://nuptul.com',
     cdn: undefined,
     api: undefined
   },

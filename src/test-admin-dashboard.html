@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .test-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            margin: 0 auto;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+        .success {
+            background: rgba(34, 197, 94, 0.2);
+            color: #16a34a;
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+        .error {
+            background: rgba(239, 68, 68, 0.2);
+            color: #dc2626;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+        }
+        .info {
+            background: rgba(59, 130, 246, 0.2);
+            color: #2563eb;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+        .test-button {
+            background: linear-gradient(135deg, #0066CC 0%, #007AFF 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 5px;
+            transition: transform 0.2s;
+        }
+        .test-button:hover {
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+    <div class="test-container">
+        <h1>🔧 Admin Dashboard Fix Verification</h1>
+        
+        <div class="status success">
+            ✅ Fixed table references:
+            <ul>
+                <li><code>events</code> → <code>wedding_events</code></li>
+                <li><code>photos</code> → <code>gallery_photos</code></li>
+            </ul>
+        </div>
+        
+        <div class="status info">
+            📋 Changes Made:
+            <ul>
+                <li>Updated AdminDashboardPopup.tsx to use correct table names</li>
+                <li>Fixed database queries for events and photo uploads</li>
+                <li>Maintained error handling for graceful degradation</li>
+            </ul>
+        </div>
+        
+        <div class="status success">
+            🎯 Expected Result:
+            <p>The admin dashboard should now load without showing "Page Error" and display proper statistics from the database.</p>
+        </div>
+        
+        <h2>🧪 Test Instructions:</h2>
+        <ol>
+            <li>Navigate to <code>http://localhost:5173</code></li>
+            <li>Log in with admin credentials</li>
+            <li>Click on the admin dashboard button/link</li>
+            <li>Verify the dashboard loads with statistics instead of "Page Error"</li>
+        </ol>
+        
+        <div class="status info">
+            <strong>Note:</strong> If you still see "Page Error", check the browser console for any remaining JavaScript errors and let me know what specific error messages appear.
+        </div>
+        
+        <button class="test-button" onclick="window.open('http://localhost:5173', '_blank')">
+            🚀 Open Application
+        </button>
+        
+        <button class="test-button" onclick="window.open('http://localhost:5173/admin', '_blank')">
+            🔐 Test Admin Route
+        </button>
+    </div>
+</body>
+</html>

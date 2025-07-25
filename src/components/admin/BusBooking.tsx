@@ -5,60 +5,108 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
-import { Bus, Users, MapPin, Calendar, Clock, DollarSign, UserCheck } from 'lucide-react';
+import {
+  Bus,
+  Users,
+  MapPin,
+  Calendar,
+  Clock,
+  DollarSign,
+  UserCheck,
+  Plus,
+  Edit,
+  Trash2,
+  Settings,
+  Eye,
+  Save,
+  RefreshCw,
+  AlertCircle,
+  CheckCircle,
+  BarChart3
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-interface BusRoute {
+interface BusSchedule {
   id: string;
-  name: string;
+  route_name: string;
   departure_location: string;
   arrival_location: string;
   departure_time: string;
-  arrival_time: string;
+  arrival_time?: string;
+  max_capacity: number;
+  current_bookings: number;
   price: number;
-  total_seats: number;
-  bus_layout: string; // JSON string of seat layout
+  is_active: boolean;
+  description?: string;
+  special_instructions?: string;
+  created_at: string;
+  updated_at: string;
 }
 
-interface SeatBooking {
-  seat_number: string;
-  guest_id: string;
-  guest_name: string;
+interface BusBookingRecord {
+  id: string;
+  user_id: string;
+  schedule_id: string;
+  seat_number: number;
+  passenger_name: string;
   booking_status: 'confirmed' | 'pending' | 'cancelled';
+  guest_count: number;
+  special_requirements?: string;
+  created_at: string;
+  user_profile?: {
+    first_name?: string;
+    last_name?: string;
+    email: string;
+  };
 }
 
-interface BusBookingData {
-  route_id: string;
-  bookings: Record<string, SeatBooking>;
+interface BusSettings {
+  booking_enabled: boolean;
+  max_bookings_per_user: number;
+  booking_deadline: string;
+  cancellation_allowed: boolean;
+  notification_emails: string[];
+  terms_and_conditions: string;
 }
 
 const BusBooking: React.FC = () => {
-  const [routes, setRoutes] = useState<BusRoute[]>([]);
-  const [selectedRoute, setSelectedRoute] = useState<string>('');
-  const [bookings, setBookings] = useState<Record<string, SeatBooking>>({});
-  const [selectedSeats, setSelectedSeats] = useState<Set<string>>(new Set());
-  const [loading, setLoading] = useState(true);
-  const [saving, setSaving] = useState(false);
-
-  // Default bus layout (can be customized per route)
-  const defaultBusLayout = {
-    rows: 10,
-    seatsPerRow: 4,
-    aisleAfter: 2, // Aisle after 2nd seat
-    unavailableSeats: ['1A', '1B'], // Driver area
-  };
+  const [loading, setLoading] = useState(false);
+  const [bookings, setBookings] = useState<any[]>([]);
 
   useEffect(() => {
-    fetchRoutes();
+    fetchBookings();
   }, []);
 
-  useEffect(() => {
-    if (selectedRoute) {
-      fetchBookings(selectedRoute);
+  const fetchBookings = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('bus_bookings')
+        .select(`
+          *,
+          profiles:user_id (
+            first_name,
+            last_name,
+            email
+          )
+        `)
+        .order('created_at', { ascending: false });
+
+      if (error) throw error;
+      setBookings(data || []);
+    } catch (error) {
+      console.error('Error fetching bookings:', error);
+      toast.error('Failed to load bus bookings');
+    } finally {
+      setLoading(false);
     }
-  }, [selectedRoute]);
+  };
 
   const fetchRoutes = async () => {
     try {
@@ -101,7 +149,7 @@ const BusBooking: React.FC = () => {
     }
   };
 
-  const fetchBookings = async (routeId: string) => {
+  const fetchBookingsByRoute = async (routeId: string) => {
     try {
       const { data, error } = await supabase
         .from('bus_bookings')
@@ -403,14 +451,56 @@ const BusBooking: React.FC = () => {
                   </div>
                   <div className="flex gap-2">
                     <Button
-                      variant="outline"
                       onClick={() => setSelectedSeats(new Set())}
+                      className="min-h-[44px] px-4 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                      style={{
+                        background: 'linear-gradient(135deg, #8E8E93 0%, #636366 100%)',
+                        backdropFilter: 'blur(20px) saturate(1.8)',
+                        WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        color: '#FFFFFF',
+                        fontWeight: '600',
+                        borderRadius: '12px',
+                        boxShadow: '0 8px 24px rgba(142, 142, 147, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'linear-gradient(135deg, #636366 0%, #48484A 100%)';
+                        e.currentTarget.style.boxShadow = '0 12px 32px rgba(142, 142, 147, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'linear-gradient(135deg, #8E8E93 0%, #636366 100%)';
+                        e.currentTarget.style.boxShadow = '0 8px 24px rgba(142, 142, 147, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+                      }}
                     >
                       Clear Selection
                     </Button>
                     <Button
                       onClick={handleSaveBookings}
                       disabled={saving}
+                      className="min-h-[44px] px-4 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                      style={{
+                        background: saving ? 'rgba(0, 122, 255, 0.5)' : 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+                        backdropFilter: 'blur(20px) saturate(1.8)',
+                        WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        color: '#FFFFFF',
+                        fontWeight: '600',
+                        borderRadius: '12px',
+                        boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)',
+                        cursor: saving ? 'not-allowed' : 'pointer'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!saving) {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+                          e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!saving) {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+                          e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+                        }
+                      }}
                     >
                       {saving ? 'Saving...' : 'Assign to Guests'}
                     </Button>

@@ -2,7 +2,7 @@ import React from 'react';
 import { NavigationIconProps } from './types';
 import { useRealTimeNotifications } from '@/hooks/useRealTimeNotifications';
 
-const NavigationIcon: React.FC<NavigationIconProps> = ({ route, isActive, size = 'medium' }) => {
+const NavigationIcon: React.FC<NavigationIconProps> = ({ route, isActive, size = 'medium', style = {} }) => {
   const { getNotificationForRoute, getGlobalMessageNotification } = useRealTimeNotifications();
   
   const iconSizes = {
@@ -42,9 +42,7 @@ const NavigationIcon: React.FC<NavigationIconProps> = ({ route, isActive, size =
           <span 
             key={i}
             style={{
-              backgroundColor: isActive 
-                ? '#ffffff'
-                : 'rgba(0, 0, 0, 0.7)',
+              backgroundColor: '#ffffff',
               borderRadius: '2px',
               display: 'block',
               position: 'relative',
@@ -82,10 +80,11 @@ const NavigationIcon: React.FC<NavigationIconProps> = ({ route, isActive, size =
         className="svg-icon" 
         style={{
           ...iconSize,
-          fill: route.id === 'venue' ? (isActive ? '#007AFF' : 'rgba(0, 0, 0, 0.7)') : 'none',
-          stroke: isActive ? '#007AFF' : 'rgba(0, 0, 0, 0.7)',
-          strokeWidth: route.id === 'venue' ? '0' : '1.5',
-          filter: 'none',
+          ...style,
+          fill: route.id === 'venue' ? '#ffffff' : 'none',
+          stroke: '#ffffff',
+          strokeWidth: route.id === 'venue' ? '0' : '2',
+          filter: style.filter || 'none',
           position: 'relative',
           zIndex: 1
         }}

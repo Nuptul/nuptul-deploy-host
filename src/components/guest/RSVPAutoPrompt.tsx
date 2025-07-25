@@ -24,6 +24,7 @@ export const RSVPAutoPrompt: React.FC<RSVPAutoPromptProps> = ({
   const [loading, setLoading] = useState(true);
   const [guestProfile, setGuestProfile] = useState<any>(null);
   const [submitting, setSubmitting] = useState(false);
+  const [showThankYou, setShowThankYou] = useState(false);
 
   useEffect(() => {
     checkRSVPStatus();
@@ -59,12 +60,41 @@ export const RSVPAutoPrompt: React.FC<RSVPAutoPromptProps> = ({
 
       if (profile) {
         setGuestProfile(profile);
-        
-        // Show prompt ONLY if they haven't responded yet AND status is pending or null
-        // Once they've responded (rsvp_responded_at is set), never show again
-        if (!profile.rsvp_responded_at && (!profile.rsvp_status || profile.rsvp_status === 'pending')) {
+
+        // Enhanced RSVP status checking logic
+        const hasResponded = profile.rsvp_responded_at ||
+                           (profile.rsvp_status && profile.rsvp_status !== 'pending');
+
+        const needsRSVP = !hasResponded &&
+                         (!profile.rsvp_status || profile.rsvp_status === 'pending');
+
+        // Additional check: Don't show to admin users who have already confirmed attendance
+        const isAdminWithConfirmedStatus = profile.rsvp_status === 'attending' ||
+                                         profile.rsvp_status === 'confirmed' ||
+                                         profile.rsvp_status === 'not_attending' ||
+                                         profile.rsvp_status === 'declined';
+
+        // Show prompt ONLY if they need to RSVP and haven't already confirmed their status
+        if (needsRSVP && !isAdminWithConfirmedStatus) {
           setShow(true);
+        } else if (hasResponded || isAdminWithConfirmedStatus) {
+          // Show thank you message for users who have already RSVP'd
+          setShowThankYou(true);
+          // Auto-hide thank you message after 3 seconds
+          setTimeout(() => setShowThankYou(false), 3000);
         }
+
+        // Debug logging for troubleshooting
+        console.log('RSVP Auto Prompt Debug:', {
+          userId: user.id,
+          rsvpStatus: profile.rsvp_status,
+          rsvpRespondedAt: profile.rsvp_responded_at,
+          hasResponded,
+          needsRSVP,
+          isAdminWithConfirmedStatus,
+          willShow: needsRSVP && !isAdminWithConfirmedStatus,
+          showThankYou: hasResponded || isAdminWithConfirmedStatus
+        });
       }
 
       // Mark that we've shown the prompt today
@@ -117,7 +147,33 @@ export const RSVPAutoPrompt: React.FC<RSVPAutoPromptProps> = ({
     navigate('/rsvp');
   };
 
-  if (loading || !show) return null;
+  if (loading || (!show && !showThankYou)) return null;
+
+  // Thank you message for users who have already RSVP'd
+  if (showThankYou && !show) {
+    return (
+      <AnimatePresence>
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 50 }}
+          className="fixed bottom-4 right-4 z-50 max-w-sm"
+        >
+          <GlassCard className="p-4">
+            <div className="flex items-center gap-3">
+              <Heart className="w-6 h-6 text-green-500" />
+              <div>
+                <h4 className="font-semibold text-[#2d3f51]">Thanks for your RSVP!</h4>
+                <p className="text-sm text-[#7a736b]">
+                  We're excited to celebrate with you at Ben Ean.
+                </p>
+              </div>
+            </div>
+          </GlassCard>
+        </motion.div>
+      </AnimatePresence>
+    );
+  }
 
   return (
     <AnimatePresence>

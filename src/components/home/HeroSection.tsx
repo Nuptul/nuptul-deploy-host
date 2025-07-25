@@ -2,9 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppSettings } from '@/hooks/useAppSettings';
 import { getUrlWithFallback } from '@/utils/supabaseStorage';
-import Countdown from './Countdown';
-import RSVPCallToAction from './RSVPCallToAction';
-import { Bus, Car, BedDouble, Route } from 'lucide-react';
+import { glassEffects, nuptulColors } from '@/styles/nuptul-design-system';
+
+
+import { Heart } from 'lucide-react';
 
 interface HeroBackgroundProps {
   backgroundType: string;
@@ -250,10 +251,9 @@ const HeroBackground: React.FC<HeroBackgroundProps> = ({
 };
 
 interface HeroSectionProps {
-  onRSVPClick?: () => void;
 }
 
-const HeroSection: React.FC<HeroSectionProps> = ({ onRSVPClick }) => {
+const HeroSection: React.FC<HeroSectionProps> = () => {
   const { settings, loading } = useAppSettings();
   const navigate = useNavigate();
 
@@ -313,32 +313,42 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onRSVPClick }) => {
 
   return (
     <div className="relative w-full hero-section" data-testid="enhanced-hero-section">
-      {/* Welcome Message with Glass Effect - Moved above video */}
+      {/* Welcome Message with Logo-Inspired Glass Effect */}
       <div className="mb-6 sm:mb-8 lg:mb-10 animate-fade-up">
-        <div 
+        <div
           className="p-8 sm:p-10 lg:p-12 text-center relative overflow-hidden"
           style={{
-            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%)',
-            backdropFilter: 'blur(30px) saturate(1.5)',
-            WebkitBackdropFilter: 'blur(30px) saturate(1.5)',
+            background: `linear-gradient(135deg,
+              rgba(255, 255, 255, 0.6) 0%,
+              rgba(255, 255, 255, 0.55) 50%,
+              rgba(255, 255, 255, 0.65) 100%)`,
+            backdropFilter: 'blur(20px) saturate(2)',
+            WebkitBackdropFilter: 'blur(20px) saturate(2)',
+            border: '1px solid rgba(255, 255, 255, 0.4)',
             borderRadius: '24px',
-            border: '1px solid rgba(255, 255, 255, 0.18)',
             boxShadow: `
-              0 8px 32px rgba(0, 0, 0, 0.12),
-              inset 0 1px 1px rgba(255, 255, 255, 0.25),
-              inset 0 -1px 1px rgba(0, 0, 0, 0.05)
+              0 12px 40px rgba(0, 0, 0, 0.15),
+              0 4px 16px rgba(0, 0, 0, 0.08),
+              inset 0 1px 0 rgba(255, 255, 255, 0.8),
+              inset 0 -1px 0 rgba(0, 0, 0, 0.05)
             `
           }}
         >
-          <h1 
-            className="couple-names wedding-names text-5xl sm:text-6xl lg:text-7xl mb-3"
+
+
+          <h1
+            className="couple-names wedding-names text-5xl sm:text-6xl lg:text-7xl mb-4"
             style={{
-              fontFamily: '"Great Vibes", cursive',
+              fontFamily: '"Great Vibes", "Dancing Script", "Brush Script MT", cursive',
               color: '#000000',
-              textShadow: '0 0 10px rgba(255, 255, 255, 1), 0 0 20px rgba(255, 255, 255, 0.8), 2px 2px 4px rgba(255, 255, 255, 1)',
-              lineHeight: '1.2',
+              textShadow: `
+                0 2px 4px rgba(255, 255, 255, 0.8),
+                0 4px 8px rgba(220, 38, 38, 0.15),
+                0 1px 2px rgba(71, 85, 105, 0.1)
+              `,
+              lineHeight: '1.1',
               fontWeight: '400',
-              letterSpacing: '0.03em',
+              letterSpacing: '0.02em',
               textRendering: 'optimizeLegibility',
               WebkitFontSmoothing: 'antialiased'
             }}
@@ -346,134 +356,53 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onRSVPClick }) => {
           >
             {settings.app_name}
           </h1>
-          <p 
-            className="text-base sm:text-lg lg:text-xl mb-4"
+          <p
+            className="text-base sm:text-lg lg:text-xl mb-6"
             style={{
-              fontFamily: '"Montserrat", sans-serif',
-              color: '#007AFF',
-              fontWeight: '500',
-              letterSpacing: '0.15em',
-              textTransform: 'uppercase'
+              fontFamily: '"Inter", "SF Pro Display", sans-serif',
+              color: '#000000',
+              fontWeight: '600',
+              letterSpacing: '0.12em',
+              textTransform: 'uppercase',
+              textShadow: '0 1px 2px rgba(255, 255, 255, 0.8)'
             }}
           >
             WE ARE GETTING MARRIED!
           </p>
-          <Countdown targetDate={settings.wedding_date || ''} onRSVPClick={onRSVPClick} />
-          <p 
-            className="text-base sm:text-lg lg:text-xl mt-4"
+          <p
+            className="text-base sm:text-lg lg:text-xl mt-6"
             style={{
-              fontFamily: '"Bodoni Moda", serif',
-              color: '#007AFF',
+              fontFamily: '"Playfair Display", "Georgia", serif',
+              color: '#000000',
               fontWeight: '500',
-              letterSpacing: '0.05em'
+              letterSpacing: '0.05em',
+              textShadow: '0 1px 2px rgba(255, 255, 255, 0.6)'
             }}
           >
             {formattedDate}
           </p>
-          <p 
-            className="text-base sm:text-lg mt-6 max-w-2xl mx-auto"
+          <p
+            className="text-base sm:text-lg mt-8 max-w-2xl mx-auto leading-relaxed"
             style={{
-              fontFamily: '"Playfair Display", serif',
+              fontFamily: '"Playfair Display", "Georgia", serif',
               fontStyle: 'italic',
-              color: 'rgba(0, 0, 0, 0.85)',
-              textShadow: '0 0 20px rgba(255, 255, 255, 1), 0 1px 3px rgba(255, 255, 255, 0.8), 0 2px 8px rgba(255, 255, 255, 0.6)',
+              color: '#000000',
+              textShadow: '0 1px 3px rgba(255, 255, 255, 0.7)',
               letterSpacing: '0.02em',
               lineHeight: '1.7',
               fontWeight: '400',
-              backdropFilter: 'contrast(1.2)',
-              WebkitBackdropFilter: 'contrast(1.2)'
+              textRendering: 'optimizeLegibility',
+              WebkitFontSmoothing: 'antialiased',
+              MozOsxFontSmoothing: 'grayscale'
             }}
           >
-            "Yes, we are that couple stuffing up your long weekend plans! Why spend it somewhere relaxing when you can watch two people who have been together for well over a decade tell you that they still love each other and are going to continue living pretty much as they have but under a legally binding contract?"
+            {settings.hero_subtitle}
           </p>
-          
-          {/* RSVP Call to Action */}
-          <RSVPCallToAction />
+
         </div>
       </div>
 
-      {/* Travel & Accommodation Cards */}
-      <div className="mb-6 sm:mb-8 lg:mb-10 animate-fade-up">
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 max-w-5xl mx-auto">
-          {[
-            { icon: Bus, title: 'Bus Booking', route: '/transport', color: '#007AFF' },
-            { icon: Car, title: 'Car Pooling', route: '/transport', color: '#34C759' },
-            { icon: BedDouble, title: 'Accommodation Share', route: '/accommodation', color: '#FF9500' },
-            { icon: Route, title: 'Long Distance Travel', route: '/transport', color: '#5856D6' },
-          ].map((item, index) => (
-            <div
-              key={index}
-              onClick={() => navigate(item.route)}
-              className="group relative cursor-pointer transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
-              style={{
-                minHeight: '140px',
-                display: 'flex'
-              }}
-            >
-              <div 
-                className="w-full p-6 flex flex-col items-center justify-center gap-3 relative overflow-hidden"
-                style={{
-                  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 100%)',
-                  backdropFilter: 'blur(30px) saturate(1.5)',
-                  WebkitBackdropFilter: 'blur(30px) saturate(1.5)',
-                  borderRadius: '20px',
-                  border: '1px solid rgba(255, 255, 255, 0.18)',
-                  boxShadow: `
-                    0 8px 32px rgba(0, 0, 0, 0.12),
-                    inset 0 1px 1px rgba(255, 255, 255, 0.25),
-                    inset 0 -1px 1px rgba(0, 0, 0, 0.05)
-                  `,
-                }}
-              >
-                {/* Hover glow effect */}
-                <div 
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"
-                  style={{
-                    background: `radial-gradient(circle at center, ${item.color}20 0%, transparent 70%)`,
-                    filter: 'blur(20px)'
-                  }}
-                />
-                
-                {/* Icon container */}
-                <div 
-                  className="w-12 h-12 rounded-2xl flex items-center justify-center relative z-10 transition-transform duration-300 group-hover:scale-110"
-                  style={{
-                    background: `linear-gradient(135deg, ${item.color}15 0%, ${item.color}05 100%)`,
-                    border: `1px solid ${item.color}30`,
-                    boxShadow: `0 4px 12px ${item.color}15`
-                  }}
-                >
-                  <item.icon 
-                    className="w-6 h-6" 
-                    style={{ color: item.color }}
-                  />
-                </div>
-                
-                {/* Title */}
-                <h3 
-                  className="text-sm sm:text-base font-semibold text-center relative z-10"
-                  style={{ 
-                    color: '#000000',
-                    letterSpacing: '0.01em',
-                    lineHeight: '1.2'
-                  }}
-                >
-                  {item.title}
-                </h3>
-                
-                {/* Glass shimmer on hover */}
-                <div 
-                  className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none group-hover:animate-[shimmer_1.5s_ease-out]"
-                  style={{
-                    background: 'linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.2) 50%, transparent 60%)',
-                    transform: 'translateX(-100%)'
-                  }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
+      {/* Travel & Accommodation Cards section removed - now available in Guest Dashboard */}
 
       {/* Hero Background Video/Image */}
       <HeroBackground

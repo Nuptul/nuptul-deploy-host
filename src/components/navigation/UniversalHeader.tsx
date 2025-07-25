@@ -4,7 +4,9 @@ import { useAuth } from '@/hooks/useAuth';
 import { useAppSettings } from '@/hooks/useAppSettings';
 import { supabase } from '@/integrations/supabase/client';
 import { useNavigate } from 'react-router-dom';
+import { nuptulColors } from '@/styles/nuptul-design-system';
 import NotificationBell from '@/components/notifications/NotificationBell';
+import ProfileManagementModal from '@/components/profile/ProfileManagementModal';
 
 interface UniversalHeaderProps {
   onProfileClick?: () => void;
@@ -19,6 +21,7 @@ const UniversalHeader: React.FC<UniversalHeaderProps> = ({
   const { settings } = useAppSettings();
   const navigate = useNavigate();
   const [showProfileDropdown, setShowProfileDropdown] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
 
   const handleProfileClick = () => {
     if (onProfileClick) {
@@ -40,7 +43,7 @@ const UniversalHeader: React.FC<UniversalHeaderProps> = ({
 
   const handleEditProfile = () => {
     setShowProfileDropdown(false);
-    navigate('/profile');
+    setShowProfileModal(true);
   };
 
   const handleSettings = () => {
@@ -63,14 +66,18 @@ const UniversalHeader: React.FC<UniversalHeaderProps> = ({
   const renderAvatar = (size: 'small' | 'large' = 'small') => {
     const avatarUrl = profile?.avatar_url || profile?.profile_picture_url;
     const sizeClasses = size === 'small' ? 'w-10 h-10 text-base' : 'w-14 h-14 text-xl';
-    
+
     if (avatarUrl) {
       return (
-        <div className={`${sizeClasses} rounded-full relative`}>
-          <img 
-            src={avatarUrl} 
+        <div className={`${sizeClasses} rounded-full relative overflow-hidden`}>
+          <img
+            src={avatarUrl}
             alt="Profile"
-            className={`${sizeClasses} rounded-full object-cover border-2 border-white/20`}
+            className={`${sizeClasses} rounded-full object-cover transition-all duration-300`}
+            style={{
+              border: '2px solid rgba(0, 122, 255, 0.3)',
+              boxShadow: '0 4px 12px rgba(0, 122, 255, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.3)'
+            }}
             onError={(e) => {
               // Hide the image and show the fallback initials
               const imgElement = e.target as HTMLImageElement;
@@ -81,9 +88,9 @@ const UniversalHeader: React.FC<UniversalHeaderProps> = ({
               }
             }}
           />
-          <div 
+          <div
             className={`avatar ${sizeClasses} rounded-full flex items-center justify-center font-semibold absolute inset-0`}
-            style={{ 
+            style={{
               display: 'none',
               background: 'linear-gradient(135deg, rgba(0, 122, 255, 0.2) 0%, rgba(0, 122, 255, 0.1) 100%)',
               backdropFilter: 'blur(20px) saturate(1.5)',
@@ -100,19 +107,26 @@ const UniversalHeader: React.FC<UniversalHeaderProps> = ({
         </div>
       );
     }
-    
+
     return (
-      <div 
-        className={`avatar ${sizeClasses} rounded-full flex items-center justify-center font-semibold`}
+      <div
+        className={`avatar ${sizeClasses} rounded-full flex items-center justify-center font-semibold transition-all duration-300`}
         style={{
-          background: 'linear-gradient(135deg, rgba(0, 122, 255, 0.2) 0%, rgba(0, 122, 255, 0.1) 100%)',
+          background: `linear-gradient(135deg,
+            rgba(71, 85, 105, 0.2) 0%,
+            rgba(220, 38, 38, 0.15) 50%,
+            rgba(71, 85, 105, 0.1) 100%)`,
           backdropFilter: 'blur(20px) saturate(1.5)',
           WebkitBackdropFilter: 'blur(20px) saturate(1.5)',
-          border: '2px solid rgba(0, 122, 255, 0.3)',
-          color: '#007AFF',
-          fontFamily: '"Montserrat", sans-serif',
+          border: `2px solid ${nuptulColors.ring[400]}`,
+          color: nuptulColors.ring[700],
+          fontFamily: '"Inter", "SF Pro Display", sans-serif',
           fontWeight: '600',
-          boxShadow: '0 4px 12px rgba(0, 122, 255, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.3)'
+          boxShadow: `
+            0 4px 12px rgba(71, 85, 105, 0.15),
+            0 2px 6px rgba(220, 38, 38, 0.1),
+            inset 0 1px 1px rgba(255, 255, 255, 0.3)
+          `
         }}
       >
         {getInitials(getDisplayName())}
@@ -179,7 +193,17 @@ const UniversalHeader: React.FC<UniversalHeaderProps> = ({
               }}>
               <div className="p-4 border-b" style={{ borderColor: 'rgba(0, 0, 0, 0.1)' }}>
                 <div className="flex items-center gap-3">
-                  {renderAvatar('large')}
+                  <div className="relative group">
+                    {renderAvatar('large')}
+                    <div className="absolute inset-0 rounded-full bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center justify-center cursor-pointer"
+                         onClick={handleEditProfile}
+                         title="Change profile picture">
+                      <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
+                      </svg>
+                    </div>
+                  </div>
                   <div>
                     <div className="font-medium" style={{ color: '#000000', fontFamily: '"Montserrat", sans-serif' }}>
                       {getDisplayName()}
@@ -284,11 +308,17 @@ const UniversalHeader: React.FC<UniversalHeaderProps> = ({
 
       {/* Click outside to close dropdown */}
       {showProfileDropdown && (
-        <div 
-          className="fixed inset-0 z-0" 
+        <div
+          className="fixed inset-0 z-0"
           onClick={() => setShowProfileDropdown(false)}
         />
       )}
+
+      {/* Profile Management Modal */}
+      <ProfileManagementModal
+        isOpen={showProfileModal}
+        onClose={() => setShowProfileModal(false)}
+      />
     </header>
   );
 };

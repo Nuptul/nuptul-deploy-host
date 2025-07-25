@@ -14,9 +14,10 @@ import PerformanceMonitor from "./components/PerformanceMonitor";
 import { ErrorBoundary, RouteErrorBoundary } from "./components/error/ErrorBoundary";
 import { logger } from "./utils/logger";
 import { useGlobalBackground } from "./hooks/useGlobalBackground";
-import RSVPAutoPrompt from "./components/guest/RSVPAutoPrompt";
+// import RSVPAutoPrompt from "./components/guest/RSVPAutoPrompt"; // Removed to disable automatic RSVP popups
 import { PresenceProvider } from "./hooks/usePresence";
 import BackgroundOverlay from "./components/BackgroundOverlay";
+import 'mapbox-gl/dist/mapbox-gl.css';
 
 // Lazy load heavy components
 const VenuePage = lazy(() => import("./pages/VenuePage"));
@@ -24,7 +25,7 @@ const VenueDetail = lazy(() => import("./pages/VenueDetail"));
 const Social = lazy(() => import("./pages/social/SocialPage"));
 const GalleryPage = lazy(() => import("./pages/GalleryPage"));
 const Accommodation = lazy(() => import("./pages/Accommodation"));
-const TransportPage = lazy(() => import("./pages/TransportPage"));
+const TransportationPage = lazy(() => import("./pages/TransportationPage"));
 const FAQ = lazy(() => import("./pages/FAQ"));
 const ProfilePage = lazy(() => import("./pages/ProfilePage"));
 const SettingsPage = lazy(() => import("./pages/SettingsPage"));
@@ -32,7 +33,7 @@ const HelpPage = lazy(() => import("./pages/HelpPage"));
 const RSVPPage = lazy(() => import("./pages/RSVPPage"));
 const ChatPage = lazy(() => import("./pages/ChatPage"));
 const CarpoolingPage = lazy(() => import("./pages/CarpoolingPage"));
-const AccommodationSharePage = lazy(() => import("./pages/AccommodationSharePage"));
+const AccommodationShare = lazy(() => import("./pages/AccommodationShare"));
 
 // Lazy load venue pages
 const BenEan = lazy(() => import("./pages/venues/BenEan"));
@@ -51,8 +52,8 @@ const AdminEvents = lazy(() => import("./pages/dashboard/AdminEvents"));
 const AdminMessages = lazy(() => import("./pages/dashboard/AdminMessages"));
 const AdminAnalytics = lazy(() => import("./pages/dashboard/AdminAnalytics"));
 const AdminContent = lazy(() => import("./pages/dashboard/AdminContent"));
+
 const AdminBusBooking = lazy(() => import("./pages/dashboard/AdminBusBooking"));
-const AdminSystem = lazy(() => import("./pages/dashboard/AdminSystem"));
 const GuestDashboard = lazy(() => import("./pages/dashboard/GuestDashboard"));
 
 // Lazy load email confirmation page
@@ -74,15 +75,20 @@ const AppContent = () => {
   }, []);
   
   // Extract current route from pathname
-  const currentRoute = location.pathname === '/' || location.pathname === '/home' ? 'home' : location.pathname.slice(1);
+  const currentRoute = location.pathname === '/' ? 'home' : location.pathname.slice(1);
   
   const handleNavigate = (route: string) => {
-    const path = route === 'home' ? '/home' : `/${route}`;
+    // Dashboard should not navigate - it opens as popup in GlassNavigation
+    if (route === 'dashboard') {
+      return; // Let GlassNavigation handle dashboard popup
+    }
+
+    const path = route === 'home' ? '/' : `/${route}`;
     navigate(path);
   };
 
   // Define public routes that don't require authentication
-  const publicRoutes = ['/', '/home', '/venue', '/venue/ben-ean', '/venue/prince-of-mereweather', '/venue/newcastle-beach', '/accommodation', '/transport', '/faq', '/help', '/rsvp'];
+  const publicRoutes = ['/', '/venue', '/venue/ben-ean', '/venue/prince-of-mereweather', '/venue/newcastle-beach', '/accommodation', '/transport', '/faq', '/help', '/rsvp'];
   const isPublicRoute = publicRoutes.includes(location.pathname);
   const isAdminRoute = location.pathname.startsWith('/admin') || location.pathname.startsWith('/dashboard');
 
@@ -95,6 +101,7 @@ const AppContent = () => {
     }
   }, [user, loading, location.pathname, navigate, isAdminRoute]);
 
+  // Show loading state while authentication is being verified
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -103,8 +110,8 @@ const AppContent = () => {
     );
   }
 
-  // Block access to admin routes without authentication
-  if (!user && isAdminRoute) {
+  // Block access to admin routes without authentication - but only after loading is complete
+  if (!loading && !user && isAdminRoute) {
     return <AuthPage />;
   }
 
@@ -125,8 +132,7 @@ const AppContent = () => {
       <Layout activeRoute={currentRoute} onNavigate={handleNavigate}>
         <Suspense fallback={<LoadingSpinner />}>
           <Routes>
-            <Route path="/" element={<Index />} />
-            <Route path="/home" element={<Home />} />
+            <Route path="/" element={<Home />} />
             <Route path="/login" element={<Navigate to="/auth" replace />} />
             <Route path="/venue" element={<VenuePage />} />
             <Route path="/venue/detail/:venueId" element={<VenueDetail />} />
@@ -139,9 +145,9 @@ const AppContent = () => {
             <Route path="/gallery" element={<GalleryPage />} />
             {/* Gift Registry route removed - now redirects externally */}
             <Route path="/accommodation" element={<Accommodation />} />
-            <Route path="/transport" element={<TransportPage />} />
+            <Route path="/accommodation-share" element={<AccommodationShare />} />
+            <Route path="/transport" element={<TransportationPage />} />
             <Route path="/carpooling" element={<CarpoolingPage />} />
-            <Route path="/accommodation-share" element={<AccommodationSharePage />} />
             <Route path="/rsvp" element={<RSVPPage />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/auth" element={<AuthPage />} />
@@ -152,6 +158,7 @@ const AppContent = () => {
             <Route path="/chat" element={<ChatPage />} />
             
             {/* Dashboard Admin Routes */}
+            <Route path="/admin" element={<Navigate to="/admin/dashboard" replace />} />
             <Route path="/admin/dashboard" element={<DashboardRouter />} />
             <Route path="/dashboard" element={<DashboardRedirect />} />
             <Route path="/dashboard/users" element={<AdminUsers />} />
@@ -165,7 +172,6 @@ const AppContent = () => {
             {/* Gift management routes removed - now handled externally */}
             <Route path="/dashboard/rsvps" element={<AdminRSVPs />} />
             <Route path="/dashboard/bus-booking" element={<AdminBusBooking />} />
-            <Route path="/dashboard/system" element={<AdminSystem />} />
             
             {/* Guest Dashboard Routes */}
             <Route path="/guest-dashboard" element={<GuestDashboard />} />
@@ -179,8 +185,8 @@ const AppContent = () => {
         </Suspense>
       </Layout>
       
-      {/* RSVP Auto Prompt - shows for logged-in users who haven't RSVPed */}
-      {user && !loading && !isAdminRoute && <RSVPAutoPrompt />}
+      {/* RSVP Auto Prompt - DISABLED to prevent automatic popups */}
+      {/* {user && !loading && !isAdminRoute && <RSVPAutoPrompt />} */}
     </>
   );
 };

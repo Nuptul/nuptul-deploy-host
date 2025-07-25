@@ -16,6 +16,51 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Adaptive Glass System - Neutral & Dynamic */
+@layer components {
+  .glass-adaptive {
+    backdrop-filter: blur(20px) saturate(2);
+    -webkit-backdrop-filter: blur(20px) saturate(2);
+    background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.25) 0%,
+      rgba(255, 255, 255, 0.18) 50%,
+      rgba(255, 255, 255, 0.22) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
+  }
+  
+  .glass-neutral {
+    @apply backdrop-blur-lg;
+    background: linear-gradient(135deg, 
+      rgba(248, 249, 250, 0.85) 0%, 
+      rgba(241, 243, 245, 0.75) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.08);
+  }
+  
+  .glass-subtle {
+    @apply backdrop-blur-sm;
+    background: rgba(255, 255, 255, 0.9);
+    border: 1px solid rgba(229, 231, 235, 0.5);
+    box-shadow: 0 4px 16px 0 rgba(0, 0, 0, 0.05);
+  }
+}
+
+/* Mapbox GL CSS Fixes */
+.mapboxgl-canvas {
+  position: absolute !important;
+  width: 100% !important;
+  height: 100% !important;
+  left: 0 !important;
+  top: 0 !important;
+}
+
+.mapboxgl-map {
+  position: relative !important;
+  width: 100% !important;
+  height: 100% !important;
+}
+
 /* Infinite Moving Cards Animation */
 @keyframes scroll {
   to {
@@ -130,14 +175,14 @@
 
     --radius: 1rem;                        /* Rounded corners for glass */
 
-    /* Glass Effect Variables */
-    --glass-blur-primary: 20px;            /* Main glass blur */
-    --glass-blur-secondary: 10px;          /* Secondary glass blur */
-    --glass-blur-frosted: 40px;            /* Maximum blur */
-    
-    --glass-opacity-primary: 0.8;          /* Main glass opacity */
-    --glass-opacity-secondary: 0.6;        /* Secondary glass opacity */
-    --glass-opacity-frosted: 0.4;          /* Frosted glass opacity */
+    /* Glass Effect Variables - Enhanced Frosted Effect */
+    --glass-blur-primary: 35px;            /* Main glass blur - increased */
+    --glass-blur-secondary: 25px;          /* Secondary glass blur - increased */
+    --glass-blur-frosted: 60px;            /* Maximum blur - increased */
+
+    --glass-opacity-primary: 0.9;          /* Main glass opacity - increased */
+    --glass-opacity-secondary: 0.8;        /* Secondary glass opacity - increased */
+    --glass-opacity-frosted: 0.7;          /* Frosted glass opacity - increased */
 
     /* Background Gradients */
     --gradient-mesh: 
@@ -197,7 +242,7 @@
   html,
   body {
     @apply text-foreground;
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     min-height: 100vh;
     font-size: clamp(15px, 3vw, 18px);
     width: 100vw;
@@ -242,16 +287,16 @@
 @layer components {
   /* Enhanced Glass Effect Classes - Mobile Optimized */
   .glass-primary {
-    background: linear-gradient(135deg, 
-      rgba(255, 255, 255, 0.15) 0%, 
-      rgba(255, 255, 255, 0.08) 50%, 
-      rgba(255, 255, 255, 0.12) 100%);
-    backdrop-filter: blur(var(--glass-blur-primary)) saturate(1.8);
-    -webkit-backdrop-filter: blur(var(--glass-blur-primary)) saturate(1.8);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    box-shadow: 
+    background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.25) 0%,
+      rgba(255, 255, 255, 0.18) 50%,
+      rgba(255, 255, 255, 0.22) 100%);
+    backdrop-filter: blur(20px) saturate(2);
+    -webkit-backdrop-filter: blur(20px) saturate(2);
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    box-shadow:
       0 8px 32px rgba(0, 0, 0, 0.08),
-      inset 0 1px 1px rgba(255, 255, 255, 0.4);
+      inset 0 1px 1px rgba(255, 255, 255, 0.45);
     
     /* Performance optimizations */
     will-change: backdrop-filter;
@@ -260,8 +305,8 @@
     
     /* Mobile blur reduction */
     @media (max-width: 768px) {
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(15px) saturate(2);
+      -webkit-backdrop-filter: blur(15px) saturate(2);
     }
     
     /* Motion sensitivity */
@@ -286,26 +331,29 @@
   }
 
   .glass-secondary {
-    background: linear-gradient(135deg, 
-      rgba(255, 255, 255, 0.1) 0%, 
-      rgba(255, 255, 255, 0.05) 50%, 
-      rgba(255, 255, 255, 0.08) 100%);
-    backdrop-filter: blur(var(--glass-blur-secondary)) saturate(1.8);
-    -webkit-backdrop-filter: blur(var(--glass-blur-secondary)) saturate(1.8);
-    border: 1px solid rgba(255, 255, 255, 0.25);
-    box-shadow: 
+    background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.6) 0%,
+      rgba(255, 255, 255, 0.55) 50%,
+      rgba(255, 255, 255, 0.65) 100%);
+    backdrop-filter: blur(18px) saturate(2);
+    -webkit-backdrop-filter: blur(18px) saturate(2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow:
       0 4px 16px rgba(0, 0, 0, 0.06),
-      inset 0 1px 1px rgba(255, 255, 255, 0.35);
+      inset 0 1px 1px rgba(255, 255, 255, 0.45);
   }
 
   .glass-frosted {
-    background: hsl(var(--glass-white) / var(--glass-opacity-frosted));
-    backdrop-filter: blur(var(--glass-blur-frosted));
-    -webkit-backdrop-filter: blur(var(--glass-blur-frosted));
-    border: 1px solid hsl(var(--glass-white) / 0.1);
-    box-shadow: 
-      0 2px 8px hsl(var(--glass-black) / 0.02),
-      inset 0 0 0 1px hsl(var(--glass-white) / 0.05);
+    background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.3) 0%,
+      rgba(255, 255, 255, 0.25) 50%,
+      rgba(255, 255, 255, 0.28) 100%);
+    backdrop-filter: blur(25px) saturate(2);
+    -webkit-backdrop-filter: blur(25px) saturate(2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    box-shadow:
+      0 8px 32px rgba(0, 0, 0, 0.08),
+      inset 0 1px 1px rgba(255, 255, 255, 0.5);
   }
 
   .dark .glass-secondary {
@@ -325,13 +373,13 @@
   }
 
   .glass-card {
-    background: linear-gradient(135deg, 
-      rgba(255, 255, 255, 0.12) 0%, 
-      rgba(255, 255, 255, 0.06) 50%, 
-      rgba(255, 255, 255, 0.1) 100%);
-    backdrop-filter: blur(15px) saturate(2);
-    -webkit-backdrop-filter: blur(15px) saturate(2);
-    border: 1px solid rgba(255, 255, 255, 0.3);
+    background: linear-gradient(135deg,
+      rgba(255, 255, 255, 0.6) 0%,
+      rgba(255, 255, 255, 0.55) 50%,
+      rgba(255, 255, 255, 0.65) 100%);
+    backdrop-filter: blur(20px) saturate(2);
+    -webkit-backdrop-filter: blur(20px) saturate(2);
+    border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 16px;
     position: relative;
     
@@ -342,8 +390,8 @@
     
     /* Mobile optimizations */
     @media (max-width: 768px) {
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
+      backdrop-filter: blur(15px) saturate(2);
+      -webkit-backdrop-filter: blur(15px) saturate(2);
       border-radius: 12px;
     }
     
@@ -824,4 +872,125 @@
       inset 0.5px 0.5px 1px rgba(255, 255, 255, 0.5),
       inset -0.5px -0.5px 1px rgba(0, 0, 0, 0.05);
   }
+}
+
+/* Social Page Layout Fixes */
+.social-page-grid {
+  display: grid;
+  grid-template-columns: 280px 1fr 320px;
+  gap: 1.5rem;
+  width: 100%;
+  max-width: 1400px;
+  margin: 0 auto;
+  align-items: start;
+}
+
+.social-page-grid > aside:first-child {
+  grid-column: 1;
+}
+
+.social-page-grid > main {
+  grid-column: 2;
+  min-width: 0; /* Prevent overflow */
+}
+
+.social-page-grid > aside:last-child {
+  grid-column: 3;
+}
+
+@media (max-width: 1280px) {
+  .social-page-grid {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  
+  .social-page-grid > aside {
+    display: none;
+  }
+  
+  .social-page-grid > main {
+    grid-column: 1;
+  }
+}
+
+/* Ensure emoji display correctly */
+.emoji-button {
+  font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji', sans-serif;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+
+/* Enhanced Glass morphism cards */
+.glass-card-enhanced {
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.9) 0%,
+    rgba(255, 255, 255, 0.8) 100%
+  );
+  backdrop-filter: blur(40px) saturate(1.8);
+  -webkit-backdrop-filter: blur(40px) saturate(1.8);
+  border: 1px solid rgba(255, 255, 255, 0.7);
+  box-shadow: 
+    0 20px 40px -12px rgba(0, 0, 0, 0.1),
+    0 4px 20px -4px rgba(0, 0, 0, 0.07),
+    inset 0 1px 1px rgba(255, 255, 255, 0.9);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border-radius: 1.5rem;
+  overflow: hidden;
+  position: relative;
+}
+
+.glass-card-enhanced::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.5),
+    transparent
+  );
+  opacity: 0.8;
+}
+
+.glass-card-enhanced:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 
+    0 25px 50px -12px rgba(0, 0, 0, 0.15),
+    0 8px 25px -5px rgba(0, 0, 0, 0.1),
+    inset 0 1px 1px rgba(255, 255, 255, 0.95);
+}
+
+/* Beautiful animations */
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+}
+
+@keyframes shimmer {
+  0% { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.4),
+    transparent
+  );
+  background-size: 200% 100%;
+  animation: shimmer 3s linear infinite;
+}
+
+/* Ensure cards don't overflow their containers */
+.glass-card-enhanced > * {
+  max-width: 100%;
 }

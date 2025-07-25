@@ -168,17 +168,30 @@ export const SignInForm: React.FC<SignInFormProps> = ({
 
         <button
           type="submit"
-          className="w-full min-h-[52px] rounded-xl font-semibold text-lg transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]"
+          className="w-full min-h-[52px] rounded-xl font-semibold text-lg transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98]"
           disabled={signInForm.formState.isSubmitting}
           style={{
-            background: 'linear-gradient(135deg, rgba(69, 183, 209, 0.9) 0%, rgba(78, 205, 196, 0.8) 50%, rgba(255, 107, 107, 0.85) 100%)',
+            background: signInForm.formState.isSubmitting ? 'rgba(0, 122, 255, 0.5)' : 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
             color: '#FFFFFF',
-            backdropFilter: 'blur(10px) saturate(2)',
-            WebkitBackdropFilter: 'blur(10px) saturate(2)',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            boxShadow: '0 4px 12px rgba(69, 183, 209, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.5)',
+            backdropFilter: 'blur(20px) saturate(1.8)',
+            WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)',
             fontFamily: '"Montserrat", sans-serif',
-            textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)'
+            fontWeight: '600',
+            cursor: signInForm.formState.isSubmitting ? 'not-allowed' : 'pointer'
+          }}
+          onMouseEnter={(e) => {
+            if (!signInForm.formState.isSubmitting) {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+              e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!signInForm.formState.isSubmitting) {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+              e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+            }
           }}
         >
           {signInForm.formState.isSubmitting ? 'Signing In...' : 'Sign In'}

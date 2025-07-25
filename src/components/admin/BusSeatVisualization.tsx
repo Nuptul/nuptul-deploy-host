@@ -140,10 +140,10 @@ const BusSeatVisualization: React.FC<BusSeatVisualizationProps> = ({
   };
 
   const getSeatColor = (seat: BusSeat) => {
-    if (seat.isDriver) return 'bg-blue-500 text-white'; // Driver
-    if (seat.isGuide) return 'bg-purple-500 text-white'; // Guide
-    if (seat.isBooked) return 'bg-red-500 text-white'; // Booked
-    return 'bg-green-500 text-white'; // Available
+    if (seat.isDriver) return 'bg-gradient-to-br from-glass-blue to-glass-blue/80 text-white shadow-lg border-glass-blue/30'; // Driver
+    if (seat.isGuide) return 'bg-gradient-to-br from-glass-purple to-glass-purple/80 text-white shadow-lg border-glass-purple/30'; // Guide
+    if (seat.isBooked) return 'bg-gradient-to-br from-red-500 to-red-600 text-white shadow-lg border-red-400/30'; // Booked
+    return 'bg-gradient-to-br from-green-500 to-green-600 text-white shadow-lg border-green-400/30 hover:from-green-400 hover:to-green-500'; // Available
   };
 
   const getSeatIcon = (seat: BusSeat) => {
@@ -277,16 +277,18 @@ const BusSeatVisualization: React.FC<BusSeatVisualizationProps> = ({
                       key={seat.seatNumber}
                       onClick={() => handleSeatClick(seat)}
                       className={`
-                        w-12 h-12 rounded-lg border-2 border-gray-300 
+                        w-14 h-14 rounded-xl border-2
                         ${getSeatColor(seat)}
-                        hover:scale-105 transition-transform
+                        hover:scale-110 transition-all duration-200
                         flex items-center justify-center
                         ${(adminMode && !seat.isDriver && !seat.isGuide) ? 'cursor-pointer' : ''}
+                        backdrop-blur-sm
+                        relative overflow-hidden
                       `}
                       title={
-                        seat.isBooked 
+                        seat.isBooked
                           ? `${seat.guestName} (${seat.guestEmail})`
-                          : seat.isDriver 
+                          : seat.isDriver
                             ? 'Bus Driver'
                             : seat.isGuide
                               ? 'Tour Guide'
@@ -311,14 +313,17 @@ const BusSeatVisualization: React.FC<BusSeatVisualizationProps> = ({
                           key={seat.seatNumber}
                           onClick={() => handleSeatClick(seat)}
                           className={`
-                            w-12 h-12 rounded-lg border-2 border-gray-300 
+                            w-14 h-14 rounded-xl border-2
                             ${getSeatColor(seat)}
-                            hover:scale-105 transition-transform
+                            hover:scale-110 transition-all duration-200
                             flex items-center justify-center text-xs font-bold
                             ${adminMode ? 'cursor-pointer' : seat.isBooked ? 'cursor-not-allowed' : 'cursor-pointer'}
+                            backdrop-blur-sm
+                            relative overflow-hidden
+                            group
                           `}
                           title={
-                            seat.isBooked 
+                            seat.isBooked
                               ? `${seat.guestName} (${seat.guestEmail})`
                               : 'Available Seat'
                           }

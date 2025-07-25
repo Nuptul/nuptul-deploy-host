@@ -8,56 +8,13 @@ interface FAQ {
   answer: string;
 }
 
-// Enhanced FAQ card with iOS-inspired glass effect
+// Enhanced FAQ card with glass morphism
 const FAQCard: React.FC<{ title: string; content: string }> = ({ title, content }) => (
-  <div 
-    className="h-full flex flex-col p-6 sm:p-7 transition-all duration-300 hover:scale-[1.02] cursor-pointer"
-    style={{
-      background: 'linear-gradient(135deg, rgba(255, 107, 107, 0.15) 0%, rgba(78, 205, 196, 0.1) 50%, rgba(69, 183, 209, 0.12) 100%)',
-      borderRadius: '20px',
-      backdropFilter: 'blur(20px) saturate(2)',
-      WebkitBackdropFilter: 'blur(20px) saturate(2)',
-      border: '1px solid rgba(255, 255, 255, 0.2)',
-      boxShadow: `
-        0 8px 32px rgba(0, 0, 0, 0.12),
-        inset 0 1px 1px rgba(255, 255, 255, 0.35),
-        inset 0 -1px 1px rgba(0, 0, 0, 0.05)
-      `,
-      position: 'relative',
-      overflow: 'hidden'
-    }}
-  >
-    {/* Glass shimmer effect */}
-    <div 
-      style={{
-        position: 'absolute',
-        top: '-50%',
-        left: '-50%',
-        width: '200%',
-        height: '200%',
-        background: 'radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.2) 0%, transparent 60%)',
-        transform: 'rotate(-15deg)',
-        pointerEvents: 'none'
-      }}
-    />
-    
-    <h3 
-      className="font-semibold text-lg sm:text-xl mb-3 relative z-10"
-      style={{
-        color: '#007AFF',
-        letterSpacing: '0.01em'
-      }}
-    >
+  <div className="h-full liquid-glass p-6 sm:p-7 transition-all duration-300 hover:scale-[1.01] hover:shadow-lg cursor-pointer">
+    <h3 className="font-semibold text-lg sm:text-xl mb-3 text-wedding-navy">
       {title}
     </h3>
-    <p 
-      className="text-base leading-relaxed relative z-10 flex-grow"
-      style={{
-        color: 'rgba(0, 0, 0, 0.75)',
-        letterSpacing: '0.02em',
-        lineHeight: '1.7'
-      }}
-    >
+    <p className="text-base leading-relaxed text-wedding-navy/80 flex-grow">
       {content}
     </p>
   </div>
@@ -169,16 +126,7 @@ const DynamicFAQSection: React.FC = () => {
 
   return (
     <div className="mb-6 sm:mb-8 lg:mb-10 animate-fade-up">
-      <h2 
-        className="text-center mb-6 sm:mb-8 font-bold"
-        style={{
-          fontSize: 'clamp(24px, 5vw, 36px)',
-          color: '#000000',
-          textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-          letterSpacing: '0.02em',
-          lineHeight: '1.3'
-        }}
-      >
+      <h2 className="text-center mb-6 sm:mb-8 font-bold text-2xl sm:text-3xl lg:text-4xl text-wedding-navy">
         Frequently Asked Questions
       </h2>
       
@@ -195,37 +143,10 @@ const DynamicFAQSection: React.FC = () => {
       <div className="text-center mt-8 sm:mt-10">
         <a 
           href="/faq" 
-          className="inline-flex items-center gap-3 px-8 py-4 rounded-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] group"
-          style={{
-            background: 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
-            backdropFilter: 'blur(20px) saturate(1.8)',
-            WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            color: '#FFFFFF',
-            fontWeight: '600',
-            fontSize: '16px',
-            letterSpacing: '0.02em',
-            boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)',
-            minHeight: '48px',
-            display: 'inline-flex',
-            alignItems: 'center',
-            textDecoration: 'none',
-            position: 'relative',
-            overflow: 'hidden'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
-            e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
-            e.currentTarget.style.transform = 'scale(1.02) translateY(-2px)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
-            e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
-            e.currentTarget.style.transform = 'scale(1) translateY(0)';
-          }}
+          className="inline-flex items-center gap-3 px-8 py-4 bg-wedding-navy text-white rounded-xl transition-all duration-300 hover:bg-wedding-navy/90 hover:shadow-lg transform hover:scale-[1.02] active:scale-[0.98] group font-semibold"
         >
           <span>View All FAQs</span>
-          <span className="transition-transform duration-300 group-hover:translate-x-1" style={{ fontSize: '20px' }}>→</span>
+          <span className="transition-transform duration-300 group-hover:translate-x-1 text-xl">→</span>
         </a>
       </div>
     </div>

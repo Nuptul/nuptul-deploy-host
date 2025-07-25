@@ -20,19 +20,45 @@ const VenueMap: React.FC<VenueMapProps> = ({ venue, className = '' }) => {
   const mapboxToken = 'pk.eyJ1Ijoic3VwYWJhc2VjcnlwdCIsImEiOiJjbWNzcG03N3kxNjFyMmlxMmQyb290cWhvIn0.VTVcx03Z6tAg5ZVzJoxjSA';
 
   useEffect(() => {
-    if (!mapContainer.current) return;
+    if (!mapContainer.current) {
+      console.error('Map container not found');
+      return;
+    }
 
     try {
+      console.log('Initializing Mapbox with coordinates:', venue.coordinates);
+      
       // Initialize map
       mapboxgl.accessToken = mapboxToken;
       
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/supabasecrypt/cmcspsqaf000p01sq2x73ewym',
+        style: 'mapbox://styles/mapbox/streets-v12', // Using default style for now
         center: venue.coordinates,
         zoom: 15,
-        pitch: 45,
+        pitch: 0, // Reduced pitch for better performance
+        attributionControl: true,
+        trackResize: true, // Automatically track container resizes
+        fitBoundsOptions: { padding: 20 }
       });
+      
+      // Add load event to check if map loads
+      map.current.on('load', () => {
+        console.log('Mapbox loaded successfully');
+        // Trigger resize after load to ensure proper sizing
+        map.current?.resize();
+      });
+      
+      map.current.on('error', (e) => {
+        console.error('Mapbox error:', e);
+      });
+
+      // Add resize observer to handle container size changes
+      const resizeObserver = new ResizeObserver(() => {
+        map.current?.resize();
+      });
+      
+      resizeObserver.observe(mapContainer.current);
 
       // Add navigation controls
       map.current.addControl(
@@ -60,16 +86,25 @@ const VenueMap: React.FC<VenueMapProps> = ({ venue, className = '' }) => {
         )
         .addTo(map.current);
 
-      // Show popup by default
-      map.current.on('load', () => {
-        const markers = document.querySelectorAll('.mapboxgl-marker');
-        if (markers.length > 0) {
-          (markers[0] as HTMLElement).click();
-        }
-      });
+      // Show popup by default after map loads
+      const showPopup = () => {
+        setTimeout(() => {
+          const markers = document.querySelectorAll('.mapboxgl-marker');
+          if (markers.length > 0) {
+            (markers[0] as HTMLElement).click();
+          }
+        }, 500);
+      };
+      
+      if (map.current.loaded()) {
+        showPopup();
+      } else {
+        map.current.once('load', showPopup);
+      }
 
       // Cleanup
       return () => {
+        resizeObserver.disconnect();
         map.current?.remove();
       };
     } catch (error) {
@@ -84,16 +119,24 @@ const VenueMap: React.FC<VenueMapProps> = ({ venue, className = '' }) => {
 
   return (
     <div className={`relative ${className}`}>
-      <div ref={mapContainer} className="w-full h-80 rounded-glass shadow-lg border border-border/20" />
+      {/* Square map container with responsive sizing */}
+      <div className="relative w-full aspect-square sm:aspect-[4/3] md:aspect-square rounded-2xl overflow-hidden shadow-xl bg-gray-100">
+        <div 
+          ref={mapContainer} 
+          className="absolute inset-0 w-full h-full rounded-2xl"
+        />
+      </div>
       <div className="absolute top-4 left-4 z-10">
         <Button 
           size="sm" 
           variant="secondary" 
           onClick={openInGoogleMaps}
-          className="shadow-lg bg-white/90 hover:bg-white"
+          className="shadow-lg bg-white/90 hover:bg-white backdrop-blur-sm"
+          title="Open directions in Google Maps"
         >
           <ExternalLink className="w-4 h-4 mr-1" />
-          Google Maps
+          <span className="hidden sm:inline">Get Directions</span>
+          <span className="sm:hidden">Directions</span>
         </Button>
       </div>
     </div>

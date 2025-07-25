@@ -81,13 +81,13 @@ const StoriesStrip: React.FC<StoriesStripProps> = ({
   };
 
   return (
-    <div className={`w-full rounded-2xl ${styles.liquidGlassCard} ${className}`} style={{
-      background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.25) 100%)',
-      backdropFilter: 'blur(25px) saturate(1.8)',
-      WebkitBackdropFilter: 'blur(25px) saturate(1.8)',
-      border: '1px solid rgba(255, 255, 255, 0.4)',
-      boxShadow: '0 8px 32px rgba(31, 38, 135, 0.12), inset 0 1px 1px rgba(255, 255, 255, 0.6)'
-    }}>
+    <div className={`w-full rounded-2xl overflow-hidden ${className}`}>
+      <div className="absolute inset-0 bg-gradient-to-r from-white/80 via-wedding-pearl/70 to-white/80 backdrop-blur-2xl" />
+      <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-white/10" />
+      <div className="relative glass-card-enhanced transition-all duration-300 hover:shadow-xl" style={{
+        borderRadius: '16px',
+        overflow: 'hidden'
+      }}>
       <div className="p-4">
         <div className="relative">
           {/* Left scroll button */}
@@ -113,19 +113,18 @@ const StoriesStrip: React.FC<StoriesStripProps> = ({
             {/* Add Story Button */}
             <div className="flex flex-col items-center gap-2 min-w-[72px]">
               <button
-                className="w-16 h-16 rounded-full border-2 border-dashed transition-all hover:scale-105"
+                className="w-16 h-16 rounded-full border-2 border-dashed transition-all duration-300 hover:scale-110 hover:rotate-12 group relative overflow-hidden"
                 style={{
                   borderColor: 'rgba(255, 215, 0, 0.6)',
-                  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.25) 100%)',
-                  backdropFilter: 'blur(20px) saturate(1.8)',
-                  WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
-                  boxShadow: '0 4px 16px rgba(255, 215, 0, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.7)'
+                  background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.85) 100%)',
+                  boxShadow: '0 4px 16px rgba(255, 215, 0, 0.15), 0 0 40px rgba(255, 215, 0, 0.1) inset'
                 }}
                 onClick={onAddStory}
                 aria-label="Add your story"
               >
+                <div className="absolute inset-0 bg-gradient-to-r from-wedding-gold/0 via-wedding-gold/20 to-wedding-gold/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300 animate-shimmer" />
                 <div className="flex flex-col items-center gap-1">
-                  <Plus className="h-6 w-6" style={{ color: '#ffd700' }} />
+                  <Plus className="h-6 w-6 group-hover:scale-110 transition-transform duration-300" style={{ color: '#ffd700' }} />
                 </div>
               </button>
               <span style={{
@@ -222,6 +221,7 @@ const StoriesStrip: React.FC<StoriesStripProps> = ({
         </div>
       </div>
     </div>
+  </div>
   );
 };
 

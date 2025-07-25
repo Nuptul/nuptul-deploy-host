@@ -13,32 +13,44 @@ const SelectValue = SelectPrimitive.Value
 const SelectTrigger = React.forwardRef<
   React.ElementRef<typeof SelectPrimitive.Trigger>,
   React.ComponentPropsWithoutRef<typeof SelectPrimitive.Trigger>
->(({ className, children, style, ...props }, ref) => (
-  <SelectPrimitive.Trigger
-    ref={ref}
-    className={cn(
-      "flex min-h-[48px] w-full items-center justify-between rounded-xl px-4 py-3 text-base focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200 [&>span]:line-clamp-1",
-      className
-    )}
-    style={{
-      background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.2) 100%) !important',
-      backdropFilter: 'blur(20px) saturate(2) !important',
-      WebkitBackdropFilter: 'blur(20px) saturate(2) !important',
-      border: '1px solid rgba(255, 255, 255, 0.3) !important',
-      boxShadow: 'inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -1px 1px rgba(0, 0, 0, 0.05) !important',
-      color: '#000000 !important',
-      fontFamily: '"Montserrat", sans-serif !important',
-      fontSize: '16px !important',
-      ...style
-    }}
-    {...props}
-  >
-    {children}
-    <SelectPrimitive.Icon asChild>
-      <ChevronDown className="h-5 w-5 opacity-70" />
-    </SelectPrimitive.Icon>
-  </SelectPrimitive.Trigger>
-))
+>(({ className, children, style, ...props }, ref) => {
+  const [isFocused, setIsFocused] = React.useState(false);
+
+  return (
+    <SelectPrimitive.Trigger
+      ref={ref}
+      className={cn(
+        "flex min-h-[48px] w-full items-center justify-between rounded-xl px-4 py-3 text-base focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200 [&>span]:line-clamp-1",
+        className
+      )}
+      style={{
+        background: isFocused
+          ? 'linear-gradient(135deg, rgba(0, 102, 204, 0.15) 0%, rgba(255, 255, 255, 0.25) 50%, rgba(0, 102, 204, 0.1) 100%) !important'
+          : 'linear-gradient(135deg, rgba(255, 255, 255, 0.25) 0%, rgba(255, 255, 255, 0.15) 50%, rgba(255, 255, 255, 0.2) 100%) !important',
+        backdropFilter: 'blur(20px) saturate(2) !important',
+        WebkitBackdropFilter: 'blur(20px) saturate(2) !important',
+        border: isFocused
+          ? '1px solid rgba(0, 102, 204, 0.4) !important'
+          : '1px solid rgba(255, 255, 255, 0.3) !important',
+        boxShadow: isFocused
+          ? '0 0 0 3px rgba(0, 102, 204, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.5), inset 0 -1px 1px rgba(0, 0, 0, 0.05) !important'
+          : 'inset 0 1px 1px rgba(255, 255, 255, 0.4), inset 0 -1px 1px rgba(0, 0, 0, 0.05) !important',
+        color: '#000000 !important',
+        fontFamily: '"Montserrat", sans-serif !important',
+        fontSize: '16px !important',
+        ...style
+      }}
+      onFocus={() => setIsFocused(true)}
+      onBlur={() => setIsFocused(false)}
+      {...props}
+    >
+      {children}
+      <SelectPrimitive.Icon asChild>
+        <ChevronDown className={cn("h-5 w-5 transition-colors duration-200", isFocused ? "text-blue-600" : "opacity-70")} />
+      </SelectPrimitive.Icon>
+    </SelectPrimitive.Trigger>
+  );
+})
 SelectTrigger.displayName = SelectPrimitive.Trigger.displayName
 
 const SelectScrollUpButton = React.forwardRef<
@@ -90,11 +102,11 @@ const SelectContent = React.forwardRef<
         className
       )}
       style={{
-        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.8) 100%) !important',
-        backdropFilter: 'blur(30px) saturate(2) !important',
-        WebkitBackdropFilter: 'blur(30px) saturate(2) !important',
-        border: '1px solid rgba(255, 255, 255, 0.4) !important',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.5) !important',
+        background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.98) 0%, rgba(249, 250, 251, 0.95) 100%) !important',
+        backdropFilter: 'blur(40px) saturate(2) !important',
+        WebkitBackdropFilter: 'blur(40px) saturate(2) !important',
+        border: '1px solid rgba(0, 102, 204, 0.2) !important',
+        boxShadow: '0 12px 40px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 102, 204, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.8) !important',
         ...style
       }}
       position={position}
@@ -141,19 +153,23 @@ const SelectItem = React.forwardRef<
     style={{
       fontFamily: '"Montserrat", sans-serif',
       color: '#000000',
+      background: 'rgba(255, 255, 255, 0.3)',
+      minHeight: '44px',
       ...style
     }}
     onMouseEnter={(e) => {
-      e.currentTarget.style.background = 'linear-gradient(135deg, rgba(69, 183, 209, 0.15) 0%, rgba(78, 205, 196, 0.1) 100%)';
+      e.currentTarget.style.background = 'linear-gradient(135deg, rgba(0, 102, 204, 0.2) 0%, rgba(69, 183, 209, 0.15) 100%)';
+      e.currentTarget.style.color = '#000000';
     }}
     onMouseLeave={(e) => {
-      e.currentTarget.style.background = 'transparent';
+      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.3)';
+      e.currentTarget.style.color = '#000000';
     }}
     {...props}
   >
     <span className="absolute left-2 flex h-3.5 w-3.5 items-center justify-center">
       <SelectPrimitive.ItemIndicator>
-        <Check className="h-4 w-4" />
+        <Check className="h-4 w-4 text-blue-600" />
       </SelectPrimitive.ItemIndicator>
     </span>
 

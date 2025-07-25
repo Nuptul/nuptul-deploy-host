@@ -14,6 +14,7 @@ export interface NavigationIconProps {
   route: NavigationRoute;
   isActive: boolean;
   size?: 'small' | 'medium' | 'large';
+  style?: React.CSSProperties;
 }
 
 export interface NavigationItemProps {

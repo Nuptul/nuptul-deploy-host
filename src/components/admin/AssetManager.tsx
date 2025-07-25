@@ -302,16 +302,51 @@ export const AssetManager: React.FC = () => {
 
           <div className="flex items-center gap-2">
             <Button
-              variant="outline"
-              size="sm"
+              className="min-h-[44px] px-3 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
               onClick={() => setViewMode(viewMode === 'grid' ? 'list' : 'grid')}
+              style={{
+                background: 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+                backdropFilter: 'blur(20px) saturate(1.8)',
+                WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: '#FFFFFF',
+                fontWeight: '600',
+                borderRadius: '12px',
+                boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+              }}
             >
               {viewMode === 'grid' ? <List className="w-4 h-4" /> : <Grid className="w-4 h-4" />}
             </Button>
-            
+
             <Button
+              className="min-h-[44px] px-3 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
               onClick={() => setShowUploadDialog(true)}
-              size="sm"
+              style={{
+                background: 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+                backdropFilter: 'blur(20px) saturate(1.8)',
+                WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: '#FFFFFF',
+                fontWeight: '600',
+                borderRadius: '12px',
+                boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+              }}
             >
               <Upload className="w-4 h-4 mr-2" />
               Upload
@@ -319,9 +354,26 @@ export const AssetManager: React.FC = () => {
 
             {selectedFiles.length > 0 && (
               <Button
-                variant="destructive"
-                size="sm"
+                className="min-h-[44px] px-3 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                 onClick={handleDeleteFiles}
+                style={{
+                  background: 'linear-gradient(135deg, #FF3B30 0%, #D70015 100%)',
+                  backdropFilter: 'blur(20px) saturate(1.8)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  color: '#FFFFFF',
+                  fontWeight: '600',
+                  borderRadius: '12px',
+                  boxShadow: '0 8px 24px rgba(255, 59, 48, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #D70015 0%, #A50000 100%)';
+                  e.currentTarget.style.boxShadow = '0 12px 32px rgba(255, 59, 48, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #FF3B30 0%, #D70015 100%)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(255, 59, 48, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+                }}
               >
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete ({selectedFiles.length})
@@ -356,10 +408,26 @@ export const AssetManager: React.FC = () => {
             <Folder className="w-12 h-12 text-muted-foreground mb-2" />
             <p className="text-muted-foreground">No files in this folder</p>
             <Button
-              variant="outline"
-              size="sm"
-              className="mt-4"
+              className="mt-4 min-h-[44px] px-4 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
               onClick={() => setShowUploadDialog(true)}
+              style={{
+                background: 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+                backdropFilter: 'blur(20px) saturate(1.8)',
+                WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: '#FFFFFF',
+                fontWeight: '600',
+                borderRadius: '12px',
+                boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+              }}
             >
               <Upload className="w-4 h-4 mr-2" />
               Upload Files
@@ -428,11 +496,28 @@ export const AssetManager: React.FC = () => {
                 </div>
                 {file.public_url && (
                   <Button
-                    variant="ghost"
-                    size="sm"
+                    className="min-h-[44px] min-w-[44px] p-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                     onClick={(e) => {
                       e.stopPropagation();
                       window.open(file.public_url, '_blank');
+                    }}
+                    style={{
+                      background: 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+                      backdropFilter: 'blur(20px) saturate(1.8)',
+                      WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      color: '#FFFFFF',
+                      fontWeight: '600',
+                      borderRadius: '12px',
+                      boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+                      e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+                      e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
                     }}
                   >
                     <ExternalLink className="w-4 h-4" />

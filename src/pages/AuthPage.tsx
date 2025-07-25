@@ -14,18 +14,15 @@ const AuthPage: React.FC = () => {
   if (mode === 'magic-link') {
     return (
       <div className="min-h-screen flex items-center justify-center px-3 sm:px-5 py-6 sm:py-12">
-        <div 
-          className="w-full max-w-md p-6 sm:p-8 rounded-3xl"
+        <div
+          className="w-full max-w-md rounded-3xl"
           style={{
-            background: 'linear-gradient(135deg, rgba(255, 107, 107, 0.15) 0%, rgba(78, 205, 196, 0.1) 50%, rgba(69, 183, 209, 0.12) 100%)',
-            backdropFilter: 'blur(30px) saturate(2)',
-            WebkitBackdropFilter: 'blur(30px) saturate(2)',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            boxShadow: `
-              0 20px 50px rgba(0, 0, 0, 0.15),
-              inset 0 1px 1px rgba(255, 255, 255, 0.5),
-              inset 0 -1px 1px rgba(0, 0, 0, 0.05)
-            `
+            background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.9) 50%, rgba(0, 102, 204, 0.05) 100%)',
+            backdropFilter: 'blur(40px) saturate(2)',
+            WebkitBackdropFilter: 'blur(40px) saturate(2)',
+            border: '1px solid rgba(0, 102, 204, 0.2)',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1), 0 8px 32px rgba(0, 102, 204, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.8)',
+            padding: '24px',
           }}
         >
           <MagicLinkForm onBack={() => setMode('signin')} />
@@ -37,18 +34,15 @@ const AuthPage: React.FC = () => {
   if (mode === 'forgot-password') {
     return (
       <div className="min-h-screen flex items-center justify-center px-3 sm:px-5 py-6 sm:py-12">
-        <div 
-          className="w-full max-w-md p-6 sm:p-8 rounded-3xl"
+        <div
+          className="w-full max-w-md rounded-3xl"
           style={{
-            background: 'linear-gradient(135deg, rgba(155, 89, 182, 0.15) 0%, rgba(78, 205, 196, 0.1) 50%, rgba(255, 107, 107, 0.12) 100%)',
-            backdropFilter: 'blur(30px) saturate(2)',
-            WebkitBackdropFilter: 'blur(30px) saturate(2)',
-            border: '1px solid rgba(255, 255, 255, 0.3)',
-            boxShadow: `
-              0 20px 50px rgba(0, 0, 0, 0.15),
-              inset 0 1px 1px rgba(255, 255, 255, 0.5),
-              inset 0 -1px 1px rgba(0, 0, 0, 0.05)
-            `
+            background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.9) 50%, rgba(0, 102, 204, 0.05) 100%)',
+            backdropFilter: 'blur(40px) saturate(2)',
+            WebkitBackdropFilter: 'blur(40px) saturate(2)',
+            border: '1px solid rgba(0, 102, 204, 0.2)',
+            boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1), 0 8px 32px rgba(0, 102, 204, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.8)',
+            padding: '24px',
           }}
         >
           <ForgotPasswordForm onBack={() => setMode('signin')} />
@@ -59,34 +53,30 @@ const AuthPage: React.FC = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-3 sm:px-5 py-6 sm:py-12">
-      <div 
-        className="w-full max-w-2xl p-6 sm:p-8 rounded-3xl"
+      <div
+        className="w-full max-w-2xl rounded-3xl transition-all duration-500"
         style={{
-          background: mode === 'signup' 
-            ? 'linear-gradient(135deg, rgba(46, 213, 115, 0.15) 0%, rgba(78, 205, 196, 0.1) 50%, rgba(69, 183, 209, 0.12) 100%)'
-            : 'linear-gradient(135deg, rgba(69, 183, 209, 0.15) 0%, rgba(78, 205, 196, 0.1) 50%, rgba(255, 107, 107, 0.12) 100%)',
-          backdropFilter: 'blur(30px) saturate(2)',
-          WebkitBackdropFilter: 'blur(30px) saturate(2)',
-          border: '1px solid rgba(255, 255, 255, 0.3)',
-          boxShadow: `
-            0 20px 50px rgba(0, 0, 0, 0.15),
-            inset 0 1px 1px rgba(255, 255, 255, 0.5),
-            inset 0 -1px 1px rgba(0, 0, 0, 0.05)
-          `,
-          transition: 'all 0.5s cubic-bezier(0.4, 0, 0.2, 1)'
+          background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.9) 50%, rgba(0, 102, 204, 0.05) 100%)',
+          backdropFilter: 'blur(40px) saturate(2)',
+          WebkitBackdropFilter: 'blur(40px) saturate(2)',
+          border: '1px solid rgba(0, 102, 204, 0.2)',
+          boxShadow: '0 20px 60px rgba(0, 0, 0, 0.1), 0 8px 32px rgba(0, 102, 204, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.8)',
+          padding: '24px',
         }}
       >
         <AuthHeader mode={mode} />
-        
-        {mode === 'signup' ? (
-          <SignUpForm onSwitchToSignIn={() => setMode('signin')} />
-        ) : (
-          <SignInForm 
-            onSwitchToSignUp={() => setMode('signup')}
-            onSwitchToMagicLink={() => setMode('magic-link')}
-            onSwitchToForgotPassword={() => setMode('forgot-password')}
-          />
-        )}
+
+        <div style={{ padding: '16px 0' }}>
+          {mode === 'signup' ? (
+            <SignUpForm onSwitchToSignIn={() => setMode('signin')} />
+          ) : (
+            <SignInForm
+              onSwitchToSignUp={() => setMode('signup')}
+              onSwitchToMagicLink={() => setMode('magic-link')}
+              onSwitchToForgotPassword={() => setMode('forgot-password')}
+            />
+          )}
+        </div>
       </div>
     </div>
   );

@@ -27,15 +27,15 @@ export const SecurityHeaders: React.FC<SecurityHeadersProps> = ({
       cspMeta.httpEquiv = 'Content-Security-Policy';
       cspMeta.content = [
         "default-src 'self'",
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval'", // Note: unsafe-inline/eval needed for React dev
-        "style-src 'self' 'unsafe-inline' fonts.googleapis.com",
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://api.mapbox.com", // Note: unsafe-inline/eval needed for React dev
+        "style-src 'self' 'unsafe-inline' fonts.googleapis.com https://api.mapbox.com",
         "font-src 'self' fonts.gstatic.com data:",
-        "img-src 'self' data: blob: https://*.supabase.co https://maps.googleapis.com",
-        "connect-src 'self' wss: https://*.supabase.co https://api.mapbox.com",
+        "img-src 'self' data: blob: https://*.supabase.co https://maps.googleapis.com https://api.mapbox.com https://*.mapbox.com",
+        "connect-src 'self' wss: https://*.supabase.co https://api.mapbox.com https://events.mapbox.com",
         "media-src 'self' blob: https://*.supabase.co",
         "object-src 'none'",
         "frame-src 'none'",
-        "worker-src 'self' blob:",
+        "worker-src 'self' blob: https://api.mapbox.com",
         "manifest-src 'self'",
         "base-uri 'self'",
         "form-action 'self'"

@@ -4,19 +4,16 @@ import WeddingCeremonyClock from '@/components/ui/wedding-ceremony-clock';
 interface CountdownProps {
   targetDate: string;
   className?: string;
-  onRSVPClick?: () => void;
 }
 
-const Countdown: React.FC<CountdownProps> = ({ 
-  targetDate, 
-  className,
-  onRSVPClick
+const Countdown: React.FC<CountdownProps> = ({
+  targetDate,
+  className
 }) => {
   return (
-    <WeddingCeremonyClock 
+    <WeddingCeremonyClock
       targetDate={targetDate}
       className={className}
-      onRSVPClick={onRSVPClick}
     />
   );
 };

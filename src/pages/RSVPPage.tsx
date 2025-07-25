@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Heart, Calendar, MapPin, Clock } from 'lucide-react';
 import { motion } from 'framer-motion';
-import RSVPIntegration from '@/components/guest/RSVPIntegration';
+import RSVPForm from '@/components/guest/RSVPForm';
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/hooks/useAuth';
 import { GuestManager } from '@/utils/guestManagement';
@@ -213,7 +213,7 @@ const RSVPPage: React.FC = () => {
           transition={{ delay: 0.2 }}
         >
           {guestRecord ? (
-            <RSVPIntegration
+            <RSVPForm
               guestId={guestRecord.id}
               onRSVPSubmitted={handleRSVPSubmitted}
               readonly={guestRecord.rsvp_responded_at !== null}

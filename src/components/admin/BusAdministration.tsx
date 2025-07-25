@@ -171,7 +171,34 @@ const BusAdministration: React.FC = () => {
             Manage bus schedules, routes, and capacity for wedding transportation
           </p>
         </div>
-        <Button onClick={startCreating} disabled={isCreating || !!editingSchedule}>
+        <Button
+          className="min-h-[44px] px-4 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+          onClick={startCreating}
+          disabled={isCreating || !!editingSchedule}
+          style={{
+            background: (isCreating || !!editingSchedule) ? 'rgba(0, 122, 255, 0.5)' : 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+            backdropFilter: 'blur(20px) saturate(1.8)',
+            WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            color: '#FFFFFF',
+            fontWeight: '600',
+            borderRadius: '12px',
+            boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)',
+            cursor: (isCreating || !!editingSchedule) ? 'not-allowed' : 'pointer'
+          }}
+          onMouseEnter={(e) => {
+            if (!(isCreating || !!editingSchedule)) {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+              e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!(isCreating || !!editingSchedule)) {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+              e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+            }
+          }}
+        >
           <Plus className="w-4 h-4 mr-2" />
           Add Bus Schedule
         </Button>
@@ -412,11 +439,53 @@ const BusAdministration: React.FC = () => {
             </div>
 
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={cancelEditing}>
+              <Button
+                className="min-h-[44px] px-4 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                onClick={cancelEditing}
+                style={{
+                  background: 'linear-gradient(135deg, #8E8E93 0%, #636366 100%)',
+                  backdropFilter: 'blur(20px) saturate(1.8)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  color: '#FFFFFF',
+                  fontWeight: '600',
+                  borderRadius: '12px',
+                  boxShadow: '0 8px 24px rgba(142, 142, 147, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #636366 0%, #48484A 100%)';
+                  e.currentTarget.style.boxShadow = '0 12px 32px rgba(142, 142, 147, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #8E8E93 0%, #636366 100%)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(142, 142, 147, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+                }}
+              >
                 <X className="w-4 h-4 mr-2" />
                 Cancel
               </Button>
-              <Button onClick={() => handleSave(editingSchedule)}>
+              <Button
+                className="min-h-[44px] px-4 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                onClick={() => handleSave(editingSchedule)}
+                style={{
+                  background: 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+                  backdropFilter: 'blur(20px) saturate(1.8)',
+                  WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  color: '#FFFFFF',
+                  fontWeight: '600',
+                  borderRadius: '12px',
+                  boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+                  e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+                  e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+                }}
+              >
                 <Save className="w-4 h-4 mr-2" />
                 {isCreating ? 'Create Schedule' : 'Save Changes'}
               </Button>
@@ -441,18 +510,57 @@ const BusAdministration: React.FC = () => {
                 <div className="flex items-center gap-2">
                   {!editingSchedule && (
                     <>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        className="min-h-[44px] min-w-[44px] p-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                         onClick={() => startEditing(schedule)}
+                        style={{
+                          background: 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+                          backdropFilter: 'blur(20px) saturate(1.8)',
+                          WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          color: '#FFFFFF',
+                          fontWeight: '600',
+                          borderRadius: '12px',
+                          boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+                          e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+                          e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+                        }}
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
-                      <Button 
-                        variant="outline" 
-                        size="sm" 
+                      <Button
+                        className="min-h-[44px] min-w-[44px] p-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
                         onClick={() => schedule.id && handleDelete(schedule.id)}
                         disabled={schedule.current_bookings > 0}
+                        style={{
+                          background: schedule.current_bookings > 0 ? 'rgba(255, 59, 48, 0.5)' : 'linear-gradient(135deg, #FF3B30 0%, #D70015 100%)',
+                          backdropFilter: 'blur(20px) saturate(1.8)',
+                          WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          color: '#FFFFFF',
+                          fontWeight: '600',
+                          borderRadius: '12px',
+                          boxShadow: '0 8px 24px rgba(255, 59, 48, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)',
+                          cursor: schedule.current_bookings > 0 ? 'not-allowed' : 'pointer'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (schedule.current_bookings === 0) {
+                            e.currentTarget.style.background = 'linear-gradient(135deg, #D70015 0%, #A50000 100%)';
+                            e.currentTarget.style.boxShadow = '0 12px 32px rgba(255, 59, 48, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (schedule.current_bookings === 0) {
+                            e.currentTarget.style.background = 'linear-gradient(135deg, #FF3B30 0%, #D70015 100%)';
+                            e.currentTarget.style.boxShadow = '0 8px 24px rgba(255, 59, 48, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+                          }
+                        }}
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
@@ -532,7 +640,28 @@ const BusAdministration: React.FC = () => {
             <p className="text-muted-foreground mb-4">
               Create your first bus schedule to start managing wedding transportation.
             </p>
-            <Button onClick={startCreating}>
+            <Button
+              className="min-h-[44px] px-4 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+              onClick={startCreating}
+              style={{
+                background: 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+                backdropFilter: 'blur(20px) saturate(1.8)',
+                WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                border: '1px solid rgba(255, 255, 255, 0.2)',
+                color: '#FFFFFF',
+                fontWeight: '600',
+                borderRadius: '12px',
+                boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+                e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+              }}
+            >
               <Plus className="w-4 h-4 mr-2" />
               Create First Schedule
             </Button>

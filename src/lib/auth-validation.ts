@@ -7,6 +7,56 @@ export const passwordSchema = z
   .regex(/[a-z]/, "Password must contain at least one lowercase letter")
   .regex(/[0-9]/, "Password must contain at least one number");
 
+// Step-specific validation schemas
+export const signUpStep1Schema = z.object({
+  email: z.string().email("Please enter a valid email address"),
+  password: passwordSchema,
+  confirmPassword: z.string().min(1, "Please confirm your password"),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
+  mobile: z.string().min(10, "Please enter a valid mobile number"),
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
+export const signUpStep2Schema = z.object({
+  address: z.string().min(5, "Please enter a valid address"),
+  suburb: z.string().min(2, "Please enter your suburb"),
+  state: z.string().min(2, "Please enter your state/province"),
+  country: z.string().min(2, "Please enter your country"),
+  postcode: z.string().min(3, "Please enter a valid postcode/zip code"),
+});
+
+export const signUpStep3Schema = z.object({
+  relationshipToCouple: z.string().min(1, "Please specify your relationship to the couple"),
+  emergencyContact: z.string().optional(),
+  dietaryRequirements: z.array(z.string()).default([]),
+  allergies: z.array(z.string()).default([]),
+  specialAccommodations: z.string().optional(),
+  bio: z.string().optional(),
+  hasPlusOne: z.boolean().default(false),
+  plusOneName: z.string().optional(),
+  plusOneEmail: z.string().email("Please enter a valid email").optional().or(z.literal("")),
+}).refine((data) => {
+  if (data.hasPlusOne && (!data.plusOneName || data.plusOneName.trim().length === 0)) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Plus one name is required when bringing a guest",
+  path: ["plusOneName"],
+}).refine((data) => {
+  if (data.hasPlusOne && (!data.plusOneEmail || data.plusOneEmail.trim().length === 0)) {
+    return false;
+  }
+  return true;
+}, {
+  message: "Plus one email is required when bringing a guest",
+  path: ["plusOneEmail"],
+});
+
+// Complete signup schema (combination of all steps)
 export const signUpSchema = z.object({
   email: z.string().email("Please enter a valid email address"),
   password: passwordSchema,
@@ -63,6 +113,9 @@ export const forgotPasswordSchema = z.object({
 });
 
 export type SignUpFormData = z.infer<typeof signUpSchema>;
+export type SignUpStep1Data = z.infer<typeof signUpStep1Schema>;
+export type SignUpStep2Data = z.infer<typeof signUpStep2Schema>;
+export type SignUpStep3Data = z.infer<typeof signUpStep3Schema>;
 export type SignInFormData = z.infer<typeof signInSchema>;
 export type MagicLinkFormData = z.infer<typeof magicLinkSchema>;
 export type ForgotPasswordFormData = z.infer<typeof forgotPasswordSchema>;

@@ -11,6 +11,7 @@ import { ChevronLeft, ChevronRight, MapPin, ExternalLink, Edit, Upload, Trash2, 
 import { toast } from 'sonner';
 import { VenueImage } from '@/components/venue/VenueImage';
 import { StorageService } from '@/services/storageService';
+import VenueCard from '@/components/venue/VenueCard';
 
 interface Venue {
   id: string;
@@ -326,24 +327,24 @@ const VenuePage: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-background to-muted/20 p-4 pt-20">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
-        <div className="glass-card p-6">
+        <div className="glass-neutral rounded-2xl p-6">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground font-dolly">
+              <h1 className="text-3xl font-bold text-gray-900 font-dolly">
                 Wedding Venues
               </h1>
-              <p className="text-muted-foreground mt-2">
+              <p className="text-gray-600 mt-2">
                 Discover the beautiful locations for our special day
               </p>
             </div>
-            <div className="text-sm text-muted-foreground">
+            <div className="text-sm text-gray-500">
               {currentIndex + 1} of {displayVenues.length}
             </div>
           </div>
         </div>
 
         {/* Main Venue Carousel */}
-        <div className="glass-card overflow-hidden shadow-2xl">
+        <div className="glass-neutral rounded-2xl overflow-hidden shadow-2xl">
           <div className="relative">
             {/* Image */}
             <div className="aspect-video relative group">
@@ -357,13 +358,13 @@ const VenuePage: React.FC = () => {
               {/* Enhanced Gradient Overlay */}
               <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent" />
               
-              {/* Navigation Arrows */}
+              {/* Navigation Arrows with Glass Effect */}
               {displayVenues.length > 1 && (
                 <>
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2"
+                    className="absolute left-4 top-1/2 -translate-y-1/2 backdrop-blur-md bg-white/20 hover:bg-white/30 text-white rounded-full p-3 border border-white/20 shadow-lg transition-all duration-200"
                     onClick={prevVenue}
                   >
                     <ChevronLeft className="w-5 h-5" />
@@ -371,7 +372,7 @@ const VenuePage: React.FC = () => {
                   <Button
                     variant="ghost"
                     size="sm"
-                    className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 hover:bg-black/70 text-white rounded-full p-2"
+                    className="absolute right-4 top-1/2 -translate-y-1/2 backdrop-blur-md bg-white/20 hover:bg-white/30 text-white rounded-full p-3 border border-white/20 shadow-lg transition-all duration-200"
                     onClick={nextVenue}
                   >
                     <ChevronRight className="w-5 h-5" />
@@ -379,7 +380,7 @@ const VenuePage: React.FC = () => {
                 </>
               )}
 
-              {/* Admin Controls */}
+              {/* Admin Controls with Glass Effect */}
               {isAdmin && (
                 <div className="absolute top-4 right-4 flex gap-2">
                   <label htmlFor={`venue-upload-${currentVenue.id}`}>
@@ -387,7 +388,7 @@ const VenuePage: React.FC = () => {
                       variant="secondary"
                       size="sm"
                       disabled={uploading}
-                      className="cursor-pointer"
+                      className="cursor-pointer backdrop-blur-md bg-white/20 hover:bg-white/30 text-white border border-white/20 shadow-lg transition-all duration-200"
                       asChild
                     >
                       <span>
@@ -406,6 +407,7 @@ const VenuePage: React.FC = () => {
                     variant="secondary"
                     size="sm"
                     onClick={() => openEditDialog(currentVenue)}
+                    className="backdrop-blur-md bg-white/20 hover:bg-white/30 text-white border border-white/20 shadow-lg transition-all duration-200"
                   >
                     <Edit className="w-4 h-4" />
                   </Button>
@@ -435,9 +437,8 @@ const VenuePage: React.FC = () => {
                       <div className="flex-1">
                         <p className="text-sm text-foreground">{currentVenue.address}</p>
                         <Button
-                          variant="outline"
                           size="sm"
-                          className="mt-2"
+                          className="mt-2 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 shadow-md transition-all duration-200"
                           onClick={() => window.open(getGoogleMapsUrl(currentVenue.address!), '_blank')}
                         >
                           <ExternalLink className="w-4 h-4 mr-2" />
@@ -447,10 +448,19 @@ const VenuePage: React.FC = () => {
                     </div>
                   )}
 
-                  {/* View Details Button */}
+                  {/* View Details Button - Blue Gradient */}
                   <div className="pt-4">
                     <Button 
-                      className="w-full"
+                      className="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg shadow-blue-500/25 transition-all duration-200 border-0"
+                      style={{
+                        background: 'linear-gradient(to right, #3b82f6, #2563eb)',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.background = 'linear-gradient(to right, #2563eb, #1d4ed8)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.background = 'linear-gradient(to right, #3b82f6, #2563eb)';
+                      }}
                       onClick={() => handleVenueClick(currentVenue.name)}
                     >
                       View Full Details & Maps
@@ -460,13 +470,13 @@ const VenuePage: React.FC = () => {
 
                 {/* Right Column - Quick Facts */}
                 {currentVenue.quick_facts && Object.keys(currentVenue.quick_facts).length > 0 && (
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground mb-3">Quick Facts</h3>
+                  <div className="backdrop-blur-sm bg-white/50 rounded-xl p-4 border border-white/20">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">Quick Facts</h3>
                     <div className="space-y-2">
                       {Object.entries(currentVenue.quick_facts).map(([key, value]) => (
-                        <div key={key} className="flex justify-between py-2 border-b border-border/50 last:border-0">
-                          <span className="text-sm font-medium text-muted-foreground">{key}</span>
-                          <span className="text-sm text-foreground">{String(value)}</span>
+                        <div key={key} className="flex justify-between py-2 border-b border-gray-200/30 last:border-0">
+                          <span className="text-sm font-medium text-gray-600">{key}</span>
+                          <span className="text-sm text-gray-900 font-medium">{String(value)}</span>
                         </div>
                       ))}
                     </div>
@@ -477,104 +487,20 @@ const VenuePage: React.FC = () => {
           </div>
         </div>
 
-        {/* Venue Thumbnails - Mobile Responsive Grid */}
+        {/* Venue Thumbnails - Updated Cards */}
         {displayVenues.length > 1 && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {displayVenues.map((venue, index) => (
-              <div
+              <VenueCard
                 key={venue.id}
-                className={`transition-all duration-500 ${
-                  index === currentIndex ? 'scale-[1.03]' : 'scale-100'
-                }`}
-              >
-                <Card
-                  className={`glass-card cursor-pointer transition-all duration-500 hover:shadow-2xl transform hover:scale-[1.02] overflow-hidden ${
-                    index === currentIndex 
-                      ? 'ring-2 ring-primary shadow-2xl bg-gradient-to-br from-primary/5 to-primary/10' 
-                      : 'hover:ring-1 hover:ring-primary/50'
-                  }`}
-                  onClick={() => setCurrentIndex(index)}
-                >
-                  <div className="aspect-[4/3] sm:aspect-video relative overflow-hidden group">
-                    <VenueImage
-                      venueId={venue.id}
-                      venueName={venue.name}
-                      fallbackUrl={venue.image_url}
-                      className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
-                    
-                    {/* Gradient Overlay */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                    
-                    {/* Quick Actions on Hover */}
-                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <Button
-                        size="sm"
-                        variant="secondary"
-                        className="bg-white/90 hover:bg-white"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleVenueClick(venue.name);
-                        }}
-                      >
-                        View Details
-                      </Button>
-                    </div>
-                    
-                    {/* Active Indicator */}
-                    {index === currentIndex && (
-                      <div className="absolute bottom-2 left-2 right-2">
-                        <div className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-medium inline-flex items-center gap-1">
-                          <div className="w-2 h-2 bg-primary-foreground rounded-full animate-pulse" />
-                          Currently Viewing
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <CardContent className="p-4 space-y-3">
-                    <h3 className="font-bold text-base sm:text-lg line-clamp-1 font-dolly text-foreground">
-                      {venue.name}
-                    </h3>
-                    
-                    {venue.caption && (
-                      <p className="text-xs sm:text-sm text-muted-foreground line-clamp-2 leading-relaxed">
-                        {venue.caption}
-                      </p>
-                    )}
-                    
-                    <div className="pt-2 space-y-2">
-                      {venue.address && (
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <MapPin className="w-4 h-4 flex-shrink-0 text-primary" />
-                          <span className="line-clamp-1">{venue.address}</span>
-                        </div>
-                      )}
-                      
-                      {/* Extract key quick fact */}
-                      {venue.quick_facts?.Date && (
-                        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                          <Calendar className="w-4 h-4 flex-shrink-0 text-primary" />
-                          <span>{venue.quick_facts.Date}</span>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* View Button */}
-                    <Button 
-                      className="w-full mt-3"
-                      size="sm"
-                      variant={index === currentIndex ? "default" : "outline"}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleVenueClick(venue.name);
-                      }}
-                    >
-                      View Full Details
-                    </Button>
-                  </CardContent>
-                </Card>
-              </div>
+                venue={venue}
+                onClick={(venueId) => {
+                  setCurrentIndex(index);
+                  handleVenueClick(venue.name);
+                }}
+                isActive={index === currentIndex}
+                index={index}
+              />
             ))}
           </div>
         )}
@@ -631,7 +557,11 @@ const VenuePage: React.FC = () => {
                       onChange={(e) => setQuickFactValue(e.target.value)}
                       className="flex-1"
                     />
-                    <Button onClick={addQuickFact} disabled={!quickFactKey || !quickFactValue}>
+                    <Button 
+                      onClick={addQuickFact} 
+                      disabled={!quickFactKey || !quickFactValue}
+                      className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 disabled:from-gray-400 disabled:to-gray-500"
+                    >
                       Add
                     </Button>
                   </div>
@@ -656,10 +586,17 @@ const VenuePage: React.FC = () => {
                 </div>
 
                 <div className="flex gap-3">
-                  <Button onClick={handleUpdateVenue} className="flex-1">
+                  <Button 
+                    onClick={handleUpdateVenue} 
+                    className="flex-1 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white border-0 shadow-md transition-all duration-200"
+                  >
                     Save Changes
                   </Button>
-                  <Button variant="outline" onClick={() => setEditingVenue(null)}>
+                  <Button 
+                    variant="outline" 
+                    onClick={() => setEditingVenue(null)}
+                    className="backdrop-blur-sm bg-white/50 hover:bg-white/70 border-gray-200"
+                  >
                     Cancel
                   </Button>
                 </div>

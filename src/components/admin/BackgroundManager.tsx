@@ -338,10 +338,40 @@ const BackgroundManager: React.FC = () => {
           <span className="text-sm font-medium">Background Manager</span>
         </div>
         <Button
-          size="sm"
-          variant={previewMode ? "default" : "outline"}
           onClick={() => setPreviewMode(!previewMode)}
-          className="text-xs"
+          className="text-xs min-h-[44px] px-3 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+          style={{
+            background: previewMode
+              ? 'linear-gradient(135deg, #34C759 0%, #30A14E 100%)'
+              : 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+            backdropFilter: 'blur(20px) saturate(1.8)',
+            WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            color: '#FFFFFF',
+            fontWeight: '600',
+            borderRadius: '12px',
+            boxShadow: previewMode
+              ? '0 8px 24px rgba(52, 199, 89, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+              : '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+          }}
+          onMouseEnter={(e) => {
+            if (previewMode) {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #30A14E 0%, #28A745 100%)';
+              e.currentTarget.style.boxShadow = '0 12px 32px rgba(52, 199, 89, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+            } else {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+              e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (previewMode) {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #34C759 0%, #30A14E 100%)';
+              e.currentTarget.style.boxShadow = '0 8px 24px rgba(52, 199, 89, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+            } else {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+              e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+            }
+          }}
         >
           <Eye className="w-3 h-3 mr-1" />
           {previewMode ? 'Exit Preview' : 'Live Preview'}
@@ -475,11 +505,32 @@ const BackgroundManager: React.FC = () => {
               <div className="flex items-center justify-between">
                 <Label className="text-xs">Select from Storage ({storageBackgrounds.length} images)</Label>
                 <Button
-                  size="sm"
-                  variant="ghost"
                   onClick={loadStorageBackgrounds}
                   disabled={loadingBackgrounds}
-                  className="h-6 text-xs"
+                  className="h-6 text-xs px-2 min-h-[44px] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                  style={{
+                    background: loadingBackgrounds ? 'rgba(0, 122, 255, 0.5)' : 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+                    backdropFilter: 'blur(20px) saturate(1.8)',
+                    WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    color: '#FFFFFF',
+                    fontWeight: '600',
+                    borderRadius: '12px',
+                    boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)',
+                    cursor: loadingBackgrounds ? 'not-allowed' : 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!loadingBackgrounds) {
+                      e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+                      e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!loadingBackgrounds) {
+                      e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+                      e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+                    }
+                  }}
                 >
                   Refresh
                 </Button>
@@ -543,10 +594,31 @@ const BackgroundManager: React.FC = () => {
                   disabled={uploading}
                 />
                 <Button
-                  size="sm"
-                  variant="outline"
                   disabled={uploading}
-                  className="text-xs"
+                  className="text-xs min-h-[44px] min-w-[44px] p-2 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+                  style={{
+                    background: uploading ? 'rgba(0, 122, 255, 0.5)' : 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+                    backdropFilter: 'blur(20px) saturate(1.8)',
+                    WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    color: '#FFFFFF',
+                    fontWeight: '600',
+                    borderRadius: '12px',
+                    boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)',
+                    cursor: uploading ? 'not-allowed' : 'pointer'
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!uploading) {
+                      e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+                      e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!uploading) {
+                      e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+                      e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+                    }
+                  }}
                 >
                   {uploading ? (
                     <div className="w-3 h-3 animate-spin rounded-full border border-current border-t-transparent" />
@@ -577,7 +649,30 @@ const BackgroundManager: React.FC = () => {
         <Button
           onClick={saveBackgroundSettings}
           disabled={saving}
-          className="flex-1 text-xs"
+          className="flex-1 text-xs min-h-[44px] transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+          style={{
+            background: saving ? 'rgba(0, 122, 255, 0.5)' : 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)',
+            backdropFilter: 'blur(20px) saturate(1.8)',
+            WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            color: '#FFFFFF',
+            fontWeight: '600',
+            borderRadius: '12px',
+            boxShadow: '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)',
+            cursor: saving ? 'not-allowed' : 'pointer'
+          }}
+          onMouseEnter={(e) => {
+            if (!saving) {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #0051D5 0%, #003D9D 100%)';
+              e.currentTarget.style.boxShadow = '0 12px 32px rgba(0, 122, 255, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!saving) {
+              e.currentTarget.style.background = 'linear-gradient(135deg, #007AFF 0%, #0051D5 100%)';
+              e.currentTarget.style.boxShadow = '0 8px 24px rgba(0, 122, 255, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+            }
+          }}
         >
           {saving ? (
             <div className="w-3 h-3 animate-spin rounded-full border border-current border-t-transparent mr-1" />
@@ -599,8 +694,25 @@ const BackgroundManager: React.FC = () => {
             setBackgroundSettings(defaultSettings);
             applyBackgroundPreview(defaultSettings);
           }}
-          variant="outline"
-          className="text-xs"
+          className="text-xs min-h-[44px] px-3 transition-all duration-300 hover:scale-[1.02] active:scale-[0.98]"
+          style={{
+            background: 'linear-gradient(135deg, #8E8E93 0%, #636366 100%)',
+            backdropFilter: 'blur(20px) saturate(1.8)',
+            WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            color: '#FFFFFF',
+            fontWeight: '600',
+            borderRadius: '12px',
+            boxShadow: '0 8px 24px rgba(142, 142, 147, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'linear-gradient(135deg, #636366 0%, #48484A 100%)';
+            e.currentTarget.style.boxShadow = '0 12px 32px rgba(142, 142, 147, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.5)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'linear-gradient(135deg, #8E8E93 0%, #636366 100%)';
+            e.currentTarget.style.boxShadow = '0 8px 24px rgba(142, 142, 147, 0.3), inset 0 1px 1px rgba(255, 255, 255, 0.4)';
+          }}
         >
           Reset
         </Button>

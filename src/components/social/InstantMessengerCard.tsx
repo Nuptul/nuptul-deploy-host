@@ -49,28 +49,28 @@ const InstantMessengerCard: React.FC<InstantMessengerCardProps> = ({
       icon: <MessageCircle className="w-5 h-5" />,
       label: 'Chat',
       onClick: () => onChat('default-user'),
-      color: 'bg-blue-500 hover:bg-blue-600',
+      color: 'bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700',
       hoverScale: 1.1
     },
     {
       icon: <Phone className="w-5 h-5" />,
       label: 'Voice',
       onClick: () => onVoice('default-user'),
-      color: 'bg-green-500 hover:bg-green-600',
+      color: 'bg-gradient-to-r from-blue-400 to-blue-500 hover:from-blue-500 hover:to-blue-600',
       hoverScale: 1.1
     },
     {
       icon: <Video className="w-5 h-5" />,
       label: 'Video',
       onClick: () => onVideo('default-user'),
-      color: 'bg-purple-500 hover:bg-purple-600',
+      color: 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800',
       hoverScale: 1.1
     },
     {
       icon: <Upload className="w-5 h-5" />,
       label: 'Media',
       onClick: () => setIsMediaSheetOpen(true),
-      color: 'bg-orange-500 hover:bg-orange-600',
+      color: 'bg-gradient-to-r from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700',
       hoverScale: 1.1
     }
   ];

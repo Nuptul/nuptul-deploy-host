@@ -2,15 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { Heart, Calendar, Clock, MapPin } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { useAuth } from '@/hooks/useAuth';
-import { useRSVPs } from '@/hooks/useWeddingData';
-import { toast } from 'sonner';
-
+import { nuptulColors, glassEffects } from '@/styles/nuptul-design-system';
 interface WeddingCeremonyClockProps {
   targetDate: string;
   className?: string;
-  onRSVPClick?: () => void;
 }
 
 interface TimeState {
@@ -27,23 +22,14 @@ interface ClockAngles {
   second: number;
 }
 
-const WeddingCeremonyClock: React.FC<WeddingCeremonyClockProps> = ({ 
-  targetDate, 
-  className,
-  onRSVPClick 
+const WeddingCeremonyClock: React.FC<WeddingCeremonyClockProps> = ({
+  targetDate,
+  className
 }) => {
   const [timeState, setTimeState] = useState<TimeState | null>(null);
   const [clockAngles, setClockAngles] = useState<ClockAngles>({ hour: 0, minute: 0, second: 0 });
   const [currentTime, setCurrentTime] = useState<string>('');
   const [isVisible, setIsVisible] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  const { user } = useAuth();
-  const { rsvps, submitRSVP } = useRSVPs(user?.id);
-
-  // Check if user has already RSVP'd for the ceremony
-  const hasRSVPd = rsvps.some(rsvp => rsvp.status === 'attending');
-  const rsvpStatus = rsvps.find(rsvp => rsvp.event_id)?.status;
 
   useEffect(() => {
     if (!targetDate) return;
@@ -104,36 +90,7 @@ const WeddingCeremonyClock: React.FC<WeddingCeremonyClockProps> = ({
     };
   }, [targetDate]);
 
-  const handleRSVP = async (status: 'attending' | 'not_attending') => {
-    if (!user) {
-      if (onRSVPClick) {
-        onRSVPClick();
-      }
-      return;
-    }
 
-    setIsSubmitting(true);
-    try {
-      // For this demo, we'll use a mock event ID. In real implementation, 
-      // you'd get the actual ceremony event ID
-      const result = await submitRSVP('ceremony-event-id', status, 1);
-      
-      if (result.error) {
-        throw result.error;
-      }
-
-      toast.success(
-        status === 'attending' 
-          ? "🎉 Thank you for your RSVP! We can't wait to celebrate with you!" 
-          : "Thank you for letting us know. We'll miss you!"
-      );
-    } catch (error) {
-      console.error('RSVP Error:', error);
-      toast.error('Failed to submit RSVP. Please try again.');
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
 
   // Background orbs animation
   const BackgroundOrbs = () => (
@@ -319,8 +276,32 @@ const WeddingCeremonyClock: React.FC<WeddingCeremonyClockProps> = ({
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <h2 className="text-2xl font-semibold text-wedding-navy">Until We Say "I Do"</h2>
-                <div className="flex items-center justify-center gap-2 text-wedding-navy/70">
+                <h2
+                  className="text-3xl sm:text-4xl font-semibold mb-4"
+                  style={{
+                    fontFamily: '"Great Vibes", cursive',
+                    fontWeight: '400',
+                    letterSpacing: '0.02em',
+                    textRendering: 'optimizeLegibility',
+                    WebkitFontSmoothing: 'antialiased',
+                    MozOsxFontSmoothing: 'grayscale',
+                    color: '#C9A961',
+                    textShadow: `
+                      2px 2px 6px rgba(0, 0, 0, 0.8),
+                      -1px -1px 3px rgba(201, 169, 97, 0.4),
+                      0 0 12px rgba(201, 169, 97, 0.3)
+                    `,
+                    filter: 'drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5))',
+                    position: 'relative',
+                    lineHeight: '1.2'
+                  }}
+                >
+                  Until We Say "I Do"
+                </h2>
+                <div
+                  className="flex items-center justify-center gap-2"
+                  style={{ color: nuptulColors.ring[600] }}
+                >
                   <Calendar className="w-4 h-4" />
                   <span>{new Date(targetDate).toLocaleDateString('en-AU', { 
                     year: 'numeric', 
@@ -330,275 +311,306 @@ const WeddingCeremonyClock: React.FC<WeddingCeremonyClockProps> = ({
                 </div>
               </motion.div>
 
-              {/* Countdown cards */}
-              <div className="flex justify-center gap-4">
-                {[
-                  { label: 'Days', value: timeState.days },
-                  { label: 'Hours', value: timeState.hours },
-                  { label: 'Minutes', value: timeState.minutes }
-                ].map((item, index) => (
-                  <motion.div
-                    key={item.label}
-                    className="relative w-24 h-28 flex flex-col items-center justify-center gap-2 overflow-hidden"
-                    style={{
-                      background: index === 0 
-                        ? 'linear-gradient(135deg, rgba(69, 183, 209, 0.2) 0%, rgba(78, 205, 196, 0.12) 100%)'
-                        : index === 1
-                        ? 'linear-gradient(135deg, rgba(255, 154, 0, 0.2) 0%, rgba(251, 105, 98, 0.12) 100%)'
-                        : 'linear-gradient(135deg, rgba(46, 213, 115, 0.2) 0%, rgba(78, 205, 196, 0.12) 100%)',
-                      backdropFilter: 'blur(20px) saturate(2)',
-                      WebkitBackdropFilter: 'blur(20px) saturate(2)',
-                      borderRadius: '20px',
-                      border: '1px solid rgba(255, 255, 255, 0.3)',
-                      boxShadow: `
-                        0 8px 32px rgba(0, 0, 0, 0.08),
-                        inset 0 1px 1px rgba(255, 255, 255, 0.4),
-                        inset 0 -1px 1px rgba(0, 0, 0, 0.05)
-                      `
-                    }}
-                    initial={{ opacity: 0, y: 20, scale: 0.9 }}
-                    animate={{ opacity: 1, y: 0, scale: 1 }}
-                    transition={{ delay: index * 0.1 + 0.5 }}
-                    whileHover={{ scale: 1.05, y: -2 }}
-                  >
-                    {/* Glass shimmer */}
-                    <motion.div
-                      className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-300"
+              {/* Clean Standard Countdown */}
+              <div className="flex justify-center">
+                <motion.div
+                  className="w-full max-w-4xl"
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.3, duration: 0.6 }}
+                >
+                  {/* Countdown Grid */}
+                  <div className="grid grid-cols-3 gap-6 sm:gap-8 md:gap-12">
+                    {/* Heart shadow */}
+                    <div className="absolute bottom-0 left-1/2 transform -translate-x-1/2 w-48 h-16 sm:w-64 sm:h-20"
                       style={{
-                        background: 'linear-gradient(105deg, transparent 40%, rgba(255, 255, 255, 0.2) 50%, transparent 60%)',
-                        transform: 'translateX(-100%)'
+                        background: 'radial-gradient(ellipse at center, rgba(0, 0, 0, 0.3) 0%, transparent 70%)',
+                        filter: 'blur(20px)',
                       }}
-                      animate={{ x: ['-100%', '100%'] }}
-                      transition={{ duration: 3, repeat: Infinity, delay: index * 0.5 }}
                     />
                     
-                    <span className="text-4xl md:text-5xl font-bold font-dolly tracking-tighter" style={{ color: '#007AFF', textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)' }}>
-                      {item.value.toString().padStart(2, '0')}
-                    </span>
-                    <span className="text-xs font-medium uppercase tracking-widest" style={{ color: 'rgba(0, 0, 0, 0.6)' }}>
-                      {item.label}
-                    </span>
-                  </motion.div>
-                ))}
+                    {/* Glass heart */}
+                    <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2">
+                      <svg width="180" height="160" viewBox="0 0 180 160" className="w-44 h-40 sm:w-52 sm:h-48">
+                        <defs>
+                          <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stopColor={nuptulColors.heart[400]} />
+                            <stop offset="50%" stopColor={nuptulColors.heart[500]} />
+                            <stop offset="100%" stopColor={nuptulColors.heart[600]} />
+                          </linearGradient>
+                          <radialGradient id="heartHighlight" cx="30%" cy="30%">
+                            <stop offset="0%" stopColor="rgba(255, 255, 255, 0.5)" />
+                            <stop offset="50%" stopColor="rgba(255, 255, 255, 0.2)" />
+                            <stop offset="100%" stopColor="rgba(255, 255, 255, 0)" />
+                          </radialGradient>
+                          <filter id="heartShadow">
+                            <feGaussianBlur in="SourceAlpha" stdDeviation="4"/>
+                            <feOffset dx="0" dy="4" result="offsetblur"/>
+                            <feFlood floodColor="rgba(0,0,0,0.3)"/>
+                            <feComposite in2="offsetblur" operator="in"/>
+                            <feMerge>
+                              <feMergeNode/>
+                              <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                          </filter>
+                        </defs>
+                        <path
+                          d="M90,145 C90,145 10,85 10,45 C10,20 25,5 45,5 C65,5 80,15 90,30 C100,15 115,5 135,5 C155,5 170,20 170,45 C170,85 90,145 90,145 Z"
+                          fill="url(#heartGradient)"
+                          filter="url(#heartShadow)"
+                          style={{
+                            fillOpacity: 0.95,
+                          }}
+                        />
+                        <path
+                          d="M90,145 C90,145 10,85 10,45 C10,20 25,5 45,5 C65,5 80,15 90,30 C100,15 115,5 135,5 C155,5 170,20 170,45 C170,85 90,145 90,145 Z"
+                          fill="url(#heartHighlight)"
+                          style={{
+                            fillOpacity: 0.3,
+                          }}
+                        />
+                      </svg>
+                    </div>
+                    
+                    {/* Two rings on top of heart - Days and Hours */}
+                    <div className="absolute top-0 left-1/2 transform -translate-x-1/2 flex gap-4">
+                      {[
+                        { label: 'DAYS', value: timeState.days },
+                        { label: 'HOURS', value: timeState.hours }
+                      ].map((item, index) => (
+                        <motion.div
+                          key={item.label}
+                          className="relative"
+                          initial={{ opacity: 0, y: -20, scale: 0.8 }}
+                          animate={{ opacity: 1, y: 0, scale: 1 }}
+                          transition={{ delay: 0.7 + index * 0.1, type: "spring" }}
+                          whileHover={{ scale: 1.05 }}
+                        >
+                          <div className="relative w-20 h-20 sm:w-24 sm:h-24">
+                            {/* Ring shadow */}
+                            <div className="absolute inset-0 rounded-full"
+                              style={{
+                                background: 'radial-gradient(circle at 50% 60%, rgba(0, 0, 0, 0.2) 40%, transparent 70%)',
+                                filter: 'blur(4px)',
+                                transform: 'translateY(2px)',
+                              }}
+                            />
+                            
+                            {/* Ring body */}
+                            <div className="absolute inset-0 rounded-full"
+                              style={{
+                                background: 'linear-gradient(135deg, #C9A961 0%, #B8985F 10%, #A78B56 20%, #9B7F4E 30%, #8F7347 40%, #85693F 50%, #7B5F37 60%, #8F7347 70%, #A78B56 80%, #B8985F 90%, #C9A961 100%)',
+                                boxShadow: '0 8px 16px rgba(0, 0, 0, 0.8), inset 0 1px 0 rgba(201, 169, 97, 0.5), inset 0 -1px 0 rgba(74, 60, 40, 0.5), inset 2px 2px 3px rgba(255, 255, 255, 0.1), inset -2px -2px 3px rgba(0, 0, 0, 0.2)',
+                              }}
+                            >
+                              <div className="absolute inset-x-0 top-0 h-1/2 rounded-t-full"
+                                style={{
+                                  background: 'radial-gradient(ellipse at center top, rgba(255, 255, 255, 0.3) 0%, transparent 60%)',
+                                }}
+                              />
+                            </div>
+                            
+                            {/* Inner circle */}
+                            <div className="absolute inset-4 rounded-full"
+                              style={{
+                                background: '#f7fafc',
+                                boxShadow: 'inset 0 2px 6px rgba(0, 0, 0, 0.1)',
+                              }}
+                            >
+                              <div className="h-full flex flex-col items-center justify-center">
+                                <span className="block text-2xl sm:text-3xl font-bold leading-none"
+                                  style={{
+                                    fontFamily: '"Montserrat", sans-serif',
+                                    color: '#4A3C28',
+                                    textShadow: '0 1px 0 rgba(218, 184, 133, 0.5), 0 -1px 0 rgba(0, 0, 0, 0.5)',
+                                  }}
+                                >
+                                  {item.value.toString().padStart(2, '0')}
+                                </span>
+                                <span className="text-[9px] sm:text-[10px] font-semibold mt-0.5"
+                                  style={{
+                                    color: '#4A3C28',
+                                    fontFamily: '"Montserrat", sans-serif',
+                                    letterSpacing: '0.8px',
+                                    textShadow: '0 1px 0 rgba(218, 184, 133, 0.3)'
+                                  }}
+                                >
+                                  {item.label}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </motion.div>
+                      ))}
+                    </div>
+                    
+                    {/* Minutes display in the heart center */}
+                    <motion.div 
+                      className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2"
+                      initial={{ opacity: 0, scale: 0 }}
+                      animate={{ opacity: 1, scale: 1 }}
+                      transition={{ delay: 0.9, type: "spring" }}
+                    >
+                      <div className="text-center">
+                        <span className="block text-4xl sm:text-5xl font-light text-white"
+                          style={{
+                            fontFamily: '"Helvetica Neue", Arial, sans-serif',
+                            textShadow: '0 2px 8px rgba(0, 0, 0, 0.3)',
+                          }}
+                        >
+                          {timeState.minutes.toString().padStart(2, '0')}
+                        </span>
+                        <span className="block text-xs sm:text-sm font-normal text-white/80 mt-1"
+                          style={{
+                            fontFamily: '"Helvetica Neue", Arial, sans-serif',
+                            letterSpacing: '1px',
+                            textShadow: '0 1px 4px rgba(0, 0, 0, 0.3)',
+                          }}
+                        >
+                          MINUTES
+                        </span>
+                      </div>
+                    </motion.div>
+                  </div>
+                </motion.div>
               </div>
 
-              {/* Analog clock */}
+              {/* Analog clock - Luxury Nuptul design */}
               <motion.div 
-                className="flex justify-center"
+                className="flex justify-center mt-8"
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ delay: 0.8, type: "spring", stiffness: 200, damping: 20 }}
               >
-                <div className="relative w-80 h-80">
-                  {/* Glow ring */}
-                  <motion.div
-                    className="absolute inset-0 rounded-full bg-gradient-to-r from-wedding-gold/20 via-transparent to-wedding-gold/20"
-                    animate={{ 
-                      scale: [1, 1.05, 1],
-                      opacity: [0.3, 0.6, 0.3]
+                <div className="relative w-64 h-64">
+                  {/* Subtle outer glow */}
+                  <div className="absolute inset-0 rounded-full"
+                    style={{
+                      background: 'radial-gradient(circle, rgba(220, 38, 38, 0.1) 0%, transparent 70%)',
+                      filter: 'blur(30px)',
                     }}
-                    transition={{ duration: 4, repeat: Infinity, ease: "easeInOut" }}
                   />
                   
-                  {/* Clock base with Apple glass effect - gradient tinted */}
-                  <div className="absolute inset-4 rounded-full shadow-2xl" style={{
-                    background: 'linear-gradient(135deg, rgba(69, 183, 209, 0.2) 0%, rgba(78, 205, 196, 0.12) 33%, rgba(255, 107, 107, 0.15) 66%, rgba(255, 154, 0, 0.18) 100%)',
-                    backdropFilter: 'blur(30px) saturate(2)',
-                    WebkitBackdropFilter: 'blur(30px) saturate(2)',
-                    border: '1px solid rgba(255, 255, 255, 0.35)',
-                    boxShadow: `
-                      0 20px 70px rgba(0, 0, 0, 0.1),
-                      inset 0 1px 1px rgba(255, 255, 255, 0.6),
-                      inset 0 -1px 1px rgba(0, 0, 0, 0.05)
-                    `
-                  }}>
-                    {/* Glass overlay with reflection */}
-                    <div className="absolute inset-2 rounded-full" style={{
-                      background: 'radial-gradient(ellipse at top left, rgba(255, 255, 255, 0.15) 0%, transparent 50%)',
-                    }}>
-                      <div className="absolute top-4 left-6 w-16 h-16 rounded-full bg-gradient-to-br from-white/20 to-transparent filter blur-lg" />
-                    </div>
+                  {/* Clock base with luxury finish */}
+                  <div className="absolute inset-2 rounded-full"
+                    style={{
+                      background: 'linear-gradient(135deg, #0f0f1e 0%, #1a1a2e 50%, #16213e 100%)',
+                      boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4), inset 0 2px 4px rgba(255, 255, 255, 0.1), inset 0 -2px 4px rgba(0, 0, 0, 0.3)',
+                    }}
+                  >
+                    {/* Glossy overlay */}
+                    <div className="absolute inset-0 rounded-full"
+                      style={{
+                        background: 'radial-gradient(ellipse at top, rgba(255, 255, 255, 0.15) 0%, transparent 50%)',
+                      }}
+                    />
                     
                     {/* Clock face */}
                     <div className="absolute inset-4 rounded-full flex items-center justify-center">
-                      <HourMarkers />
-                      
-                      {/* Digital time display with gradient glass */}
-                      <div className="absolute top-20 left-1/2 transform -translate-x-1/2 px-4 py-2 rounded-full text-sm font-mono tabular-nums" style={{
-                        background: 'linear-gradient(135deg, rgba(255, 107, 107, 0.2) 0%, rgba(78, 205, 196, 0.15) 100%)',
-                        backdropFilter: 'blur(20px) saturate(2)',
-                        WebkitBackdropFilter: 'blur(20px) saturate(2)',
-                        border: '1px solid rgba(255, 255, 255, 0.3)',
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.5)'
-                      }}>
-                        <div className="flex items-center gap-2" style={{ color: '#007AFF' }}>
-                          <Clock className="w-3 h-3" />
-                          {currentTime}
+                      {/* Refined hour markers */}
+                      {[...Array(12)].map((_, i) => (
+                        <div
+                          key={i}
+                          className="absolute w-full h-full flex justify-center"
+                          style={{ transform: `rotate(${i * 30}deg)` }}
+                        >
+                          <div 
+                            style={{
+                              width: i % 3 === 0 ? '2px' : '1px',
+                              height: i % 3 === 0 ? '12px' : '6px',
+                              backgroundColor: 'rgba(255, 255, 255, 0.6)',
+                              borderRadius: '1px',
+                              boxShadow: '0 0 2px rgba(255, 255, 255, 0.3)'
+                            }}
+                          />
                         </div>
+                      ))}
+                      
+                      {/* Digital time display - minimalist luxury */}
+                      <div className="absolute top-20 px-3 py-1 rounded-full"
+                        style={{
+                          background: 'rgba(0, 0, 0, 0.5)',
+                          backdropFilter: 'blur(10px)',
+                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                        }}
+                      >
+                        <span className="text-xs font-light text-white/80" style={{ fontFamily: '"Helvetica Neue", Arial, sans-serif' }}>
+                          {currentTime}
+                        </span>
                       </div>
                       
-                      <ClockHands />
+                      {/* Premium clock hands */}
+                      {/* Hour hand */}
+                      <div
+                        className="absolute rounded-full"
+                        style={{
+                          width: '4px',
+                          height: '60px',
+                          bottom: '50%',
+                          left: '50%',
+                          marginLeft: '-2px',
+                          transformOrigin: 'bottom center',
+                          transform: `rotate(${clockAngles.hour}deg)`,
+                          background: 'linear-gradient(to top, #ffffff 0%, #e0e0e0 100%)',
+                          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
+                        }}
+                      />
+                      
+                      {/* Minute hand */}
+                      <div
+                        className="absolute rounded-full"
+                        style={{
+                          width: '3px',
+                          height: '80px',
+                          bottom: '50%',
+                          left: '50%',
+                          marginLeft: '-1.5px',
+                          transformOrigin: 'bottom center',
+                          transform: `rotate(${clockAngles.minute}deg)`,
+                          background: 'linear-gradient(to top, #ffffff 0%, #e0e0e0 100%)',
+                          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
+                        }}
+                      />
+                      
+                      {/* Second hand - elegant red accent */}
+                      <div
+                        className="absolute"
+                        style={{
+                          width: '1px',
+                          height: '90px',
+                          bottom: '50%',
+                          left: '50%',
+                          marginLeft: '-0.5px',
+                          transformOrigin: 'bottom center',
+                          transform: `rotate(${clockAngles.second}deg)`,
+                          background: '#dc2626',
+                          boxShadow: '0 0 4px rgba(220, 38, 38, 0.5)'
+                        }}
+                      />
+                      
+                      {/* Center cap - glossy finish */}
+                      <div className="absolute w-4 h-4 rounded-full"
+                        style={{
+                          background: `radial-gradient(circle at 30% 30%, ${nuptulColors.heart[500]}, ${nuptulColors.heart[700]})`,
+                          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.4), inset 0 1px 2px rgba(255, 255, 255, 0.3)',
+                        }}
+                      />
                     </div>
+                    
+                    {/* Premium edge detail */}
+                    <div className="absolute inset-2 rounded-full"
+                      style={{
+                        border: '1px solid rgba(255, 255, 255, 0.05)',
+                        boxShadow: 'inset 0 0 20px rgba(0, 0, 0, 0.3)',
+                      }}
+                    />
                   </div>
                 </div>
               </motion.div>
             </div>
           </div>
 
-          {/* RSVP Section */}
-          <motion.div
-            className={cn(
-              "rounded-2xl p-6",
-              "bg-white/10 dark:bg-black/20",
-              "backdrop-blur-2xl border border-white/10"
-            )}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.2 }}
-          >
-            <div className="text-center space-y-4">
-              <div className="space-y-2">
-                <h3 className="text-lg font-semibold text-wedding-navy flex items-center justify-center gap-2">
-                  <Heart className="w-5 h-5 text-wedding-gold" />
-                  Will you celebrate with us?
-                </h3>
-                <div className="flex items-center justify-center gap-2 text-sm text-wedding-navy/60">
-                  <MapPin className="w-4 h-4" />
-                  <span>Ben Ean, Hunter Valley • 30 Mins Prior 2:30PM</span>
-                </div>
-              </div>
 
-              {!user ? (
-                <Button 
-                  onClick={onRSVPClick}
-                  className="w-full bg-wedding-gold hover:bg-wedding-gold/90 text-wedding-navy font-medium"
-                >
-                  Please Sign In to RSVP
-                </Button>
-              ) : hasRSVPd ? (
-                <div className="space-y-3">
-                  <div className="flex items-center justify-center gap-2 text-wedding-navy">
-                    <Heart className="w-4 h-4 text-wedding-gold fill-current" />
-                    <span className="font-medium">
-                      {rsvpStatus === 'attending' 
-                        ? "You're attending! 🎉" 
-                        : rsvpStatus === 'not_attending'
-                        ? "Thanks for letting us know"
-                        : "RSVP status pending"
-                      }
-                    </span>
-                  </div>
-                  <div className="flex gap-2">
-                    <button
-                      onClick={() => handleRSVP('attending')}
-                      disabled={isSubmitting}
-                      className="flex-1 px-4 py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-[1.02] group"
-                      style={{
-                        background: rsvpStatus === 'attending' 
-                          ? 'linear-gradient(135deg, rgba(52, 199, 89, 0.25) 0%, rgba(52, 199, 89, 0.15) 100%)'
-                          : 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
-                        backdropFilter: 'blur(20px) saturate(1.5)',
-                        WebkitBackdropFilter: 'blur(20px) saturate(1.5)',
-                        border: rsvpStatus === 'attending'
-                          ? '1px solid rgba(52, 199, 89, 0.4)'
-                          : '1px solid rgba(255, 255, 255, 0.2)',
-                        color: rsvpStatus === 'attending' ? '#34C759' : 'rgba(0, 0, 0, 0.5)',
-                        boxShadow: rsvpStatus === 'attending'
-                          ? '0 4px 12px rgba(52, 199, 89, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.3)'
-                          : '0 2px 8px rgba(0, 0, 0, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.2)',
-                        opacity: rsvpStatus === 'not_attending' ? 0.6 : 1
-                      }}
-                      onMouseEnter={(e) => {
-                        if (rsvpStatus !== 'attending') {
-                          e.currentTarget.style.background = 'linear-gradient(135deg, rgba(52, 199, 89, 0.2) 0%, rgba(52, 199, 89, 0.1) 100%)';
-                          e.currentTarget.style.border = '1px solid rgba(52, 199, 89, 0.35)';
-                          e.currentTarget.style.color = '#34C759';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (rsvpStatus !== 'attending') {
-                          e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)';
-                          e.currentTarget.style.border = '1px solid rgba(255, 255, 255, 0.2)';
-                          e.currentTarget.style.color = 'rgba(0, 0, 0, 0.5)';
-                        }
-                      }}
-                    >
-                      ✓ Attending
-                    </button>
-                    <button
-                      onClick={() => handleRSVP('not_attending')}
-                      disabled={isSubmitting}
-                      className="flex-1 px-4 py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-[1.02] group"
-                      style={{
-                        background: rsvpStatus === 'not_attending' 
-                          ? 'linear-gradient(135deg, rgba(255, 59, 48, 0.25) 0%, rgba(255, 59, 48, 0.15) 100%)'
-                          : 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)',
-                        backdropFilter: 'blur(20px) saturate(1.5)',
-                        WebkitBackdropFilter: 'blur(20px) saturate(1.5)',
-                        border: rsvpStatus === 'not_attending'
-                          ? '1px solid rgba(255, 59, 48, 0.4)'
-                          : '1px solid rgba(255, 255, 255, 0.2)',
-                        color: rsvpStatus === 'not_attending' ? '#FF3B30' : 'rgba(0, 0, 0, 0.5)',
-                        boxShadow: rsvpStatus === 'not_attending'
-                          ? '0 4px 12px rgba(255, 59, 48, 0.2), inset 0 1px 1px rgba(255, 255, 255, 0.3)'
-                          : '0 2px 8px rgba(0, 0, 0, 0.05), inset 0 1px 1px rgba(255, 255, 255, 0.2)',
-                        opacity: rsvpStatus === 'attending' ? 0.6 : 1
-                      }}
-                      onMouseEnter={(e) => {
-                        if (rsvpStatus !== 'not_attending') {
-                          e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 59, 48, 0.2) 0%, rgba(255, 59, 48, 0.1) 100%)';
-                          e.currentTarget.style.border = '1px solid rgba(255, 59, 48, 0.35)';
-                          e.currentTarget.style.color = '#FF3B30';
-                        }
-                      }}
-                      onMouseLeave={(e) => {
-                        if (rsvpStatus !== 'not_attending') {
-                          e.currentTarget.style.background = 'linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, rgba(255, 255, 255, 0.05) 100%)';
-                          e.currentTarget.style.border = '1px solid rgba(255, 255, 255, 0.2)';
-                          e.currentTarget.style.color = 'rgba(0, 0, 0, 0.5)';
-                        }
-                      }}
-                    >
-                      Can't Make It
-                    </button>
-                  </div>
-                </div>
-              ) : (
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => handleRSVP('attending')}
-                    disabled={isSubmitting}
-                    className="flex-1 px-4 py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-[1.02]"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(52, 199, 89, 0.15) 0%, rgba(52, 199, 89, 0.05) 100%)',
-                      backdropFilter: 'blur(20px) saturate(1.5)',
-                      WebkitBackdropFilter: 'blur(20px) saturate(1.5)',
-                      border: '1px solid rgba(52, 199, 89, 0.3)',
-                      color: '#34C759',
-                      boxShadow: '0 4px 12px rgba(52, 199, 89, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.2)'
-                    }}
-                  >
-                    {isSubmitting ? 'Submitting...' : '✓ Yes, I\'ll Be There!'}
-                  </button>
-                  <button
-                    onClick={() => handleRSVP('not_attending')}
-                    disabled={isSubmitting}
-                    className="flex-1 px-4 py-3 rounded-xl font-medium transition-all duration-300 transform hover:scale-[1.02]"
-                    style={{
-                      background: 'linear-gradient(135deg, rgba(255, 59, 48, 0.15) 0%, rgba(255, 59, 48, 0.05) 100%)',
-                      backdropFilter: 'blur(20px) saturate(1.5)',
-                      WebkitBackdropFilter: 'blur(20px) saturate(1.5)',
-                      border: '1px solid rgba(255, 59, 48, 0.3)',
-                      color: '#FF3B30',
-                      boxShadow: '0 4px 12px rgba(255, 59, 48, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.2)'
-                    }}
-                  >
-                    {isSubmitting ? 'Submitting...' : 'Can\'t Make It'}
-                  </button>
-                </div>
-              )}
-            </div>
-          </motion.div>
         </motion.div>
       )}
     </AnimatePresence>

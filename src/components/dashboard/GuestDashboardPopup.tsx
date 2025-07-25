@@ -1,19 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { X, Calendar, MapPin, Camera, Gift, MessageSquare, Clock, Heart, Users, CheckCircle, Bell, User, Plane, Utensils, Music, Car } from 'lucide-react';
+import { X, Calendar, MapPin, Camera, Gift, MessageSquare, Clock, Heart, Users, Bell, User, Plane, Utensils, Music, Car, Sparkles, HelpCircle, Bus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import GlassCard from '@/components/GlassCard';
-import { GlareCard } from '@/ui/aceternity/glare-card';
-import { TextGenerate } from '@/ui/aceternity/text-generate';
-import FeatureFlag from '@/components/ui/FeatureFlag';
-import AceternityErrorBoundary from '@/components/ui/AceternityErrorBoundary';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useAuth } from '@/hooks/useAuth';
 import { useNavigate } from 'react-router-dom';
-import { useRSVPStatus } from '@/hooks/useRSVPStatus';
+
 import { useWeddingEvents } from '@/hooks/useWeddingData';
-import { getLiquidGlassStyle, stylePresets } from '@/utils/styleHelpers';
-import styles from './dashboard.module.css';
+import { supabase } from '@/integrations/supabase/client';
+import '@/styles/dashboard-enhancements.css';
+import '@/styles/dashboard-animations.css';
 
 interface GuestDashboardPopupProps {
   onClose?: () => void;
@@ -22,27 +19,146 @@ interface GuestDashboardPopupProps {
 const GuestDashboardPopup: React.FC<GuestDashboardPopupProps> = ({ onClose }) => {
   const { user, profile } = useAuth();
   const navigate = useNavigate();
-  const { needsRSVP, rsvpData, hasRSVPd } = useRSVPStatus();
+
   const { events, loading: eventsLoading } = useWeddingEvents();
   
   const [daysUntilWedding, setDaysUntilWedding] = useState(0);
   const [currentTime, setCurrentTime] = useState(new Date());
+  const [weddingEvents, setWeddingEvents] = useState<any[]>([]);
+  const [loadingEvents, setLoadingEvents] = useState(true);
 
   useEffect(() => {
     // Calculate days until wedding (Ben & Ean's wedding - October 5, 2025)
-    const weddingDate = new Date('2025-10-05');
-    const today = new Date();
-    const diffTime = weddingDate.getTime() - today.getTime();
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    setDaysUntilWedding(Math.max(0, diffDays));
-    
-    // Update current time every minute
-    const timer = setInterval(() => {
-      setCurrentTime(new Date());
-    }, 60000);
-    
-    return () => clearInterval(timer);
+    const updateCountdown = () => {
+      const weddingDate = new Date('2025-10-05T15:00:00'); // 3 PM ceremony time
+      const now = new Date();
+      const diffTime = weddingDate.getTime() - now.getTime();
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      setDaysUntilWedding(Math.max(0, diffDays));
+      setCurrentTime(now);
+    };
+
+    // Initial calculation
+    updateCountdown();
+
+    // Update countdown every minute for accuracy
+    const countdownTimer = setInterval(updateCountdown, 60000);
+
+    // Load wedding events from database
+    loadWeddingEvents();
+
+    return () => clearInterval(countdownTimer);
   }, []);
+
+  const loadWeddingEvents = async () => {
+    try {
+      setLoadingEvents(true);
+      // Force fresh data fetch
+      const { data, error } = await supabase
+        .from('wedding_events')
+        .select('*')
+        .order('start_time', { ascending: true })
+        .eq('is_active', true); // Only get active events
+      
+      if (error) throw error;
+      
+      if (data && data.length > 0) {
+        console.log('Loaded wedding events from database:', data);
+        setWeddingEvents(data);
+      } else {
+        // Fallback events if none in database
+        setWeddingEvents([
+          {
+            id: 1,
+            title: 'Guest Arrival',
+            start_time: '2025-10-05T14:30:00+11:00',
+            location: 'Ben Ean',
+            description: 'Please arrive by 2:30 PM',
+            event_type: 'arrival'
+          },
+          {
+            id: 2,
+            title: 'Wedding Ceremony',
+            start_time: '2025-10-05T15:00:00+11:00',
+            location: 'Garden Terrace Lawn, Ben Ean',
+            description: 'Join us as we say "I do"',
+            event_type: 'ceremony'
+          },
+          {
+            id: 3,
+            title: 'Cocktail Hour',
+            start_time: '2025-10-05T16:00:00+11:00',
+            location: 'Ben Ean',
+            description: 'Drinks and canapés after ceremony',
+            event_type: 'cocktails'
+          },
+          {
+            id: 4,
+            title: 'Wedding Reception',
+            start_time: '2025-10-05T17:00:00+11:00',
+            location: 'Ben Ean',
+            description: 'Dinner, dancing & celebration',
+            event_type: 'reception'
+          },
+          {
+            id: 5,
+            title: 'Reception Concludes',
+            start_time: '2025-10-06T00:00:00+11:00',
+            location: 'Ben Ean',
+            description: 'End of formal celebrations',
+            event_type: 'end'
+          }
+        ]);
+      }
+    } catch (error) {
+      console.error('Error loading wedding events:', error);
+      // Use fallback events on error
+      setWeddingEvents([
+        {
+          id: 1,
+          title: 'Guest Arrival',
+          start_time: '2025-10-05T14:30:00+11:00',
+          location: 'Ben Ean',
+          description: 'Please arrive by 2:30 PM',
+          event_type: 'arrival'
+        },
+        {
+          id: 2,
+          title: 'Wedding Ceremony',
+          start_time: '2025-10-05T15:00:00+11:00',
+          location: 'Garden Terrace Lawn, Ben Ean',
+          description: 'Join us as we say "I do"',
+          event_type: 'ceremony'
+        },
+        {
+          id: 3,
+          title: 'Cocktail Hour',
+          start_time: '2025-10-05T16:00:00+11:00',
+          location: 'Ben Ean',
+          description: 'Drinks and canapés after ceremony',
+          event_type: 'cocktails'
+        },
+        {
+          id: 4,
+          title: 'Wedding Reception',
+          start_time: '2025-10-05T17:00:00+11:00',
+          location: 'Ben Ean',
+          description: 'Dinner, dancing & celebration',
+          event_type: 'reception'
+        },
+        {
+          id: 5,
+          title: 'Reception Concludes',
+          start_time: '2025-10-06T00:00:00+11:00',
+          location: 'Ben Ean',
+          description: 'End of formal celebrations',
+          event_type: 'end'
+        }
+      ]);
+    } finally {
+      setLoadingEvents(false);
+    }
+  };
 
   const handleNavigation = (path: string, external = false) => {
     if (onClose) onClose();
@@ -65,630 +181,411 @@ const GuestDashboardPopup: React.FC<GuestDashboardPopupProps> = ({ onClose }) =>
     }
   };
 
-  // Get RSVP status display
-  const getRSVPStatus = () => {
-    if (!user) return { text: 'Not logged in', color: 'text-gray-600', bgColor: 'bg-gray-50' };
-    if (!hasRSVPd) return { text: 'Pending', color: 'text-orange-600', bgColor: 'bg-orange-50' };
-    if (rsvpData?.status === 'attending') return { text: 'Attending', color: 'text-green-600', bgColor: 'bg-green-50' };
-    return { text: 'Not Attending', color: 'text-red-600', bgColor: 'bg-red-50' };
-  };
-  
-  const rsvpStatusInfo = getRSVPStatus();
+
   
   const quickStats = [
     {
       label: 'Days to Go',
       value: daysUntilWedding,
       icon: Calendar,
-      color: 'text-pink-600',
-      bgColor: 'bg-pink-50',
-      subtitle: 'Until the big day'
-    },
-    {
-      label: 'RSVP Status',
-      value: rsvpStatusInfo.text,
-      icon: CheckCircle,
-      color: rsvpStatusInfo.color,
-      bgColor: rsvpStatusInfo.bgColor,
-      subtitle: hasRSVPd ? 'You\'re all set!' : 'Action needed'
+      color: 'text-[#0066CC]',
+      bgColor: 'bg-[#0066CC]/10',
+      subtitle: 'Until the big day',
+      isCountdown: true
     },
     {
       label: 'Your Party',
       value: profile?.plus_one_name ? '2 guests' : user ? '1 guest' : 'Login to see',
       icon: Users,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-50',
+      color: 'text-[#0066CC]',
+      bgColor: 'bg-[#0066CC]/10',
       subtitle: profile?.plus_one_name ? `You + ${profile.plus_one_name}` : 'Just you'
     },
     {
       label: 'Events',
-      value: events?.length || '4',
+      value: weddingEvents?.length || '4',
       icon: Bell,
-      color: 'text-purple-600',
-      bgColor: 'bg-purple-50',
+      color: 'text-[#0066CC]',
+      bgColor: 'bg-[#0066CC]/10',
       subtitle: 'Wedding activities'
     }
   ];
 
-  const quickActions = [
+  const guestActions = [
     {
-      icon: Calendar,
-      title: 'RSVP',
-      subtitle: needsRSVP ? 'Please respond!' : 'Update response',
-      path: '/',
-      color: needsRSVP ? 'text-red-600' : 'text-blue-600',
-      urgent: needsRSVP,
-      onClick: () => {
-        if (onClose) onClose();
-        // Trigger RSVP popup instead of navigation
-        const event = new CustomEvent('openRSVP');
-        window.dispatchEvent(event);
-      }
-    },
-    {
-      icon: MapPin,
-      title: 'Venues',
-      subtitle: 'View locations & directions',
-      path: '/venue/ben-ean',
-      color: 'text-green-600'
+      icon: Bus,
+      title: 'Transportation',
+      subtitle: 'Shuttle service booking',
+      path: '/transport',
+      color: 'text-orange-600'
     },
     {
       icon: Gift,
-      title: 'Gifts',
-      subtitle: 'Honeymoon contribution (optional)',
+      title: 'Gift Registry',
+      subtitle: 'View wedding registry',
       path: 'https://mygiftregistry.com.au/id/tim-and-kirsten/',
-      color: 'text-purple-600',
-      external: true,
-      description: 'We are excited to have everyone we love gather together for an epic celebration - that is a gift on its own! There is no expectation for gifts from guests. If, however, you have the urge to give a gift, one option is to contribute towards honeymoon.'
-    },
-    {
-      icon: Camera,
-      title: 'Photo Gallery',
-      subtitle: 'Share your memories',
-      path: '/gallery',
-      color: 'text-pink-600'
-    },
-    {
-      icon: MessageSquare,
-      title: 'Social Hub',
-      subtitle: 'Chat & updates',
-      path: '/social',
-      color: 'text-indigo-600'
-    },
-    {
-      icon: Plane,
-      title: 'Travel & Stay',
-      subtitle: 'Accommodation & transport',
-      path: '/accommodation',
-      color: 'text-teal-600'
-    },
-    {
-      icon: Utensils,
-      title: 'Coming Soon',
-      subtitle: 'Menu & dietary information',
-      path: '#',
-      color: 'text-gray-500',
-      disabled: true
-    },
-    {
-      icon: Music,
-      title: 'Coming Soon',
-      subtitle: 'Entertainment & activities',
-      path: '#',
-      color: 'text-gray-500',
-      disabled: true
+      color: 'text-rose-600',
+      external: true
     }
   ];
 
-  // Use real events data or fallback to default
-  const weddingSchedule = events?.length ? events.slice(0, 4) : [
-    { 
-      time: '3:00 PM', 
-      title: 'Wedding Ceremony', 
-      location: 'Ben Ean Pokolbin', 
-      description: 'Join us as we say "I do"',
-      type: 'ceremony'
-    },
-    { 
-      time: '4:30 PM', 
-      title: 'Cocktail Hour', 
-      location: 'Gardens at Ben Ean', 
-      description: 'Drinks and canapés',
-      type: 'reception'
-    },
-    { 
-      time: '6:00 PM', 
-      title: 'Wedding Reception', 
-      location: 'Ben Ean Function Centre', 
-      description: 'Dinner, dancing & celebration',
-      type: 'reception'
-    },
-    { 
-      time: '11:00 PM', 
-      title: 'After Party', 
-      location: 'Prince of Mereweather', 
-      description: 'Continue the celebration',
-      type: 'afterparty'
-    }
-  ];
-
-  const recentUpdates = [
-    { 
-      type: 'info', 
-      title: 'Transportation Update', 
-      message: 'Shuttle service from Newcastle CBD at 2:30 PM', 
-      time: '2 hours ago',
-      urgent: false,
-      icon: Car
-    },
-    { 
-      type: 'venue', 
-      title: 'Venue Details Updated', 
-      message: 'Ceremony location confirmed at Ben Ean Pokolbin', 
-      time: '6 hours ago',
-      urgent: false,
-      icon: MapPin
-    },
-    { 
-      type: 'reminder', 
-      title: needsRSVP ? 'RSVP Required' : 'RSVP Confirmed', 
-      message: needsRSVP ? 'Please confirm your attendance by September 15th' : 'Thank you for confirming your attendance!', 
-      time: needsRSVP ? 'Action needed' : '3 days ago',
-      urgent: needsRSVP,
-      icon: Calendar
-    },
-    { 
-      type: 'social', 
-      title: 'Wedding Registry', 
-      message: 'Our gift registry is now available on Myer', 
-      time: '1 week ago',
-      urgent: false,
-      icon: Gift
-    }
-  ];
-
-  // Allow guest dashboard even without authentication
+  // Format time from ISO string
+  const formatEventTime = (isoString: string) => {
+    const date = new Date(isoString);
+    return date.toLocaleTimeString('en-AU', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true,
+      timeZone: 'Australia/Sydney'
+    });
+  };
 
   return (
     <div className="w-full h-full flex flex-col max-h-[90vh] overflow-hidden">
-      {/* Main Glass Container with Liquid Glass Effect */}
-      <div className={`w-full h-full max-h-[90vh] overflow-hidden rounded-3xl ${styles.liquidGlassContainer}`} style={{
-        background: 'linear-gradient(135deg, rgba(173, 216, 230, 0.3) 0%, rgba(221, 160, 221, 0.25) 25%, rgba(255, 182, 193, 0.2) 50%, rgba(255, 218, 185, 0.25) 75%, rgba(176, 224, 230, 0.3) 100%)',
-        backdropFilter: 'blur(35px) saturate(1.8)',
-        WebkitBackdropFilter: 'blur(35px) saturate(1.8)',
-        border: '1px solid rgba(255, 255, 255, 0.6)',
-        boxShadow: '0 20px 50px rgba(31, 38, 135, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.8)',
-        borderRadius: '24px',
-      }}>
-        
-        {/* Header with Pastel Glass Design */}
-        <div className="flex items-center justify-between p-6 rounded-t-3xl" style={{ 
-          borderBottom: '1px solid rgba(255, 255, 255, 0.3)',
-          background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.2) 0%, rgba(255, 255, 255, 0.1) 100%)'
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.3 }}
+        className="relative w-full h-full max-h-[90vh] overflow-hidden rounded-3xl transition-all duration-500"
+        style={{
+          background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.95) 0%, rgba(249, 250, 251, 0.9) 100%)',
+          backdropFilter: 'blur(120px) saturate(2)',
+          WebkitBackdropFilter: 'blur(120px) saturate(2)',
+          border: '1px solid rgba(255, 255, 255, 0.5)',
+          boxShadow: '0 30px 60px -15px rgba(0, 0, 0, 0.3), 0 0 0 1px rgba(255, 255, 255, 0.5) inset, 0 20px 40px -20px rgba(59, 130, 246, 0.15)',
         }}>
-          <div className="relative">
-            <h2 className="flex items-center" style={{
-              fontSize: '26px',
-              fontFamily: '"Bodoni Moda", serif',
-              fontWeight: '600',
-              color: '#000000'
-            }}>
-              <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3" style={{
-                background: 'linear-gradient(135deg, rgba(255, 182, 193, 0.8) 0%, rgba(255, 192, 203, 0.7) 100%)',
-                boxShadow: '0 4px 12px rgba(255, 182, 193, 0.3)'
-              }}>
-                <Heart className="w-5 h-5" style={{ color: '#FFFFFF' }} />
-              </div>
-              Your Dashboard
-            </h2>
-            <p style={{
-              fontSize: '14px',
-              fontFamily: '"Montserrat", sans-serif',
-              color: 'rgba(0, 0, 0, 0.6)',
-              marginLeft: '52px'
-            }}>Welcome, {profile?.first_name || user?.email || 'Guest'}!</p>
-          </div>
-          {onClose && (
-            <button
-              onClick={onClose}
-              className="rounded-full min-h-[44px] min-w-[44px] flex items-center justify-center transition-all duration-200 hover:scale-105"
-              style={{
-                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.35) 0%, rgba(255, 255, 255, 0.25) 100%)',
-                backdropFilter: 'blur(20px) saturate(1.8)',
-                WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
-                border: '1px solid rgba(255, 255, 255, 0.4)',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.08), inset 0 1px 1px rgba(255, 255, 255, 0.7)'
-              }}
-            >
-              <X className="w-5 h-5" style={{ color: '#000000' }} />
-            </button>
-          )}
+        
+        {/* Decorative background elements */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
+          <div className="absolute -top-40 -right-40 w-80 h-80 rounded-full filter blur-3xl opacity-10 animate-blob bg-blue-400 mix-blend-multiply"></div>
+          <div className="absolute -bottom-40 -left-40 w-80 h-80 rounded-full filter blur-3xl opacity-10 animate-blob animation-delay-2000 bg-purple-400 mix-blend-multiply"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-80 h-80 rounded-full filter blur-3xl opacity-10 animate-blob animation-delay-4000 bg-pink-400 mix-blend-multiply"></div>
         </div>
-
-        {/* Content */}
-        <div className="p-4 space-y-6 overflow-y-auto max-h-[calc(90vh-80px)]">
+        
+        {/* Enhanced Header */}
+        <div className="relative overflow-hidden border-b border-gray-200/50">
+          {/* Animated gradient background */}
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-600/5 via-purple-600/5 to-pink-600/5" />
+          <div className="absolute inset-0 bg-gradient-to-b from-transparent to-white/20" />
           
-          {/* Hero Countdown - Liquid Glass Design */}
-          <div className={`rounded-2xl overflow-hidden ${styles.liquidGlassSubtle}`} style={{
-            background: 'linear-gradient(135deg, rgba(255, 182, 193, 0.4) 0%, rgba(255, 218, 185, 0.35) 50%, rgba(173, 216, 230, 0.4) 100%)',
-            backdropFilter: 'blur(30px) saturate(1.8)',
-            WebkitBackdropFilter: 'blur(30px) saturate(1.8)',
-            border: '1px solid rgba(255, 255, 255, 0.5)',
-            boxShadow: '0 12px 40px rgba(255, 182, 193, 0.15), inset 0 1px 1px rgba(255, 255, 255, 0.8)',
-            borderRadius: '16px',
-          }}>
-            <div className="p-8 text-center">
-              {/* Countdown bubble */}
-              <div className="inline-block rounded-3xl p-6 mb-4" style={{
-                background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.4) 100%)',
-                backdropFilter: 'blur(20px) saturate(1.8)',
-                border: '1px solid rgba(255, 255, 255, 0.6)',
-                boxShadow: 'inset 0 2px 4px rgba(255, 255, 255, 0.8), 0 4px 16px rgba(31, 38, 135, 0.08)'
-              }}>
-                <div style={{
-                  fontSize: '48px',
-                  fontFamily: '"Bodoni Moda", serif',
-                  fontWeight: '700',
-                  background: 'linear-gradient(135deg, #FF6B6B 0%, #9B59B6 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-                }}>
-                  {daysUntilWedding}
-                </div>
-              </div>
-              
-              <FeatureFlag 
-                name="aceternity.text-generate" 
-                fallback={
-                  <div className="text-xl font-semibold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-2">
-                    Days Until Ben & Ean's Wedding
-                  </div>
-                }
+          <div className="relative flex items-center justify-between p-6">
+            <div className="flex items-center space-x-4">
+              <motion.div 
+                initial={{ rotate: -180, opacity: 0 }}
+                animate={{ rotate: 0, opacity: 1 }}
+                transition={{ duration: 0.5 }}
+                className="relative"
               >
-                <AceternityErrorBoundary 
-                  componentName="TextGenerate (Wedding Countdown)"
-                  fallback={
-                    <div className="text-xl font-semibold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-2">
-                      Days Until Ben & Ean's Wedding
-                    </div>
-                  }
-                >
-                  <TextGenerate 
-                    text="Days Until Ben & Ean's Wedding"
-                    className="text-xl font-semibold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-2"
-                    wedding={true}
-                    duration={1}
-                    staggerDelay={0.05}
-                  />
-                </AceternityErrorBoundary>
-              </FeatureFlag>
-              <div className="text-sm text-gray-600/80 mb-3">October 5, 2025 • Hunter Valley</div>
-              
-              {/* Time pill */}
-              <div className="inline-block bg-white/30 backdrop-blur-sm px-4 py-2 rounded-full border border-white/40 shadow-lg">
-                <div className="text-xs font-medium text-gray-700">
-                  {currentTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-600 to-purple-600 rounded-2xl blur-xl opacity-50"></div>
+                <div className="relative p-4 rounded-2xl bg-gradient-to-br from-blue-600 to-purple-600 shadow-2xl">
+                  <Heart className="w-7 h-7 text-white" />
                 </div>
+              </motion.div>
+              <div>
+                <motion.h2 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.2 }}
+                  className="text-3xl font-bold bg-gradient-to-r from-gray-900 via-blue-900 to-purple-900 bg-clip-text text-transparent"
+                >
+                  Guest Dashboard
+                </motion.h2>
+                <motion.p 
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.3 }}
+                  className="text-sm mt-1 flex items-center gap-2 text-gray-600"
+                >
+                  <span className="font-medium text-gray-700">
+                    Welcome, {profile?.first_name || 'Guest'}
+                  </span>
+                  <span className="text-gray-400">•</span>
+                  <span>Tim & Kirsten's Wedding</span>
+                </motion.p>
               </div>
             </div>
+            {onClose && (
+              <motion.button
+                whileHover={{ scale: 1.05, rotate: 90 }}
+                whileTap={{ scale: 0.95 }}
+                onClick={onClose}
+                className="relative p-3 rounded-2xl backdrop-blur-xl border transition-all duration-300 group bg-white/50 border-gray-200/50 hover:bg-white/80 hover:border-gray-300/50 hover:shadow-lg"
+              >
+                <X className="w-5 h-5 transition-colors duration-300 text-gray-600 group-hover:text-gray-900" />
+              </motion.button>
+            )}
           </div>
+        </div>
+
+        {/* Enhanced Content with Custom Scrollbar */}
+        <div className="p-6 space-y-8 overflow-y-auto max-h-[calc(90vh-100px)] scrollbar-thin scrollbar-thumb-blue-500/20 scrollbar-track-transparent hover:scrollbar-thumb-blue-500/30">
+          
+          {/* Hero Countdown Section */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="relative overflow-hidden rounded-2xl"
+            style={{
+              background: 'linear-gradient(145deg, rgba(59, 130, 246, 0.05) 0%, rgba(147, 51, 234, 0.05) 100%)',
+              backdropFilter: 'blur(40px) saturate(1.8)',
+              WebkitBackdropFilter: 'blur(40px) saturate(1.8)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              boxShadow: '0 10px 30px rgba(0, 0, 0, 0.1), inset 0 1px 1px rgba(255, 255, 255, 0.5)'
+            }}
+          >
+            <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 to-purple-500/5" />
+            <div className="relative p-8 text-center">
+              <motion.div
+                initial={{ scale: 0.5, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                transition={{ delay: 0.3, type: "spring", stiffness: 200 }}
+                className="inline-block"
+              >
+                <div className="text-7xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                  {daysUntilWedding}
+                </div>
+                <div className="text-xl font-semibold text-gray-700 mb-1">Days Until</div>
+                <div className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
+                  Tim & Kirsten's Wedding
+                </div>
+                <div className="text-sm text-gray-500 mt-2">October 5, 2025 • Hunter Valley</div>
+              </motion.div>
+            </div>
+          </motion.div>
 
           {/* Quick Stats Grid */}
           <div className="grid grid-cols-2 gap-4">
             {quickStats.map((stat, index) => {
               const Icon = stat.icon;
+              const isCountdown = stat.isCountdown;
+
               return (
-                <FeatureFlag 
+                <motion.div
                   key={index}
-                  name="aceternity.glare-card" 
-                  fallback={
-                    <div key={index} className="relative group cursor-pointer">
-                      <div className="bg-white/25 backdrop-blur-xl rounded-2xl border border-white/30 shadow-lg hover:shadow-2xl transition-all duration-300 group-hover:scale-105 overflow-hidden">
-                        <div className={`absolute inset-0 ${stat.bgColor} opacity-20 rounded-2xl`}></div>
-                        <div className="absolute inset-[1px] bg-gradient-to-br from-white/20 to-transparent rounded-2xl"></div>
-                        <div className="relative p-5 text-center">
-                          <div className="w-14 h-14 mx-auto mb-3 bg-white/40 backdrop-blur-lg rounded-2xl border border-white/50 shadow-inner flex items-center justify-center relative overflow-hidden">
-                            <div className="absolute inset-2 bg-gradient-to-br from-white/30 to-transparent rounded-xl"></div>
-                            <Icon className={`relative w-7 h-7 ${stat.color} drop-shadow-lg`} />
-                          </div>
-                          <div className={`text-2xl font-bold ${stat.color} mb-1 drop-shadow-lg`}>{stat.value}</div>
-                          <div className="text-xs font-semibold text-gray-700/90 mb-1">{stat.label}</div>
-                          <div className="text-xs text-gray-600/80">{stat.subtitle}</div>
-                        </div>
-                      </div>
-                    </div>
-                  }
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.1 + index * 0.05 }}
+                  whileHover={{ scale: 1.02 }}
+                  className="relative group"
                 >
-                  <AceternityErrorBoundary 
-                    componentName={`GlareCard (${stat.label})`}
-                    fallback={
-                      <div key={index} className="relative group cursor-pointer">
-                        <div className="bg-white/25 backdrop-blur-xl rounded-2xl border border-white/30 shadow-lg hover:shadow-2xl transition-all duration-300 group-hover:scale-105 overflow-hidden">
-                          <div className={`absolute inset-0 ${stat.bgColor} opacity-20 rounded-2xl`}></div>
-                          <div className="relative p-5 text-center">
-                            <div className="w-14 h-14 mx-auto mb-3 bg-white/40 backdrop-blur-lg rounded-2xl border border-white/50 shadow-inner flex items-center justify-center">
-                              <Icon className={`w-7 h-7 ${stat.color}`} />
-                            </div>
-                            <div className={`text-2xl font-bold ${stat.color} mb-1`}>{stat.value}</div>
-                            <div className="text-xs font-semibold text-gray-700/90 mb-1">{stat.label}</div>
-                            <div className="text-xs text-gray-600/80">{stat.subtitle}</div>
-                          </div>
-                        </div>
-                      </div>
-                    }
+                  <div className={`relative overflow-hidden rounded-2xl transition-all duration-500 shadow-lg hover:shadow-2xl hover:-translate-y-1 ${
+                    isCountdown
+                      ? 'bg-gradient-to-br from-[#0066CC]/10 via-white/95 to-[#0066CC]/5 border-2 border-[#0066CC]/20 hover:border-[#0066CC]/40'
+                      : 'bg-white/90 border border-gray-200/50 hover:border-[#0066CC]/30'
+                  }`}
+                    style={{
+                      backdropFilter: 'blur(30px) saturate(1.8)',
+                      WebkitBackdropFilter: 'blur(30px) saturate(1.8)',
+                    }}
                   >
-                    <GlareCard 
-                      key={index}
-                      className="group"
-                      glareColor="rgba(255, 215, 0, 0.15)"
-                      glareSize={300}
-                      rotationRange={15}
-                    >
-                      <div className={`bg-white/25 backdrop-blur-xl rounded-2xl border border-white/30 shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden ${styles.statCard}`}>
-                        <div className={`absolute inset-0 ${stat.bgColor} opacity-20 rounded-2xl`}></div>
-                        <div className="absolute inset-[1px] bg-gradient-to-br from-white/20 to-transparent rounded-2xl"></div>
-                        <div className="relative p-5 text-center">
-                          <div className="w-14 h-14 mx-auto mb-3 bg-white/40 backdrop-blur-lg rounded-2xl border border-white/50 shadow-inner flex items-center justify-center relative overflow-hidden">
-                            <div className="absolute inset-2 bg-gradient-to-br from-white/30 to-transparent rounded-xl"></div>
-                            <Icon className={`relative w-7 h-7 ${stat.color} drop-shadow-lg`} />
-                          </div>
-                          <div className={`text-2xl font-bold ${stat.color} mb-1 drop-shadow-lg`} style={{
-                            fontFamily: '"Bodoni Moda", serif',
-                            fontWeight: '700'
-                          }}>{stat.value}</div>
-                          <div className="text-xs font-semibold text-gray-700/90 mb-1" style={{
-                            fontFamily: '"Montserrat", sans-serif',
-                            fontWeight: '600'
-                          }}>{stat.label}</div>
-                          <div className="text-xs text-gray-600/80" style={{
-                            fontFamily: '"Montserrat", sans-serif'
-                          }}>{stat.subtitle}</div>
+                    {/* Enhanced shimmer effect for countdown */}
+                    <div className={`absolute inset-0 ${
+                      isCountdown
+                        ? 'bg-gradient-to-r from-transparent via-[#0066CC]/15 to-transparent'
+                        : 'bg-gradient-to-r from-transparent via-blue-500/10 to-transparent'
+                    } -translate-x-full group-hover:translate-x-full transition-transform duration-700`} />
+
+                    {/* Special countdown glow */}
+                    {isCountdown && (
+                      <div className="absolute inset-0 bg-gradient-to-br from-[#0066CC]/5 via-transparent to-[#0066CC]/5 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                    )}
+
+                    <div className="relative p-6 text-center">
+                      <div className="relative inline-flex items-center justify-center w-16 h-16 mx-auto mb-4">
+                        <div className={`absolute inset-0 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500 ${
+                          isCountdown
+                            ? 'bg-gradient-to-br from-[#0066CC]/30 to-[#0066CC]/10'
+                            : 'bg-gradient-to-br from-blue-500/20 to-purple-500/20'
+                        }`}></div>
+                        <div className={`relative flex items-center justify-center w-full h-full rounded-2xl border shadow-lg group-hover:shadow-xl transition-all duration-500 transform group-hover:scale-110 ${
+                          isCountdown
+                            ? 'bg-gradient-to-br from-[#0066CC]/10 to-white border-[#0066CC]/30 group-hover:border-[#0066CC]/50'
+                            : 'bg-gradient-to-br from-white to-gray-50 border-gray-200 group-hover:border-[#0066CC]/30'
+                        }`}>
+                          <Icon className={`w-8 h-8 ${stat.color} transition-all duration-300 group-hover:scale-110 ${
+                            isCountdown ? 'drop-shadow-sm' : ''
+                          }`} />
                         </div>
                       </div>
-                    </GlareCard>
-                  </AceternityErrorBoundary>
-                </FeatureFlag>
+
+                      {/* Enhanced countdown value display */}
+                      <div className={`${
+                        isCountdown
+                          ? 'text-3xl font-bold bg-gradient-to-r from-[#0066CC] to-[#0066CC]/80 bg-clip-text text-transparent mb-2'
+                          : `text-2xl font-bold ${stat.color} mb-1`
+                      }`}>
+                        {isCountdown && (
+                          <motion.span
+                            key={stat.value}
+                            initial={{ scale: 1.1, opacity: 0 }}
+                            animate={{ scale: 1, opacity: 1 }}
+                            transition={{ duration: 0.3 }}
+                          >
+                            {stat.value}
+                          </motion.span>
+                        )}
+                        {!isCountdown && stat.value}
+                      </div>
+
+                      <div className={`text-sm font-semibold mb-1 ${
+                        isCountdown ? 'text-[#0066CC]/80' : 'text-gray-700'
+                      }`}>{stat.label}</div>
+                      <div className={`text-xs ${
+                        isCountdown ? 'text-[#0066CC]/60' : 'text-gray-500'
+                      }`}>{stat.subtitle}</div>
+
+                      {/* Special countdown pulse indicator */}
+                      {isCountdown && (
+                        <div className="absolute top-3 right-3">
+                          <div className="w-2 h-2 bg-[#0066CC] rounded-full animate-pulse"></div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </motion.div>
               );
             })}
           </div>
 
-          {/* Recent Updates - Enhanced */}
-          <div className={`bg-white/20 backdrop-blur-xl rounded-2xl border border-white/30 shadow-2xl overflow-hidden ${styles.liquidGlassCard}`}>
-            <div className="p-5 bg-white/10 border-b border-white/20 relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 to-cyan-500/10"></div>
-              <h3 className="relative text-lg font-semibold flex items-center bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-cyan-500 flex items-center justify-center mr-3 shadow-lg">
-                  <Bell className="w-4 h-4 text-white" />
+          {/* Guest Actions - Admin Style */}
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-gradient-to-br from-blue-500/20 to-purple-500/20 backdrop-blur-xl">
+                  <Sparkles className="w-5 h-5 text-blue-600" />
                 </div>
-                Latest Updates
-              </h3>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900">Guest Actions</h3>
+                  <p className="text-sm text-gray-500">Quick access to wedding features</p>
+                </div>
+              </div>
             </div>
-            <div className="p-5 space-y-4">
-              {recentUpdates.map((update, index) => {
-                const UpdateIcon = update.icon;
+            <div className="grid grid-cols-2 gap-4">
+              {guestActions.map((action, index) => {
+                const Icon = action.icon;
                 return (
-                  <div key={index} className={`flex items-start space-x-4 p-4 rounded-xl backdrop-blur-sm border transition-all duration-300 hover:shadow-lg group relative overflow-hidden ${
-                    update.urgent 
-                      ? 'bg-orange-50/60 border-orange-200/60 hover:bg-orange-100/80' 
-                      : 'bg-white/20 border-white/30 hover:bg-white/30'
-                  }`}>
-                    {/* Inner glow */}
-                    <div className="absolute inset-[1px] bg-gradient-to-br from-white/20 to-transparent rounded-xl"></div>
-                    
-                    {/* Icon container */}
-                    <div className="relative w-10 h-10 bg-white/40 backdrop-blur-sm rounded-xl border border-white/50 shadow-inner flex items-center justify-center shrink-0">
-                      <UpdateIcon className={`w-5 h-5 ${update.urgent ? 'text-orange-600' : 'text-gray-600'} drop-shadow-sm`} />
-                    </div>
-                    
-                    <div className="relative flex-1 min-w-0">
-                      <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-semibold text-sm text-gray-800 truncate">{update.title}</h4>
-                        {update.urgent && (
-                          <div className="w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center shadow-lg shrink-0 ml-2">
-                            <span className="text-white text-xs font-bold">!</span>
-                          </div>
-                        )}
+                  <motion.button
+                    key={index}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: index * 0.05 }}
+                    whileHover={{ scale: 1.03 }}
+                    whileTap={{ scale: 0.98 }}
+                    onClick={() => handleNavigation(action.path, action.external)}
+                    className="relative text-left rounded-2xl transition-all duration-500 group overflow-hidden bg-white/90 border border-gray-200/50 hover:border-blue-400/50 shadow-lg hover:shadow-2xl hover:-translate-y-1"
+                    style={{
+                      padding: '24px',
+                      minHeight: '150px',
+                      background: 'linear-gradient(145deg, rgba(255, 255, 255, 0.9) 0%, rgba(249, 250, 251, 0.8) 100%)',
+                      backdropFilter: 'blur(30px) saturate(1.8)',
+                      WebkitBackdropFilter: 'blur(30px) saturate(1.8)',
+                    }}
+                  >
+                    {/* Enhanced hover effect overlay */}
+                    <div className="absolute inset-0 bg-gradient-to-r from-transparent via-blue-500/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+
+                    <div className="relative h-full flex flex-col">
+                      <div className="relative inline-flex items-center justify-center w-16 h-16 mx-auto mb-4">
+                        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-2xl blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                        <div className="relative flex items-center justify-center w-full h-full rounded-2xl border shadow-lg group-hover:shadow-xl transition-all duration-500 transform group-hover:scale-110 bg-gradient-to-br from-white to-gray-50 border-gray-200 group-hover:border-blue-300">
+                          <Icon className={`w-8 h-8 ${action.color} transition-all duration-300 group-hover:scale-110`} />
+                        </div>
                       </div>
-                      <p className="text-xs text-gray-600/90 leading-relaxed mb-2">{update.message}</p>
-                      <div className="inline-block bg-white/30 backdrop-blur-sm px-2 py-1 rounded-full border border-white/40">
-                        <span className="text-xs text-gray-600 font-medium">{update.time}</span>
+
+                      <div className="space-y-1 text-center flex-1">
+                        <div className="font-bold text-sm leading-tight text-gray-900">
+                          {action.title}
+                        </div>
+                        <div className="text-xs leading-relaxed line-clamp-2 text-gray-600">
+                          {action.subtitle}
+                        </div>
+                      </div>
+
+                      {/* Urgent indicator */}
+                      {action.urgent && (
+                        <div className="absolute top-3 right-3 w-3 h-3 bg-red-500 rounded-full animate-pulse" />
+                      )}
+
+                      {/* Arrow indicator */}
+                      <div className="absolute top-3 right-3 transform translate-x-2 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-500 text-blue-600">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                        </svg>
                       </div>
                     </div>
-                  </div>
+                  </motion.button>
                 );
               })}
             </div>
           </div>
 
-          {/* Quick Actions - Enhanced Neumorphic */}
-          <div className={`bg-white/20 backdrop-blur-xl rounded-2xl border border-white/30 shadow-2xl overflow-hidden ${styles.liquidGlassCard}`}>
-            <div className="p-5 bg-white/10 border-b border-white/20 relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-pink-500/10 to-purple-500/10"></div>
-              <h3 className="relative text-lg font-semibold flex items-center bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-pink-400 to-rose-500 flex items-center justify-center mr-3 shadow-lg">
-                  <Heart className="w-4 h-4 text-white" />
+          {/* Wedding Timeline - Enhanced Admin Style */}
+          <div>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-gradient-to-br from-purple-500/20 to-pink-500/20 backdrop-blur-xl">
+                  <Clock className="w-5 h-5 text-purple-600" />
                 </div>
-                Quick Actions
-              </h3>
+                <div>
+                  <h3 className="text-xl font-semibold text-gray-900">Wedding Day Timeline</h3>
+                  <p className="text-sm text-gray-500">October 5, 2025 Schedule</p>
+                </div>
+              </div>
             </div>
-            <div className="p-5">
-              <div className="grid grid-cols-2 gap-4">
-                {quickActions.map((action, index) => {
-                  const Icon = action.icon;
-                  const isGifts = action.title === 'Gifts';
-                  
-                  return (
-                    <div key={index} className="relative group">
-                      <button
-                        className={`w-full p-4 rounded-xl text-left transition-all duration-300 group-hover:scale-105 relative overflow-hidden ${styles.actionButton} ${
-                          action.disabled 
-                            ? 'bg-gray-100/50 cursor-not-allowed opacity-60' 
-                            : action.urgent 
-                              ? 'bg-red-50/60 border border-red-200/60 hover:bg-red-100/80 hover:shadow-xl' 
-                              : 'bg-white/30 border border-white/40 hover:bg-white/40 hover:shadow-xl backdrop-blur-lg'
-                        }`}
-                        onClick={() => handleActionClick(action)}
-                        disabled={action.disabled}
-                      >
-                        {/* Inner highlight */}
-                        <div className="absolute inset-[1px] bg-gradient-to-br from-white/20 to-transparent rounded-xl"></div>
-                        
-                        <div className="relative">
-                          <div className="flex items-center justify-between mb-3">
-                            {/* Neumorphic icon container */}
-                            <div className="w-10 h-10 bg-white/40 backdrop-blur-sm rounded-xl border border-white/50 shadow-inner flex items-center justify-center">
-                              <Icon className={`w-5 h-5 ${action.color} drop-shadow-sm`} />
-                            </div>
-                            {action.urgent && (
-                              <div className="w-6 h-6 bg-red-500 rounded-full flex items-center justify-center shadow-lg">
-                                <span className="text-white text-xs font-bold">!</span>
-                              </div>
-                            )}
-                          </div>
-                          <div className="font-semibold text-sm text-gray-800 mb-1">{action.title}</div>
-                          <div className="text-xs text-gray-600/90 leading-relaxed">{action.subtitle}</div>
-                        </div>
-                      </button>
-                      
-                      {/* Enhanced Gift description tooltip */}
-                      {isGifts && action.description && (
-                        <div className="absolute top-full left-0 right-0 mt-3 p-4 bg-white/95 backdrop-blur-xl rounded-xl border border-white/50 shadow-2xl text-xs text-gray-700 leading-relaxed z-20 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                          <div className="font-semibold mb-2 text-purple-700 flex items-center">
-                            <Gift className="w-4 h-4 mr-2" />
-                            Gift Information
-                          </div>
-                          <p className="text-gray-600">{action.description}</p>
-                        </div>
+            <div className="relative overflow-hidden rounded-2xl bg-white/90 border border-gray-200/50 shadow-lg" style={{
+              backdropFilter: 'blur(30px) saturate(1.8)',
+              WebkitBackdropFilter: 'blur(30px) saturate(1.8)',
+            }}>
+              <div className="p-6 space-y-4">
+                {loadingEvents ? (
+                  <div className="text-center py-8">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
+                    <p className="text-gray-500 mt-2">Loading events...</p>
+                  </div>
+                ) : (
+                  // Filter to show only October 5th events
+                  weddingEvents
+                    .filter(event => {
+                      const eventDate = new Date(event.start_time);
+                      return eventDate.getDate() === 5 && eventDate.getMonth() === 9; // October is month 9 (0-indexed)
+                    })
+                    .map((event, index, filteredEvents) => (
+                    <motion.div
+                      key={event.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: index * 0.1 }}
+                      className="relative flex items-start gap-4 p-4 rounded-xl bg-gradient-to-r from-blue-50/50 to-purple-50/50 border border-gray-200/50 hover:shadow-md transition-all duration-300"
+                    >
+                      {/* Timeline connector */}
+                      {index < filteredEvents.length - 1 && (
+                        <div className="absolute left-[58px] top-[60px] w-0.5 h-[calc(100%+8px)] bg-gradient-to-b from-blue-300 to-purple-300 opacity-30"></div>
                       )}
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
-          </div>
-
-          {/* Wedding Timeline - Enhanced */}
-          <div className={`bg-white/20 backdrop-blur-xl rounded-2xl border border-white/30 shadow-2xl overflow-hidden ${styles.liquidGlassCard}`}>
-            <div className="p-5 bg-white/10 border-b border-white/20 relative">
-              <div className="absolute inset-0 bg-gradient-to-r from-purple-500/10 to-pink-500/10"></div>
-              <h3 className="relative text-lg font-semibold flex items-center bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-                <div className="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-500 flex items-center justify-center mr-3 shadow-lg">
-                  <Clock className="w-4 h-4 text-white" />
-                </div>
-                Wedding Day Timeline
-              </h3>
-            </div>
-            <div className="p-5 space-y-4">
-              {weddingSchedule.map((event, index) => (
-                <div key={index} className={`flex items-start space-x-5 p-4 rounded-xl bg-gradient-to-r from-purple-50/60 to-pink-50/60 backdrop-blur-sm border border-purple-200/50 shadow-lg hover:shadow-xl transition-all duration-300 group relative overflow-hidden ${styles.scheduleItem}`}>
-                  {/* Connecting line for timeline effect */}
-                  {index < weddingSchedule.length - 1 && (
-                    <div className="absolute left-8 top-16 w-0.5 h-8 bg-gradient-to-b from-purple-300 to-pink-300 opacity-50"></div>
-                  )}
-                  
-                  {/* Inner glow */}
-                  <div className="absolute inset-[1px] bg-gradient-to-br from-white/20 to-transparent rounded-xl"></div>
-                  
-                  {/* Time badge */}
-                  <div className="relative shrink-0">
-                    <div className="bg-white/60 backdrop-blur-lg rounded-xl px-4 py-3 shadow-inner border border-white/50 relative overflow-hidden">
-                      <div className="absolute inset-1 bg-gradient-to-br from-white/30 to-transparent rounded-lg"></div>
-                      <div className="relative text-sm font-bold text-purple-700 text-center whitespace-nowrap">
-                        {event.time}
+                      
+                      {/* Time badge */}
+                      <div className="shrink-0">
+                        <div className="bg-gradient-to-br from-blue-500 to-purple-600 text-white rounded-xl px-4 py-2 font-semibold text-sm shadow-lg min-w-[100px] text-center">
+                          {formatEventTime(event.start_time)}
+                        </div>
                       </div>
-                    </div>
-                  </div>
-                  
-                  <div className="relative flex-1 min-w-0">
-                    <div className="font-bold text-sm text-gray-800 mb-2">{event.title}</div>
-                    <div className="text-xs text-gray-600/90 mb-2 flex items-center">
-                      <div className="w-5 h-5 bg-white/40 rounded-full flex items-center justify-center mr-2 shadow-inner">
-                        <MapPin className="w-3 h-3 text-purple-600" />
+                      
+                      <div className="flex-1">
+                        <h4 className="font-bold text-gray-800 mb-1">{event.title}</h4>
+                        <p className="text-sm text-gray-600 mb-1 flex items-center">
+                          <MapPin className="w-3 h-3 mr-1" />
+                          {event.location}
+                        </p>
+                        <p className="text-xs text-gray-500">{event.description}</p>
                       </div>
-                      {event.location}
-                    </div>
-                    <div className="text-xs text-gray-600/80 leading-relaxed">{event.description}</div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* RSVP Status Card - Final Enhanced */}
-          <div className={`bg-white/20 backdrop-blur-xl rounded-2xl border shadow-2xl overflow-hidden relative ${styles.liquidGlassCard} ${
-            needsRSVP ? 'border-orange-300/60 shadow-orange-500/25' : 'border-green-300/60 shadow-green-500/25'
-          }`}>
-            {/* Animated accent bar for urgent RSVP */}
-            {needsRSVP && (
-              <div className="h-1 bg-gradient-to-r from-yellow-400 via-orange-400 to-red-400 animate-pulse"></div>
-            )}
-            
-            <div className="p-5 bg-white/10 border-b border-white/20 relative">
-              <div className={`absolute inset-0 ${needsRSVP ? 'bg-gradient-to-r from-orange-500/10 to-red-500/10' : 'bg-gradient-to-r from-green-500/10 to-emerald-500/10'}`}></div>
-              <h3 className="relative text-lg font-semibold flex items-center bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent">
-                <div className={`w-8 h-8 rounded-full bg-gradient-to-br flex items-center justify-center mr-3 shadow-lg ${
-                  needsRSVP ? 'from-orange-400 to-red-500' : 'from-green-400 to-emerald-500'
-                }`}>
-                  <User className="w-4 h-4 text-white" />
-                </div>
-                Your RSVP Status
-              </h3>
-            </div>
-            
-            <div className="p-5 space-y-5">
-              <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                  <span className="text-sm font-semibold text-gray-700">Status:</span>
-                  <div className={`px-4 py-2 rounded-full text-xs font-bold backdrop-blur-sm border shadow-lg ${
-                    needsRSVP 
-                      ? "bg-orange-100/80 text-orange-700 border-orange-300/60" 
-                      : hasRSVPd && rsvpData?.status === 'attending' 
-                        ? "bg-green-100/80 text-green-700 border-green-300/60" 
-                        : "bg-red-100/80 text-red-700 border-red-300/60"
-                  }`}>
-                    {needsRSVP ? 'Action Required' : hasRSVPd && rsvpData?.status === 'attending' ? 'Attending' : hasRSVPd ? 'Not Attending' : 'Pending'}
-                  </div>
-                </div>
-                {user && (
-                  <div className="flex justify-between items-center">
-                    <span className="text-sm font-semibold text-gray-700">Party size:</span>
-                    <div className="bg-white/40 backdrop-blur-sm px-3 py-2 rounded-full border border-white/50 shadow-lg">
-                      <span className="text-sm text-gray-800 font-semibold">
-                        {profile?.plus_one_name ? `2 guests (You + ${profile.plus_one_name})` : '1 guest (You)'}
-                      </span>
-                    </div>
-                  </div>
-                )}
-                {!user && (
-                  <div className="text-center p-4 bg-blue-100/60 backdrop-blur-sm rounded-xl border border-blue-300/60 shadow-lg">
-                    <p className="text-sm text-blue-700 font-medium">Login to manage your RSVP</p>
-                  </div>
+                    </motion.div>
+                  ))
                 )}
               </div>
-              
-              <button
-                className={`w-full py-4 px-6 rounded-xl font-semibold text-sm backdrop-blur-sm transition-all duration-300 hover:scale-105 hover:shadow-2xl transform relative overflow-hidden ${
-                  needsRSVP 
-                    ? `bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white shadow-orange-500/50 ${styles.liquidGlassButton}` 
-                    : `bg-white/40 hover:bg-white/50 border border-white/50 text-gray-800 shadow-lg ${styles.liquidGlassButton}`
-                }`}
-                onClick={() => {
-                  if (onClose) onClose();
-                  const event = new CustomEvent('openRSVP');
-                  window.dispatchEvent(event);
-                }}
-              >
-                {/* Button highlight effect */}
-                <div className="absolute inset-[1px] bg-gradient-to-br from-white/20 to-transparent rounded-xl"></div>
-                <span className="relative">
-                  {needsRSVP ? 'Complete RSVP Now' : 'Update RSVP'}
-                </span>
-              </button>
             </div>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 };

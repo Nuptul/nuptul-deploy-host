@@ -1,0 +1,229 @@
+/* Enhanced Glass Morphism System with Dynamic Adaptation */
+
+/* CSS Custom Properties for Dynamic Glass */
+:root {
+  /* Dynamic color variables that can be updated via JS */
+  --glass-tint-primary: 173, 216, 230; /* RGB values for mixing */
+  --glass-tint-secondary: 255, 182, 193;
+  --glass-tint-accent: 221, 160, 221;
+  
+  /* Adaptive opacity based on background luminance */
+  --glass-opacity-light-bg: 0.15;
+  --glass-opacity-dark-bg: 0.25;
+  --glass-opacity-image-bg: 0.35;
+  
+  /* Mobile-optimized blur values */
+  --glass-blur-mobile: 10px;
+  --glass-blur-tablet: 15px;
+  --glass-blur-desktop: 20px;
+  --glass-blur-luxury: 30px;
+  
+  /* Dynamic saturation based on content */
+  --glass-saturation-vibrant: 2.2;
+  --glass-saturation-muted: 1.4;
+  --glass-saturation-neutral: 1.8;
+}
+
+/* Adaptive Glass Base Class */
+.glass-adaptive {
+  /* Dynamic background with CSS variables */
+  background: linear-gradient(
+    135deg,
+    rgba(var(--glass-tint-primary), var(--glass-opacity-light-bg)) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(var(--glass-tint-secondary), var(--glass-opacity-light-bg)) 100%
+  );
+  
+  /* Progressive enhancement for backdrop-filter */
+  backdrop-filter: blur(var(--glass-blur-mobile)) saturate(var(--glass-saturation-neutral));
+  -webkit-backdrop-filter: blur(var(--glass-blur-mobile)) saturate(var(--glass-saturation-neutral));
+  
+  /* Adaptive border based on background */
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  
+  /* Performance optimizations */
+  will-change: backdrop-filter, background-color;
+  transform: translateZ(0);
+  contain: layout style paint;
+}
+
+/* Tablet and up */
+@media (min-width: 768px) {
+  .glass-adaptive {
+    backdrop-filter: blur(var(--glass-blur-tablet)) saturate(var(--glass-saturation-neutral));
+    -webkit-backdrop-filter: blur(var(--glass-blur-tablet)) saturate(var(--glass-saturation-neutral));
+  }
+}
+
+/* Desktop and up */
+@media (min-width: 1024px) {
+  .glass-adaptive {
+    backdrop-filter: blur(var(--glass-blur-desktop)) saturate(var(--glass-saturation-neutral));
+    -webkit-backdrop-filter: blur(var(--glass-blur-desktop)) saturate(var(--glass-saturation-neutral));
+  }
+}
+
+/* Luxury displays (4K and up) */
+@media (min-width: 2560px) {
+  .glass-adaptive {
+    backdrop-filter: blur(var(--glass-blur-luxury)) saturate(var(--glass-saturation-vibrant));
+    -webkit-backdrop-filter: blur(var(--glass-blur-luxury)) saturate(var(--glass-saturation-vibrant));
+  }
+}
+
+/* Context-aware glass variations */
+.glass-over-image {
+  --glass-opacity-current: var(--glass-opacity-image-bg);
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.2) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(0, 0, 0, 0.15) 100%
+  );
+  backdrop-filter: blur(25px) saturate(1.5) brightness(1.1);
+}
+
+.glass-over-dark {
+  --glass-opacity-current: var(--glass-opacity-dark-bg);
+  background: linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.2) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0.15) 100%
+  );
+  border-color: rgba(255, 255, 255, 0.4);
+}
+
+.glass-over-light {
+  --glass-opacity-current: var(--glass-opacity-light-bg);
+  background: linear-gradient(
+    135deg,
+    rgba(0, 0, 0, 0.05) 0%,
+    rgba(0, 0, 0, 0.02) 50%,
+    rgba(0, 0, 0, 0.03) 100%
+  );
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile-first responsive utilities */
+.glass-mobile-optimized {
+  /* Reduce complexity on mobile */
+  @media (max-width: 768px) {
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    background: rgba(255, 255, 255, 0.9);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  /* Progressive enhancement for tablets */
+  @media (min-width: 769px) and (max-width: 1024px) {
+    backdrop-filter: blur(12px) saturate(1.5);
+    -webkit-backdrop-filter: blur(12px) saturate(1.5);
+  }
+}
+
+/* Dynamic color shift animation */
+@keyframes glassColorShift {
+  0%, 100% {
+    --glass-tint-primary: 173, 216, 230;
+    --glass-tint-secondary: 255, 182, 193;
+  }
+  25% {
+    --glass-tint-primary: 221, 160, 221;
+    --glass-tint-secondary: 152, 255, 208;
+  }
+  50% {
+    --glass-tint-primary: 255, 218, 185;
+    --glass-tint-secondary: 173, 216, 230;
+  }
+  75% {
+    --glass-tint-primary: 152, 255, 208;
+    --glass-tint-secondary: 221, 160, 221;
+  }
+}
+
+.glass-dynamic-colors {
+  animation: glassColorShift 30s ease-in-out infinite;
+}
+
+/* Interaction states with dynamic response */
+.glass-interactive {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  cursor: pointer;
+}
+
+.glass-interactive:hover {
+  backdrop-filter: blur(calc(var(--glass-blur-desktop) + 5px)) saturate(2.5);
+  -webkit-backdrop-filter: blur(calc(var(--glass-blur-desktop) + 5px)) saturate(2.5);
+  transform: translateY(-2px) scale(1.02);
+  box-shadow: 
+    0 10px 30px rgba(var(--glass-tint-primary), 0.2),
+    0 5px 15px rgba(var(--glass-tint-secondary), 0.1);
+}
+
+.glass-interactive:active {
+  transform: translateY(0) scale(0.98);
+}
+
+/* Accessibility enhancements */
+@media (prefers-reduced-motion: reduce) {
+  .glass-adaptive,
+  .glass-interactive,
+  .glass-dynamic-colors {
+    animation: none;
+    transition: none;
+  }
+}
+
+@media (prefers-contrast: high) {
+  .glass-adaptive {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.95);
+    border: 2px solid currentColor;
+  }
+}
+
+/* Dark mode adaptive glass */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --glass-opacity-light-bg: 0.25;
+    --glass-opacity-dark-bg: 0.35;
+    --glass-opacity-image-bg: 0.45;
+  }
+  
+  .glass-adaptive {
+    background: linear-gradient(
+      135deg,
+      rgba(var(--glass-tint-primary), 0.1) 0%,
+      rgba(0, 0, 0, 0.3) 50%,
+      rgba(var(--glass-tint-secondary), 0.1) 100%
+    );
+    border-color: rgba(255, 255, 255, 0.2);
+  }
+}
+
+/* Touch-friendly mobile interactions */
+@media (pointer: coarse) {
+  .glass-interactive {
+    /* Larger touch targets */
+    min-height: 44px;
+    padding: 12px 16px;
+  }
+  
+  /* Remove hover effects on touch devices */
+  .glass-interactive:hover {
+    transform: none;
+    backdrop-filter: blur(var(--glass-blur-mobile)) saturate(var(--glass-saturation-neutral));
+  }
+}
+
+/* Performance mode for low-end devices */
+@media (max-width: 768px) and (prefers-reduced-data: reduce) {
+  .glass-adaptive {
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: rgba(255, 255, 255, 0.85);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+}

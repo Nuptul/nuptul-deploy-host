@@ -54,7 +54,7 @@ const DashboardPopup: React.FC<DashboardPopupProps> = ({ isOpen, onClose, userRo
     <>
       {/* Enhanced backdrop overlay with proper z-index */}
       <div 
-        className="fixed inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
+        className="fixed inset-0 bg-black/60 backdrop-blur-md transition-opacity duration-300"
         style={{ 
           zIndex: 9999,
           display: 'block',
@@ -80,8 +80,19 @@ const DashboardPopup: React.FC<DashboardPopupProps> = ({ isOpen, onClose, userRo
         }}
       >
         <div 
-          className="w-full max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-4xl max-h-[90vh] bg-white/95 backdrop-blur-xl rounded-2xl sm:rounded-3xl border border-white/20 shadow-2xl overflow-hidden"
+          className="w-full max-w-md sm:max-w-lg md:max-w-2xl lg:max-w-4xl max-h-[90vh] overflow-hidden"
           style={{
+            background: 'linear-gradient(145deg, #1f2937 0%, #111827 100%)',
+            backdropFilter: 'blur(20px) saturate(1.8)',
+            WebkitBackdropFilter: 'blur(20px) saturate(1.8)',
+            borderRadius: '24px',
+            border: '1px solid rgba(255, 255, 255, 0.15)',
+            boxShadow: `
+              0 30px 60px rgba(0, 0, 0, 0.5),
+              0 20px 40px rgba(0, 0, 0, 0.4),
+              inset 0 1px 2px rgba(255, 255, 255, 0.1),
+              inset 0 -1px 2px rgba(0, 0, 0, 0.5)
+            `,
             pointerEvents: 'auto'
           }}
           onClick={(e) => e.stopPropagation()}

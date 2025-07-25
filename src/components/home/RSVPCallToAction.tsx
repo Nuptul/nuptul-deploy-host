@@ -13,8 +13,8 @@ const RSVPCallToAction: React.FC<RSVPCallToActionProps> = ({ onRSVPClick }) => {
   
   const isAdmin = userRole?.role === 'admin' || userRole?.role === 'couple';
   
-  // Don't show for admins or if user is not logged in
-  if (!user || isAdmin || loading) {
+  // Don't show for admins
+  if (isAdmin || loading) {
     return null;
   }
   
