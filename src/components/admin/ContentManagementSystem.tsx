@@ -186,7 +186,6 @@ const ContentManagementSystem: React.FC = () => {
       pageSubtitle: 'Pre-Wedding Celebration',
       description: 'Join us for pre-wedding drinks and casual dinner at this historic Newcastle pub. A relaxed evening to kick off the wedding weekend celebrations.',
       heroImage: 'https://iwmfxcrzzwpmxomydmuq.supabase.co/storage/v1/object/public/venue-prince-of-mereweather/prince-of-mereweather-hero.jpg',
-      popupImage: 'https://iwmfxcrzzwpmxomydmuq.supabase.co/storage/v1/object/public/venue-prince-of-mereweather/prince-popup.jpg',
       heroImageAlt: 'Prince of Mereweather historic pub exterior',
       heroImageCaption: 'Historic Newcastle pub perfect for pre-wedding celebrations',
 
@@ -205,12 +204,7 @@ const ContentManagementSystem: React.FC = () => {
       // Contact & Additional Info
       website: 'https://www.princeofmereweather.com.au/',
       phone: '+61249261983',
-      specialInstructions: 'No RSVP required for this casual pre-wedding gathering. Come and go as you please!',
-
-      // Image fields (ensure they exist)
-      heroImageAlt: 'Prince of Mereweather historic pub exterior',
-      heroImageCaption: 'Historic Newcastle pub perfect for pre-wedding celebrations',
-      popupImageAlt: 'Prince of Mereweather pub interior'
+      specialInstructions: 'No RSVP required for this casual pre-wedding gathering. Come and go as you please!'
     },
     
     newcastleBeach: {
@@ -233,7 +227,6 @@ const ContentManagementSystem: React.FC = () => {
       pageSubtitle: 'Recovery Day',
       description: 'Join us for a relaxed recovery day at beautiful Newcastle Beach. Start with breakfast, enjoy beach activities, and unwind after the wedding celebrations.',
       heroImage: 'https://iwmfxcrzzwpmxomydmuq.supabase.co/storage/v1/object/public/venue-newcastle-beach/newcastle-beach-hero.jpg',
-      popupImage: 'https://iwmfxcrzzwpmxomydmuq.supabase.co/storage/v1/object/public/venue-newcastle-beach/beach-popup.jpg',
       heroImageAlt: 'Newcastle Beach with golden sand and blue ocean',
       heroImageCaption: 'Beautiful Newcastle Beach perfect for recovery day relaxation',
 
@@ -252,12 +245,7 @@ const ContentManagementSystem: React.FC = () => {
       // Additional Info
       meetingPoint: 'Newcastle Beach Surf Club',
       parking: 'Street parking available along The Esplanade',
-      specialInstructions: 'Bring sunscreen, towels, and comfortable beach attire. Breakfast will be provided at the Surf Club.',
-
-      // Image fields (ensure they exist)
-      heroImageAlt: 'Newcastle Beach with golden sand and blue ocean',
-      heroImageCaption: 'Beautiful Newcastle Beach perfect for recovery day relaxation',
-      popupImageAlt: 'Newcastle Beach coastline view'
+      specialInstructions: 'Bring sunscreen, towels, and comfortable beach attire. Breakfast will be provided at the Surf Club.'
     }
   });
 

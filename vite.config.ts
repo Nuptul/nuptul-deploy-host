@@ -6,6 +6,12 @@ import { visualizer } from "rollup-plugin-visualizer";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
+  esbuild: {
+    // Ensure proper JSX transformation
+    jsx: 'transform',
+    jsxFactory: 'React.createElement',
+    jsxFragment: 'React.Fragment',
+  },
   server: {
     host: "::",
     port: Number(process.env.PORT) || 5173,
@@ -47,92 +53,31 @@ export default defineConfig(({ mode }) => ({
   build: {
     rollupOptions: {
       output: {
-        manualChunks: (id) => {
-          // Core React libraries - must include ALL React-related packages
-          if (id.includes('react') || id.includes('react-dom') || id.includes('react/') || id.includes('react-dom/') || id.includes('scheduler') || id.includes('use-sync-external-store')) {
-            return 'vendor-react';
-          }
-          
-          // Routing
-          if (id.includes('react-router-dom')) {
-            return 'vendor-router';
-          }
-          
-          // UI libraries - split into smaller chunks
-          if (id.includes('lucide-react')) {
-            return 'vendor-icons';
-          }
-          if (id.includes('@radix-ui')) {
-            return 'vendor-ui';
-          }
-          
-          // Supabase and data
-          if (id.includes('@supabase')) {
-            return 'vendor-supabase';
-          }
-          if (id.includes('@tanstack/react-query')) {
-            return 'vendor-query';
-          }
-          
-          // Animation libraries
-          if (id.includes('framer-motion')) {
-            return 'vendor-motion';
-          }
-          
-          // Chart libraries
-          if (id.includes('recharts')) {
-            return 'features-charts';
-          }
-          
-          // Form libraries
-          if (id.includes('react-hook-form') || id.includes('@hookform') || id.includes('zod')) {
-            return 'vendor-forms';
-          }
-          
-          // CRITICAL: Separate mapbox into its own chunk
-          if (id.includes('mapbox-gl')) {
-            return 'vendor-maps';
-          }
-          
-          // Heavy admin components
-          if (id.includes('/src/components/admin') || id.includes('/src/pages/dashboard')) {
-            return 'features-admin';
-          }
-          
-          // Chat and messaging
-          if (id.includes('/src/components/chat') || id.includes('InstantMessenger')) {
-            return 'features-messaging';
-          }
-          
-          // Venue pages (without the map component)
-          if (id.includes('/src/pages/venues')) {
-            return 'pages-venues';
-          }
-          
-          // Venue components (without map)
-          if (id.includes('/src/components/venue') && !id.includes('VenueMap')) {
-            return 'components-venue';
-          }
-          
-          // Map components separately
-          if (id.includes('VenueMap') || id.includes('/src/components/map')) {
-            return 'features-maps';
-          }
-          
-          // Utils and helpers
-          if (id.includes('/src/utils') || id.includes('/src/integrations')) {
-            return 'utils';
-          }
-          
-          // Large component libraries
-          if (id.includes('date-fns')) {
-            return 'vendor-dates';
-          }
-          
-          // Default fallback for other vendor modules
-          if (id.includes('node_modules')) {
-            return 'vendor-misc';
-          }
+        entryFileNames: (chunkInfo) => {
+          // Ensure all entry files have .js extension
+          return `assets/[name]-[hash].js`;
+        },
+        chunkFileNames: `assets/[name]-[hash].js`,
+        assetFileNames: `assets/[name]-[hash].[ext]`,
+        manualChunks: {
+          // Keep React and all React-related packages together
+          'vendor-react': ['react', 'react-dom', 'react-dom/client', 'react-router-dom', 'scheduler', 'use-sync-external-store'],
+          // Supabase
+          'vendor-supabase': ['@supabase/supabase-js'],
+          // UI libraries
+          'vendor-ui': ['@radix-ui/react-dialog', '@radix-ui/react-dropdown-menu', '@radix-ui/react-select', '@radix-ui/react-toast'],
+          // Icons
+          'vendor-icons': ['lucide-react'],
+          // Animation
+          'vendor-motion': ['framer-motion'],
+          // Maps (keep separate due to size)
+          'vendor-maps': ['mapbox-gl'],
+          // Charts
+          'vendor-charts': ['recharts'],
+          // Forms
+          'vendor-forms': ['react-hook-form', '@hookform/resolvers', 'zod'],
+          // Dates
+          'vendor-dates': ['date-fns']
         }
       }
     },

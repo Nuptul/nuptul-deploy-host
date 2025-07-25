@@ -8,7 +8,7 @@ import './utils/fixUpsertIssues'
 import { initializeSecurity } from './utils/security'
 initializeSecurity()
 
-import App from './App'
+import App from './AppMain'
 import './index.css'
 import SecurityHeaders from './components/security/SecurityHeaders'
 import EnvironmentValidator from './components/security/EnvironmentValidator'
