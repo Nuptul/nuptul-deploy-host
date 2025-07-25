@@ -276,9 +276,24 @@ export const SignUpForm: React.FC<SignUpFormProps> = ({ onSwitchToSignIn }) => {
 
       const { data: authData, error } = await signUp(data.email, data.password, data.firstName, data.lastName, profileData);
       if (error) {
+        console.error('Signup form error:', error);
+        
+        // Provide more specific error messages
+        let errorMessage = error.message || 'Failed to create account';
+        
+        if (error.message?.includes('already registered')) {
+          errorMessage = 'This email is already registered. Please sign in instead.';
+        } else if (error.message?.includes('Invalid email')) {
+          errorMessage = 'Please enter a valid email address.';
+        } else if (error.message?.includes('password')) {
+          errorMessage = 'Password must be at least 8 characters with uppercase, lowercase, and numbers.';
+        } else if (error.message?.includes('Database error')) {
+          errorMessage = 'Server error. Please try again in a moment.';
+        }
+        
         toast({
           title: "Sign Up Error",
-          description: error.message,
+          description: errorMessage,
           variant: "destructive",
         });
         return;

@@ -294,6 +294,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const redirectUrl = `${window.location.origin}/auth/confirm`;
 
     try {
+      console.log('Starting signup process for:', email);
+      
       // Step 1: Create auth user
       const { data, error } = await supabase.auth.signUp({
         email,
@@ -309,11 +311,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         }
       });
 
-      if (error) return { data, error };
+      if (error) {
+        console.error('Supabase signup error:', error);
+        // Check for specific error types
+        if (error.message?.includes('already registered')) {
+          return { data, error: { ...error, message: 'This email is already registered. Please sign in instead.' } };
+        }
+        return { data, error };
+      }
+
+      console.log('Auth user created successfully:', data.user?.id);
 
       // Step 2: Store profile data for later creation (after email confirmation)
-      if (data.user && !error && profileData) {
-        // Store profile data in localStorage temporarily for creation after confirmation
+      if (data.user && !error) {
+        // Always store profile data, even if minimal
         const profileDataToStore = {
           user_id: data.user.id,
           email: email,
@@ -342,12 +353,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         };
 
         localStorage.setItem('pendingProfileData', JSON.stringify(profileDataToStore));
+        console.log('Profile data stored in localStorage for user:', data.user.id);
       }
 
       return { data, error };
-    } catch (err) {
-      console.error('Signup error:', err);
-      return { data: null, error: err };
+    } catch (err: any) {
+      console.error('Unexpected signup error:', err);
+      // Return a more user-friendly error
+      return { 
+        data: null, 
+        error: { 
+          message: err.message || 'An unexpected error occurred during signup. Please try again.',
+          status: err.status || 500
+        } 
+      };
     }
   };
 
