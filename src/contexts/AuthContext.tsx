@@ -155,19 +155,45 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       // If no profile exists, create one
       if (!profileResult.data && currentUser) {
         console.log('Creating missing profile for user:', userId);
-        const { data: newProfile, error: createError } = await supabase
-          .from('profiles')
-          .insert({
+
+        // Check if there's stored profile data from signup
+        const storedProfileData = localStorage.getItem('pendingProfileData');
+        let profileInsertData;
+
+        if (storedProfileData) {
+          try {
+            const parsedData = JSON.parse(storedProfileData);
+            // Verify this is for the current user
+            if (parsedData.user_id === userId) {
+              profileInsertData = parsedData;
+              // Clear the stored data
+              localStorage.removeItem('pendingProfileData');
+              console.log('Using stored profile data from signup');
+            }
+          } catch (e) {
+            console.error('Error parsing stored profile data:', e);
+            localStorage.removeItem('pendingProfileData');
+          }
+        }
+
+        // Fallback to basic profile data if no stored data
+        if (!profileInsertData) {
+          profileInsertData = {
             user_id: userId,
             email: currentUser.email || '',
             first_name: currentUser.user_metadata?.firstName || '',
             last_name: currentUser.user_metadata?.lastName || '',
             created_at: new Date().toISOString(),
             updated_at: new Date().toISOString()
-          })
+          };
+        }
+
+        const { data: newProfile, error: createError } = await supabase
+          .from('profiles')
+          .insert(profileInsertData)
           .select()
           .single();
-        
+
         if (createError) {
           console.error('Error creating profile:', createError);
         } else {
@@ -285,9 +311,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) return { data, error };
 
-      // Step 2: Create profile if user was created successfully
-      if (data.user && !error) {
-        const profileInsertData = {
+      // Step 2: Store profile data for later creation (after email confirmation)
+      if (data.user && !error && profileData) {
+        // Store profile data in localStorage temporarily for creation after confirmation
+        const profileDataToStore = {
           user_id: data.user.id,
           email: email,
           first_name: firstName || '',
@@ -314,15 +341,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           updated_at: new Date().toISOString()
         };
 
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert(profileInsertData);
-
-        if (profileError) {
-          console.error('Error creating profile:', profileError);
-          // Don't return the profile error as the auth user was created successfully
-          // The profile will be created later when the user logs in
-        }
+        localStorage.setItem('pendingProfileData', JSON.stringify(profileDataToStore));
       }
 
       return { data, error };
